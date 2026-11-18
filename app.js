@@ -1,13 +1,50 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-let myProfile = {
-  name: "Player",
-  role: "Игрок",
-  avatar: "https://ui-avatars.com/api/?name=P&background=random",
-  kd: 1.25,
-  avg: 85.4
+// Проверяем, зарегистрирован ли пользователь (LocalStorage)
+let userProfile = JSON.parse(localStorage.getItem("hltv_user"));
+
+// Запускаем логику показа экранов
+window.onload = () => {
+  setTimeout(() => {
+    document.getElementById("splash-screen").style.opacity = "0";
+    setTimeout(() => {
+      document.getElementById("splash-screen").style.display = "none";
+      
+      if (!userProfile) {
+        document.getElementById("register-screen").style.display = "flex";
+      } else {
+        document.getElementById("register-screen").style.display = "none";
+        document.getElementById("app-container").style.display = "flex";
+        switchTab('ranking');
+      }
+    }, 500);
+  }, 2000); // 2 секунды показываем логотип
 };
+
+// Регистрация
+function registerUser() {
+  const nick = document.getElementById("reg-nick").value;
+  const tgId = document.getElementById("reg-id").value || "12345678";
+  
+  if (!nick) return alert("Введите ник!");
+
+  userProfile = {
+    name: nick,
+    tgId: tgId,
+    role: "Игрок",
+    avatar: "https://ui-avatars.com/api/?name=" + nick + "&background=8b5cf6&color=fff",
+    kd: 1.00,
+    avg: 0.0
+  };
+
+  localStorage.setItem("hltv_user", JSON.stringify(userProfile));
+  
+  // Показываем приложение
+  document.getElementById("register-screen").style.display = "none";
+  document.getElementById("app-container").style.display = "flex";
+  switchTab('ranking');
+}
 
 function toggleMenu() {
   document.getElementById("sidebar").classList.toggle("open");
@@ -46,7 +83,7 @@ function renderRanking() {
   const container = document.getElementById("ranking-container");
   let html = "";
   DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
-    let teamAvatar = t.avatar ? `<img src="${t.avatar}" class="avatar">` : `<div class="avatar" style="background:linear-gradient(135deg,#a855f7,#ec4899)">${t.name.charAt(0)}</div>`;
+    let teamAvatar = t.avatar ? `<img src="${t.avatar}" class="avatar">` : `<div class="avatar">${t.name.charAt(0)}</div>`;
     html += `
       <div class="card" onclick="showTeamDetail('${t.name}')">
         <div class="card-num">${i+1}</div>
@@ -81,7 +118,7 @@ function showTeamDetail(name) {
       <div class="team-stat-box"><div class="val" style="color:var(--win)">${team.wins}</div><div class="lbl">Победы</div></div>
       <div class="team-stat-box"><div class="val" style="color:var(--lose)">${team.losses}</div><div class="lbl">Поражения</div></div>
     </div>
-    <div class="table-wrapper" style="background:var(--card); border-radius:12px; border:1px solid var(--border);">
+    <div class="table-wrapper">
       <table>
         <thead><tr><th>Игрок</th><th>Убийства</th><th>Смерти</th><th>К/Д</th><th>HS%</th><th>AVG</th></tr></thead>
         <tbody>
@@ -114,11 +151,9 @@ function renderMatchesList() {
   const container = document.getElementById("matches-container");
   let html = "";
   
-  // Функция поиска картинки карты (ищет .jpg, .webp, .png)
   const getMapImage = (mapName) => {
-    // Очищаем название (например, "de_mirage" -> "mirage")
     let cleanName = mapName.toLowerCase().replace("de_", "").trim();
-    // Пытаемся угадать формат. Браузер сам подтянет, если файл есть.
+    // Пытаемся подставить webp, если jpg нет - браузер сам покажет градиент
     return `maps/${cleanName}.webp`;
   };
 
@@ -157,8 +192,8 @@ function showMatchDetail(id) {
   const t2Win = m.team2.score > m.team1.score;
 
   const renderTeamTable = (team, isWinner) => `
-    <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:16px; overflow:hidden;">
-      <div style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between;">
+    <div style="margin-bottom:16px;">
+      <div style="padding:12px 0; font-weight:700; display:flex; justify-content:space-between;">
         <span style="color:${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
         <span style="color:var(--muted); font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
       </div>
@@ -179,7 +214,7 @@ function showMatchDetail(id) {
   `;
 
   document.getElementById("match-detail-content").innerHTML = `
-    <div style="background:linear-gradient(135deg,#1e1b4b,#0f172a); border-radius:16px; padding:20px; margin-bottom:20px; border:1px solid #312e81; text-align:center;">
+    <div style="background:linear-gradient(135deg,#1e1b4b,#0f172a); border-radius:20px; padding:20px; margin-bottom:20px; border:1px solid #312e81; text-align:center;">
       <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
         <div style="flex:1; font-size:18px; font-weight:800; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
         <div style="font-size:32px; font-weight:800; background:rgba(0,0,0,0.4); padding:4px 16px; border-radius:8px;">
@@ -195,18 +230,20 @@ function showMatchDetail(id) {
 
 // --- ПРОФИЛЬ ---
 function renderProfile() {
-  document.getElementById("profile-name").innerText = myProfile.name;
-  document.getElementById("profile-role").innerText = myProfile.role;
-  document.getElementById("profile-avatar-img").src = myProfile.avatar;
-  document.getElementById("profile-kd").innerText = myProfile.kd.toFixed(2);
-  document.getElementById("profile-avg").innerText = myProfile.avg.toFixed(1);
+  if (!userProfile) return;
+  document.getElementById("profile-name").innerText = userProfile.name;
+  document.getElementById("profile-role").innerText = userProfile.role;
+  document.getElementById("profile-avatar-img").src = userProfile.avatar;
+  document.getElementById("profile-kd").innerText = userProfile.kd.toFixed(2);
+  document.getElementById("profile-avg").innerText = userProfile.avg.toFixed(1);
 }
 
 function changeMyAvatar(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      myProfile.avatar = e.target.result;
+      userProfile.avatar = e.target.result;
+      localStorage.setItem("hltv_user", JSON.stringify(userProfile));
       renderProfile();
     };
     reader.readAsDataURL(input.files[0]);
@@ -350,5 +387,3 @@ function addMatch() {
   alert("Матч добавлен!");
   showAdminForm('match');
 }
-
-switchTab('ranking');
