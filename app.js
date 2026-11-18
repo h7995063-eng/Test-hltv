@@ -241,36 +241,32 @@ function rejectTeamRequest(index) {
 }
 
 function approveNews(index) {
-  var req = newsRequests[index];
-  fetch(API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
-  }).then(function() {
-    alert("Отправлено в канал!");
-    newsRequests.splice(index, 1);
-    saveRequests();
-    showAdminTab("requests");
-  }).catch(function(err) {
-    alert("ОШИБКА СЕТИ!");
-  });
+  const req = newsRequests[index];
+  const data = { action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' };
+  
+  if (tg && tg.sendData) {
+    tg.sendData(JSON.stringify(data));
+    alert('Отправлено в канал!');
+  } else {
+    alert('Ошибка: Telegram WebApp API недоступен.');
+  }
+  
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
 }
 
 function rejectNews(index) {
-  var req = newsRequests[index];
-  fetch(API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'reject_news', team: req.team, text: req.text })
-  }).then(function() {
-    newsRequests.splice(index, 1);
-    saveRequests();
-    showAdminTab("requests");
-  }).catch(function(err) {
-    alert("ОШИБКА СЕТИ!");
-  });
+  const req = newsRequests[index];
+  const data = { action: 'reject_news', team: req.team, text: req.text };
+  
+  if (tg && tg.sendData) {
+    tg.sendData(JSON.stringify(data));
+  }
+  
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
 }
 
 function addMatchAdmin() {
