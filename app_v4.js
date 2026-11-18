@@ -75,7 +75,7 @@ function renderRanking() {
     var teamAvatar = t.avatar ? '<img src="' + t.avatar + '" class="avatar">' : '<div class="avatar">' + t.name.charAt(0) + '</div>';
     html += '<div class="card animate-in delay-' + Math.min(i+1, 5) + '" onclick="showTeamDetail(\'' + t.name + '\')">' +
         '<div class="card-num">' + (i+1) + '</div>' + teamAvatar +
-        '<div class="info"><div class="name">' + t.name + ' <span class="team-tag">' + (t.tag || "") + '</span></div>' +
+        '<div class="info"><div class="name">' + t.name + ' </div>' +
         '<div class="sub">' + (t.wins + t.losses) + ' матчей</div></div>' +
         '<div class="points">' + t.points + ' PTS</div></div>';
   });
@@ -97,7 +97,7 @@ function showTeamDetail(name) {
   }).join('');
 
   document.getElementById("team-detail-content").innerHTML = 
-    '<div class="team-header animate-in">' + teamAvatar + '<div class="team-title-info"><h2>' + team.name + ' <span class="team-tag">' + (team.tag || "") + '</span></h2><p>Рейтинг команды</p></div></div>' +
+    '<div class="team-header animate-in">' + teamAvatar + '<div class="team-title-info"><h2>' + team.name + ' </h2><p>Рейтинг команды</p></div></div>' +
     '<div class="team-stats-row animate-in delay-1">' +
       '<div class="team-stat-box"><div class="val" style="color:var(--accent)">' + team.points + '</div><div class="lbl">Поинты</div></div>' +
       '<div class="team-stat-box"><div class="val" style="color:var(--win)">' + team.wins + '</div><div class="lbl">Победы</div></div>' +
