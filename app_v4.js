@@ -75,7 +75,7 @@ function renderRanking() {
     var teamAvatar = t.avatar ? '<img src="' + t.avatar + '" class="avatar">' : '<div class="avatar">' + t.name.charAt(0) + '</div>';
     html += '<div class="card animate-in delay-' + Math.min(i+1, 5) + '" onclick="showTeamDetail(\'' + t.name + '\')">' +
         '<div class="card-num">' + (i+1) + '</div>' + teamAvatar +
-        '<div class="info"><div class="name">' + t.name + ' </div>' +
+        '<div class="info"><div class="name">' + t.name + (t.verified ? ' <span style="color:#3b82f6; font-size:16px; font-weight:bold;" title="Верифицировано">✔</span>' : '') + '</div>' +
         '<div class="sub">' + (t.wins + t.losses) + ' матчей</div></div>' +
         '<div class="points">' + t.points + ' PTS</div></div>';
   });
@@ -221,7 +221,7 @@ function renderAdminTeamsList(teams) {
   teams.forEach(function(t) {
     html += '<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">' +
       '<div><b>' + t.name + '</b> (' + t.points + ' pts)</div>' +
-      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeam(\'' + t.name + '\')">Удал.</button></div></div>';
+      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn" style="margin:0; padding:6px 10px; font-size:12px; background: #3b82f6;" onclick="toggleVerify(\'' + t.name + '\')">' + (t.verified ? 'Снять ✔' : '✔') + '</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeam(\'' + t.name + '\')">Удал.</button></div></div>';
   });
   list.innerHTML = html;
 }
@@ -510,5 +510,12 @@ function addNewTeam() {
   });
   saveData();
   alert("Команда создана!");
+  showAdminTab('teams');
+}
+function toggleVerify(teamName) {
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team) return;
+  team.verified = !team.verified;
+  saveData();
   showAdminTab('teams');
 }
