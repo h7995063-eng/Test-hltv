@@ -301,7 +301,7 @@ function editTeamAdmin(teamName) {
   if (!team) return;
 
   // Создаем модальное окно (или перерисовываем контейнер админки)
-  var adminContent = document.getElementById("admin-content") || document.getElementById("screen-admin-panel");
+  var adminContent = document.getElementById("admin-form-container");
   
   var html = '<button class="back-btn" onclick="showAdminTab(\'teams\')">← Назад к командам</button>';
   html += '<h2 style="margin-bottom:20px;">Редактирование: ' + team.name + '</h2>';
