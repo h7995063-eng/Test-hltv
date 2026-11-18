@@ -23,18 +23,8 @@ window.onload = () => {
 function registerUser() {
   const nick = document.getElementById("reg-nick").value;
   const tgId = document.getElementById("reg-id").value || "12345678";
-  
   if (!nick) return alert("Введите ник!");
-
-  userProfile = {
-    name: nick,
-    tgId: tgId,
-    role: "Игрок",
-    avatar: "https://ui-avatars.com/api/?name=" + nick + "&background=8b5cf6&color=fff",
-    kd: 1.00,
-    avg: 0.0
-  };
-
+  userProfile = { name: nick, tgId: tgId, role: "Игрок", avatar: "https://ui-avatars.com/api/?name=" + nick + "&background=8b5cf6&color=fff", kd: 1.00, avg: 0.0 };
   localStorage.setItem("hltv_user", JSON.stringify(userProfile));
   document.getElementById("register-screen").style.display = "none";
   document.getElementById("app-container").style.display = "flex";
@@ -49,7 +39,6 @@ function toggleMenu() {
 function switchTab(tab) {
   document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
   document.getElementById(`nav-${tab}`)?.classList.add("active");
-  
   const screens = ["ranking", "team-detail", "matches-list", "match-detail", "profile", "admin-login", "admin-panel"];
   screens.forEach(s => document.getElementById(`screen-${s}`).classList.add("hidden"));
 
@@ -69,7 +58,6 @@ function switchTab(tab) {
       document.getElementById("screen-admin-login").classList.remove("hidden");
     }
   }
-
   if (window.innerWidth <= 768) toggleMenu();
 }
 
@@ -96,12 +84,9 @@ function renderRanking() {
 function showTeamDetail(name) {
   const team = DATA.teams.find(t => t.name === name);
   if (!team) return;
-
   document.getElementById("screen-ranking").classList.add("hidden");
   document.getElementById("screen-team-detail").classList.remove("hidden");
-
   let teamAvatar = team.avatar ? `<img src="${team.avatar}" class="team-big-logo">` : `<div class="team-big-logo">${team.name.charAt(0)}</div>`;
-
   document.getElementById("team-detail-content").innerHTML = `
     <div class="team-header">
       ${teamAvatar}
@@ -121,15 +106,7 @@ function showTeamDetail(name) {
             let pAvatar = p.avatar ? `<img src="${p.avatar}" class="player-avatar">` : `<div class="player-avatar">${p.nick.charAt(0)}</div>`;
             return `
               <tr>
-                <td>
-                  <div class="player-cell">
-                    ${pAvatar}
-                    <div>
-                      <span class="player-nick">${p.nick}</span>
-                      ${p.role ? `<span class="role-badge">${p.role}</span>` : ''}
-                    </div>
-                  </div>
-                </td>
+                <td><div class="player-cell">${pAvatar}<div><span class="player-nick">${p.nick}</span>${p.role ? `<span class="role-badge">${p.role}</span>` : ''}</div></div></td>
                 <td>${p.kills}</td><td>${p.deaths}</td><td style="color:var(--accent)">${kd}</td><td>${p.hs}%</td><td>${p.rating.toFixed(2)}</td>
               </tr>
             `;
@@ -143,12 +120,7 @@ function showTeamDetail(name) {
 function renderMatchesList() {
   const container = document.getElementById("matches-container");
   let html = "";
-  
-  // Ищем все возможные форматы картинок
-  const getMapImage = (mapName) => {
-    let cleanName = mapName.toLowerCase().replace("de_", "").trim();
-    return `maps/${cleanName}.jpg`;
-  };
+  const getMapImage = (mapName) => `maps/${mapName.toLowerCase().replace("de_", "").trim()}.jpg`;
 
   DATA.matches.forEach(m => {
     const t1Win = m.team1.score > m.team2.score;
@@ -174,6 +146,7 @@ function renderMatchesList() {
   container.innerHTML = html || '<p style="color:var(--muted)">Матчей нет</p>';
 }
 
+// ОБНОВЛЕННАЯ ФУНКЦИЯ ДЕТАЛЕЙ МАТЧА
 function showMatchDetail(id) {
   const m = DATA.matches.find(x => x.id === id);
   if (!m) return;
@@ -183,37 +156,48 @@ function showMatchDetail(id) {
 
   const t1Win = m.team1.score > m.team2.score;
   const t2Win = m.team2.score > m.team1.score;
+  const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
 
   const renderTeamTable = (team, isWinner) => `
-    <div style="margin-bottom:16px;">
-      <div style="padding:12px 0; font-weight:700; display:flex; justify-content:space-between;">
+    <div class="table-wrapper">
+      <div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);">
         <span style="color:${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
         <span style="color:var(--muted); font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
       </div>
-      <div class="table-wrapper">
-        <table>
-          <thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
-          <tbody>
-            ${team.players.map(p => `
-              <tr>
-                <td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div class="player-nick">${p.nick}</div></div></td>
-                <td>${p.kills}</td><td style="color:var(--accent)">${(p.kills/(p.deaths||1)).toFixed(2)}</td><td>${p.hs}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
+      <table>
+        <thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
+        <tbody>
+          ${team.players.map(p => `
+            <tr>
+              <td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div class="player-nick">${p.nick}</div></div></td>
+              <td>${p.kills}</td><td style="color:var(--accent)">${(p.kills/(p.deaths||1)).toFixed(2)}</td><td>${p.hs}%</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
   `;
 
   document.getElementById("match-detail-content").innerHTML = `
-    <div style="background:linear-gradient(135deg,#1e1b4b,#0f172a); border-radius:20px; padding:20px; margin-bottom:20px; border:1px solid #312e81; text-align:center;">
-      <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
-        <div style="flex:1; font-size:18px; font-weight:800; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-        <div style="font-size:32px; font-weight:800; background:rgba(0,0,0,0.4); padding:4px 16px; border-radius:8px;">
-          ${m.team1.score} : ${m.team2.score}
+    <div class="match-header-card" style="background-image: url('${mapImg}');">
+      <div class="match-header-content">
+        <div class="match-top-info">
+          <span>${m.map}</span>
+          <span style="color:var(--accent)">Завершен</span>
         </div>
-        <div style="flex:1; font-size:18px; font-weight:800; color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+        <div class="score-board">
+          <div class="team-block">
+            <div class="name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
+          </div>
+          <div class="score-display">
+            <span class="${t1Win ? 'win' : 'lose'}">${m.team1.score}</span>
+            <span style="background:transparent; border:none; color:var(--muted); font-size:24px;">:</span>
+            <span class="${t2Win ? 'win' : 'lose'}">${m.team2.score}</span>
+          </div>
+          <div class="team-block">
+            <div class="name" style="color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+          </div>
+        </div>
       </div>
     </div>
     ${renderTeamTable(m.team1, t1Win)}
@@ -221,7 +205,6 @@ function showMatchDetail(id) {
   `;
 }
 
-// --- ПРОФИЛЬ ---
 function renderProfile() {
   if (!userProfile) return;
   document.getElementById("profile-name").innerText = userProfile.name;
@@ -243,7 +226,6 @@ function changeMyAvatar(input) {
   }
 }
 
-// --- АДМИНКА ---
 function loginAdmin() {
   const pass = document.getElementById("admin-pass").value;
   if (pass === "hltv26") {
@@ -257,7 +239,6 @@ function loginAdmin() {
 
 function showAdminForm(type) {
   const container = document.getElementById("admin-form-container");
-  
   const fileUploadHtml = (id, label) => `
     <div class="form-group">
       <label>${label}</label>
@@ -339,7 +320,6 @@ function addTeam() {
   const points = parseInt(document.getElementById("t-points").value) || 0;
   const avatar = getBase64('t-avatar-file');
   if (!name) return alert("Введите название");
-  
   DATA.teams.push({ id: Date.now(), name, points, wins: 0, losses: 0, avatar, players: [] });
   alert("Команда добавлена!");
   showAdminForm('team');
@@ -351,7 +331,6 @@ function addPlayer() {
   const role = document.getElementById("p-role").value;
   const avatar = getBase64('p-avatar-file');
   if (!nick) return alert("Введите ник");
-
   const team = DATA.teams.find(t => t.id === teamId);
   if (team) {
     team.players.push({ nick, role, kills: 0, deaths: 0, hs: 0, rating: 1.0, avatar });
@@ -366,10 +345,8 @@ function addMatch() {
   const t2Name = document.getElementById("m-t2").value;
   const s1 = parseInt(document.getElementById("m-s1").value) || 0;
   const s2 = parseInt(document.getElementById("m-s2").value) || 0;
-
   const t1 = DATA.teams.find(t => t.name === t1Name);
   const t2 = DATA.teams.find(t => t.name === t2Name);
-
   if (!t1 || !t2) return alert("Выберите команды");
 
   DATA.matches.push({

@@ -101,63 +101,24 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 .file-upload-label { font-size: 14px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .file-upload-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--card); }
 
-/* === ИСПРАВЛЕННЫЙ ПРОФИЛЬ === */
-.profile-container {
-  position: relative;
-  margin-bottom: 20px;
-}
-.profile-banner {
-  height: 160px; 
-  background: var(--accent-gradient); 
-  border-radius: 24px;
-  position: relative;
-  z-index: 1;
-}
-.profile-avatar-wrapper {
-  width: 110px; height: 110px; border-radius: 28px;
-  background: var(--bg); padding: 4px;
-  position: absolute; top: 105px; left: 20px; /* Наезжает на баннер */
-  z-index: 2;
-  cursor: pointer; transition: transform 0.2s;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-}
+/* Профиль */
+.profile-container { position: relative; margin-bottom: 20px; }
+.profile-banner { height: 160px; background: var(--accent-gradient); border-radius: 24px; position: relative; z-index: 1; }
+.profile-avatar-wrapper { width: 110px; height: 110px; border-radius: 28px; background: var(--bg); padding: 4px; position: absolute; top: 105px; left: 20px; z-index: 2; cursor: pointer; transition: transform 0.2s; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 .profile-avatar-wrapper:hover { transform: scale(1.05); }
-.profile-avatar-img {
-  width: 100%; height: 100%; border-radius: 24px; object-fit: cover;
-}
-.profile-body {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 24px 24px;
-  padding: 70px 20px 20px 20px; /* Отступ сверху под аватарку */
-  position: relative;
-  z-index: 0;
-  margin-top: -20px;
-  backdrop-filter: blur(10px);
-}
-.profile-info {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
-}
+.profile-avatar-img { width: 100%; height: 100%; border-radius: 24px; object-fit: cover; }
+.profile-body { background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 24px 24px; padding: 70px 20px 20px 20px; position: relative; z-index: 0; margin-top: -20px; backdrop-filter: blur(10px); }
+.profile-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
 .profile-name { font-size: 26px; font-weight: 800; line-height: 1; }
-.profile-role-badge {
-  background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.5);
-  color: #a78bfa; font-size: 12px; font-weight: 800;
-  padding: 4px 10px; border-radius: 8px; text-transform: uppercase;
-}
-.profile-stats-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-}
-.p-stat-box {
-  background: rgba(0,0,0,0.2); border: 1px solid var(--border);
-  border-radius: 16px; padding: 16px; text-align: center;
-}
+.profile-role-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.5); color: #a78bfa; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
+.profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.p-stat-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 16px; padding: 16px; text-align: center; }
 .p-stat-box .val { font-size: 26px; font-weight: 800; }
 .p-stat-box .lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-top: 4px; }
 .p-stat-box.kd .val { color: var(--win); }
 .p-stat-box.avg .val { color: var(--accent); }
 
-/* Карточки матчей */
+/* Карточки матчей (список) */
 .match-card-img { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 16px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s; backdrop-filter: blur(10px); }
 .match-map-bg { height: 140px; width: 100%; background-size: cover; background-position: center; position: relative; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
 .match-map-bg::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to right, rgba(15,18,26,0.9) 0%, rgba(15,18,26,0.3) 50%, rgba(15,18,26,0.9) 100%); z-index: 0; }
@@ -166,8 +127,29 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 .match-score-big { font-size: 24px; font-weight: 800; font-family: monospace; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
 .match-card-footer { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); font-weight: 600; }
 
+/* ДЕТАЛИ МАТЧА (Обновлено) */
+.match-header-card {
+  border-radius: 20px; padding: 30px 20px; margin-bottom: 24px;
+  border: 1px solid var(--border); position: relative; overflow: hidden;
+  background-size: cover; background-position: center;
+}
+.match-header-card::before {
+  content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+  background: rgba(15, 18, 26, 0.85); /* Затемнение картинки */
+  z-index: 0;
+}
+.match-header-content { position: relative; z-index: 1; }
+.match-top-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.score-board { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.team-block { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+.team-block .name { font-size: 20px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.score-display { display: flex; align-items: center; gap: 12px; font-size: 36px; font-weight: 800; font-family: monospace; }
+.score-display span { padding: 4px 16px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+.score-display .win { color: var(--win); }
+.score-display .lose { color: var(--lose); }
+
 /* Таблицы */
-.table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+.table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); backdrop-filter: blur(10px); }
 th { text-align: left; color: var(--muted); font-weight: 600; padding: 12px 16px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
 th:nth-child(n+2) { text-align: center; }
@@ -202,4 +184,6 @@ td:nth-child(n+2) { text-align: center; }
   .profile-avatar-wrapper { width: 90px; height: 90px; top: 75px; border-radius: 22px; }
   .profile-avatar-img { border-radius: 18px; }
   .profile-body { padding-top: 50px; }
+  .score-display { font-size: 28px; }
+  .team-block .name { font-size: 16px; }
 }
