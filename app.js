@@ -242,43 +242,36 @@ function rejectTeamRequest(index) {
 
 function approveNews(index) {
   const req = newsRequests[index];
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'https://nashville-kitchen-verification-phantom.trycloudflare.com/'; // Ссылка на твой сервер
-  form.target = '_blank';
-  form.style.display = 'none';
-
   const data = { action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' };
-  for (const key in data) {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = key;
-    input.value = data[key];
-    form.appendChild(input);
-  }
-
-  document.body.appendChild(form);
-  form.submit();
-  
-  alert('Запрос отправлен на сервер!');
+  const API_URL = "https://officially-colorado-extreme-impact.trycloudflare.com";
+  fetch(API_URL + "/api/news", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(d => alert(d.ok ? "✅ Заявка отправлена" : "❌ Ошибка: " + (d.error || "")))
+  .catch(e => alert("❌ Сеть: " + e.message));
   newsRequests.splice(index, 1);
   saveRequests();
   showAdminTab('requests');
-  setTimeout(() => document.body.removeChild(form), 2000);
 }
+
 
 function rejectNews(index) {
   const req = newsRequests[index];
   const data = { action: 'reject_news', team: req.team, text: req.text };
-  
-  if (tg && tg.sendData) {
-    tg.sendData(JSON.stringify(data));
-  }
-  
+  const API_URL = "https://officially-colorado-extreme-impact.trycloudflare.com";
+  fetch(API_URL + "/api/news", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  }).catch(e => console.warn(e));
   newsRequests.splice(index, 1);
   saveRequests();
   showAdminTab('requests');
 }
+
 
 function addMatchAdmin() {
   var map = document.getElementById("m-map").value;
