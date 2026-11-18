@@ -1,4 +1,4 @@
-const API_URL = "https://planner-edward-noble-spaces.trycloudflare.com";
+const API_URL = "https://upon-explained-cartridges-penalty.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
