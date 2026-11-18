@@ -297,26 +297,37 @@ function addTeamAdminForm() { alert("Функция добавления в ра
 function renderMatchesList() {
   var container = document.getElementById("matches-container");
   if (!container) return;
+  
+  // Убираем дублирующийся заголовок, если он есть в HTML
+  container.innerHTML = '<h1 style="margin-bottom:20px;">Сыгранные матчи</h1>';
+  
   var html = '';
   APP_DATA.matches.forEach(function(m) {
-    var t1 = m.team1 || m.t1 || m.teamA || (m.teams && m.teams[0]) || 'Team 1';
-    var t2 = m.team2 || m.t2 || m.teamB || (m.teams && m.teams[1]) || 'Team 2';
-    var s1 = m.score1 !== undefined ? m.score1 : (m.s1 !== undefined ? m.s1 : 0);
-    var s2 = m.score2 !== undefined ? m.score2 : (m.s2 !== undefined ? m.s2 : 0);
-    if (typeof t1 === 'object' && t1 !== null) t1 = t1.name || t1.team || 'Team 1';
-    if (typeof t2 === 'object' && t2 !== null) t2 = t2.name || t2.team || 'Team 2';
-    var mapName = m.map || m.mapName || 'default';
-    if (typeof mapName === 'object' && mapName !== null) mapName = mapName.name || 'default';
-    var mapBg = mapName.toLowerCase() + '.jpg';
-    var matchId = m.id || m.matchId || Date.now();
+    // Берем данные строго из твоей структуры
+    var t1 = m.team1.name || 'Team 1';
+    var s1 = m.team1.score || 0;
+    var t2 = m.team2.name || 'Team 2';
+    var s2 = m.team2.score || 0;
     
-    // Используем твои классы, чтобы дизайн остался прежним
-    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\'); cursor:pointer;" onclick="openMatch(\'' + matchId + '\')">';
-    html += '  <div class="match-team">' + t1 + '</div>';
-    html += '  <div class="match-score">' + s1 + ' : ' + s2 + '</div>';
-    html += '  <div class="match-team right">' + t2 + '</div>';
+    // Убираем префикс "de_" из названия карты для поиска картинки
+    var mapName = m.map ? m.map.replace('de_', '') : 'default';
+    var mapBg = mapName.toLowerCase() + '.jpg';
+
+    var t1Class = s1 > s2 ? 'match-winner' : '';
+    var t2Class = s2 > s1 ? 'match-winner' : '';
+
+    // Используем классы, которые уже есть в твоем style.css (или добавим стили прямо тут)
+    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\'); cursor:pointer; margin-bottom:10px; padding:20px; display:flex; justify-content:space-between; align-items:center; border-radius:12px;" onclick="openMatch(' + m.id + ')">';
+    html += '  <div class="match-team ' + t1Class + '" style="font-weight:bold; color:#fff; font-size:16px;">' + t1 + '</div>';
+    html += '  <div class="match-score" style="background:rgba(0,0,0,0.7); padding:5px 15px; border-radius:5px; color:#fff; font-weight:bold; font-size:18px;">' + s1 + ' : ' + s2 + '</div>';
+    html += '  <div class="match-team right ' + t2Class + '" style="font-weight:bold; color:#fff; font-size:16px; text-align:right;">' + t2 + '</div>';
     html += '</div>';
   });
+  
+  if (APP_DATA.matches.length === 0) {
+      html += '<p style="color:#8b959e;">Матчей пока нет.</p>';
+  }
+  
   container.innerHTML = html;
 }
 

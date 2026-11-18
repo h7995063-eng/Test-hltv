@@ -193,3 +193,24 @@ td:nth-child(n+2) { text-align: center; }
   .team-stats-row { flex-direction: column; }
   .team-header { flex-direction: column; text-align: center; }
 }
+
+/* Стили для карточек матчей */
+.match-card {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.match-card::before {
+  content: '';
+  position: absolute; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5); /* Затемнение фона */
+  z-index: 1;
+}
+.match-team, .match-score {
+  position: relative;
+  z-index: 2; /* Текст поверх затемнения */
+}
+.match-winner {
+  color: var(--win) !important; /* Зеленый цвет для победителя */
+}
