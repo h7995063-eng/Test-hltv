@@ -1,4 +1,4 @@
-const API_URL = https://planning-birth-collar-suddenly.trycloudflare.com;
+const API_URL = "https://planning-birth-collar-suddenly.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -15,10 +15,10 @@ function saveRequests() {
   localStorage.setItem("hltv_news_requests", JSON.stringify(newsRequests));
 }
 
-window.onload = () => {
-  setTimeout(() => {
+window.onload = function() {
+  setTimeout(function() {
     document.getElementById("splash-screen").style.opacity = "0";
-    setTimeout(() => {
+    setTimeout(function() {
       document.getElementById("splash-screen").style.display = "none";
       document.getElementById("app-container").style.display = "flex";
       switchTab('ranking');
@@ -32,11 +32,12 @@ function toggleMenu() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
-  if (document.getElementById(`nav-${tab}`)) document.getElementById(`nav-${tab}`).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(function(el) { el.classList.remove("active"); });
+  var navEl = document.getElementById("nav-" + tab);
+  if (navEl) navEl.classList.add("active");
   
-  const screens = ["ranking", "team-detail", "register-team", "matches-list", "match-detail", "news", "admin-login", "admin-panel"];
-  screens.forEach(s => document.getElementById(`screen-${s}`).classList.add("hidden"));
+  var screens = ["ranking", "team-detail", "register-team", "matches-list", "match-detail", "news", "admin-login", "admin-panel"];
+  screens.forEach(function(s) { document.getElementById("screen-" + s).classList.add("hidden"); });
 
   if (tab === "ranking") {
     document.getElementById("screen-ranking").classList.remove("hidden");
@@ -62,154 +63,106 @@ function switchTab(tab) {
 }
 
 function renderRanking() {
-  const container = document.getElementById("ranking-container");
-  let html = "";
-  APP_DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
-    let teamAvatar = t.avatar ? `<img src="${t.avatar}" class="avatar">` : `<div class="avatar">${t.name.charAt(0)}</div>`;
-    html += `
-      <div class="card animate-in delay-${Math.min(i+1, 5)}" onclick="showTeamDetail('${t.name}')">
-        <div class="card-num">${i+1}</div>
-        ${teamAvatar}
-        <div class="info">
-          <div class="name">${t.name} <span class="team-tag">${t.tag || ""}</span></div>
-          <div class="sub">${t.wins + t.losses} матчей</div>
-        </div>
-        <div class="points">${t.points} PTS</div>
-      </div>
-    `;
+  var container = document.getElementById("ranking-container");
+  var html = "";
+  APP_DATA.teams.sort(function(a,b){return b.points-a.points;}).forEach(function(t,i){
+    var teamAvatar = t.avatar ? '<img src="' + t.avatar + '" class="avatar">' : '<div class="avatar">' + t.name.charAt(0) + '</div>';
+    html += '<div class="card animate-in delay-' + Math.min(i+1, 5) + '" onclick="showTeamDetail(\'' + t.name + '\')">' +
+        '<div class="card-num">' + (i+1) + '</div>' + teamAvatar +
+        '<div class="info"><div class="name">' + t.name + ' <span class="team-tag">' + (t.tag || "") + '</span></div>' +
+        '<div class="sub">' + (t.wins + t.losses) + ' матчей</div></div>' +
+        '<div class="points">' + t.points + ' PTS</div></div>';
   });
   container.innerHTML = html || '<p style="color:var(--muted); text-align:center; padding:20px;">Команд пока нет</p>';
 }
 
 function showTeamDetail(name) {
-  const team = APP_DATA.teams.find(t => t.name === name);
+  var team = APP_DATA.teams.find(function(t){ return t.name === name; });
   if (!team) return;
   document.getElementById("screen-ranking").classList.add("hidden");
   document.getElementById("screen-team-detail").classList.remove("hidden");
-  let teamAvatar = team.avatar ? `<img src="${team.avatar}" class="team-big-logo">` : `<div class="team-big-logo">${team.name.charAt(0)}</div>`;
+  var teamAvatar = team.avatar ? '<img src="' + team.avatar + '" class="team-big-logo">' : '<div class="team-big-logo">' + team.name.charAt(0) + '</div>';
   
-  document.getElementById("team-detail-content").innerHTML = `
-    <div class="team-header animate-in">
-      ${teamAvatar}
-      <div class="team-title-info"><h2>${team.name} <span class="team-tag">${team.tag || ""}</span></h2><p>Рейтинг команды</p></div>
-    </div>
-    <div class="team-stats-row animate-in delay-1">
-      <div class="team-stat-box"><div class="val" style="color:var(--accent)">${team.points}</div><div class="lbl">Поинты</div></div>
-      <div class="team-stat-box"><div class="val" style="color:var(--win)">${team.wins}</div><div class="lbl">Победы</div></div>
-      <div class="team-stat-box"><div class="val" style="color:var(--lose)">${team.losses}</div><div class="lbl">Поражения</div></div>
-    </div>
-    <div class="table-wrapper animate-in delay-2">
-      <table>
-        <thead><tr><th>Игрок</th><th>Убийства</th><th>Смерти</th><th>К/Д</th><th>HS%</th><th>AVG</th></tr></thead>
-        <tbody>
-          ${team.players.map(p => {
-            const kd = (p.kills / (p.deaths || 1)).toFixed(2);
-            let pAvatar = p.avatar ? `<img src="${p.avatar}" class="player-avatar">` : `<div class="player-avatar">${p.nick.charAt(0)}</div>`;
-            return `
-              <tr>
-                <td><div class="player-cell">${pAvatar}<div><span class="player-nick">${p.nick}</span>${p.role ? `<span class="role-badge">${p.role}</span>` : ''}</div></div></td>
-                <td>${p.kills}</td><td>${p.deaths}</td><td style="color:var(--accent)">${kd}</td><td>${p.hs}%</td><td>${p.rating.toFixed(2)}</td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
+  var playersHtml = team.players.map(function(p) {
+    var kd = (p.kills / (p.deaths || 1)).toFixed(2);
+    var pAvatar = p.avatar ? '<img src="' + p.avatar + '" class="player-avatar">' : '<div class="player-avatar">' + p.nick.charAt(0) + '</div>';
+    return '<tr><td><div class="player-cell">' + pAvatar + '<div><span class="player-nick">' + p.nick + '</span>' + (p.role ? '<span class="role-badge">' + p.role + '</span>' : '') + '</div></div></td>' +
+           '<td>' + p.kills + '</td><td>' + p.deaths + '</td><td style="color:var(--accent)">' + kd + '</td><td>' + p.hs + '%</td><td>' + p.rating.toFixed(2) + '</td></tr>';
+  }).join('');
+
+  document.getElementById("team-detail-content").innerHTML = 
+    '<div class="team-header animate-in">' + teamAvatar + '<div class="team-title-info"><h2>' + team.name + ' <span class="team-tag">' + (team.tag || "") + '</span></h2><p>Рейтинг команды</p></div></div>' +
+    '<div class="team-stats-row animate-in delay-1">' +
+      '<div class="team-stat-box"><div class="val" style="color:var(--accent)">' + team.points + '</div><div class="lbl">Поинты</div></div>' +
+      '<div class="team-stat-box"><div class="val" style="color:var(--win)">' + team.wins + '</div><div class="lbl">Победы</div></div>' +
+      '<div class="team-stat-box"><div class="val" style="color:var(--lose)">' + team.losses + '</div><div class="lbl">Поражения</div></div>' +
+    '</div>' +
+    '<div class="table-wrapper animate-in delay-2"><table>' +
+      '<thead><tr><th>Игрок</th><th>Убийства</th><th>Смерти</th><th>К/Д</th><th>HS%</th><th>AVG</th></tr></thead>' +
+      '<tbody>' + playersHtml + '</tbody></table></div>';
 }
 
 function renderRegisterTeamForm() {
-  const container = document.getElementById("register-team-content");
-  const ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
-  let playersHtml = '';
-  for (let i = 1; i <= 5; i++) {
-    playersHtml += `
-      <div class="player-row-admin">
-        <div class="num">${i}.</div>
-        <div style="flex:1; display:flex; gap:10px;">
-          <div style="flex:2;"><input type="text" id="rt-nick-${i}" class="form-control" placeholder="Ник" style="padding:10px;"></div>
-          <div style="flex:1;"><select id="rt-role-${i}" class="form-control" style="padding:10px;">${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
-        </div>
-      </div>
-    `;
+  var container = document.getElementById("register-team-content");
+  var ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
+  var playersHtml = '';
+  for (var i = 1; i <= 5; i++) {
+    playersHtml += '<div class="player-row-admin"><div class="num">' + i + '.</div><div style="flex:1; display:flex; gap:10px;">' +
+      '<div style="flex:2;"><input type="text" id="rt-nick-' + i + '" class="form-control" placeholder="Ник" style="padding:10px;"></div>' +
+      '<div style="flex:1;"><select id="rt-role-' + i + '" class="form-control" style="padding:10px;">' + ROLES.map(function(r){return '<option value="'+r+'">'+r+'</option>';}).join('') + '</select></div>' +
+      '</div></div>';
   }
 
-  container.innerHTML = `
-    <div class="form-group"><label>Название команды</label><input type="text" id="rt-name" class="form-control" placeholder="Team Spirit"></div>
-    <div class="form-group"><label>Тег (до 6 букв)</label><input type="text" id="rt-tag" class="form-control" maxlength="6" placeholder="TS"></div>
-    
-    <div class="form-group">
-      <label>Логотип</label>
-      <div class="file-upload-wrapper" onclick="document.getElementById('rt-logo').click()">
-        <img id="rt-logo-preview" class="file-upload-preview">
-        <div class="file-upload-label">Загрузить</div>
-        <input type="file" id="rt-logo" accept="image/*" onchange="previewImage(this, 'rt-logo-preview')">
-      </div>
-    </div>
-
-    <div class="form-group"><label>Состав</label>${playersHtml}</div>
-    <div class="form-group"><label>Ваш Telegram (@username)</label><input type="text" id="rt-contact" class="form-control" placeholder="@username"></div>
-    
-    <button class="btn" onclick="submitTeamRequest()">Отправить заявку</button>
-  `;
+  container.innerHTML = '<div class="form-group"><label>Название команды</label><input type="text" id="rt-name" class="form-control" placeholder="Team Spirit"></div>' +
+    '<div class="form-group"><label>Тег (до 6 букв)</label><input type="text" id="rt-tag" class="form-control" maxlength="6" placeholder="TS"></div>' +
+    '<div class="form-group"><label>Логотип</label><div class="file-upload-wrapper" onclick="document.getElementById(\'rt-logo\').click()"><img id="rt-logo-preview" class="file-upload-preview"><div class="file-upload-label">Загрузить</div><input type="file" id="rt-logo" accept="image/*" onchange="previewImage(this, \'rt-logo-preview\')"></div></div>' +
+    '<div class="form-group"><label>Состав</label>' + playersHtml + '</div>' +
+    '<div class="form-group"><label>Ваш Telegram (@username)</label><input type="text" id="rt-contact" class="form-control" placeholder="@username"></div>' +
+    '<button class="btn" onclick="submitTeamRequest()">Отправить заявку</button>';
 }
 
 function submitTeamRequest() {
-  const name = document.getElementById("rt-name").value;
-  const tag = document.getElementById("rt-tag").value;
-  const logo = document.getElementById("rt-logo-preview").src;
-  const contact = document.getElementById("rt-contact").value;
+  var name = document.getElementById("rt-name").value;
+  var tag = document.getElementById("rt-tag").value;
+  var logo = document.getElementById("rt-logo-preview").src;
+  var contact = document.getElementById("rt-contact").value;
 
   if (!name || !tag || !contact) return alert("Заполните все поля!");
-
-  const players = [];
-  for (let i = 1; i <= 5; i++) {
-    const nick = document.getElementById(`rt-nick-${i}`).value;
-    if (!nick) return alert(`Введите ник игрока ${i}`);
-    players.push({ nick: nick, role: document.getElementById(`rt-role-${i}`).value });
+  var players = [];
+  for (var i = 1; i <= 5; i++) {
+    var nick = document.getElementById("rt-nick-" + i).value;
+    if (!nick) return alert("Введите ник игрока " + i);
+    players.push({ nick: nick, role: document.getElementById("rt-role-" + i).value });
   }
-
-  teamRequests.push({ name, tag, logo, contact, players });
+  teamRequests.push({ name: name, tag: tag, logo: logo, contact: contact, players: players });
   saveRequests();
   alert("Заявка отправлена на модерацию!");
   switchTab('ranking');
 }
 
 function renderNewsForm() {
-  const container = document.getElementById("news-content");
-  container.innerHTML = `
-    <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Отправьте заявку на изменение состава или новость.</p>
-    <div class="form-group"><label>Команда</label><input type="text" id="n-team" class="form-control" placeholder="Название вашей команды"></div>
-    <div class="form-group">
-      <label>Текст изменения</label>
-      <textarea id="n-text" class="form-control" rows="4" placeholder="+S1mple&#10;-Nico"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Фото (необязательно)</label>
-      <div class="file-upload-wrapper" onclick="document.getElementById('n-photo').click()">
-        <img id="n-photo-preview" class="file-upload-preview">
-        <div class="file-upload-label">Прикрепить фото</div>
-        <input type="file" id="n-photo" accept="image/*" onchange="previewImage(this, 'n-photo-preview')">
-      </div>
-    </div>
-    <button class="btn" onclick="submitNewsRequest()">Отправить админу</button>
-  `;
+  var container = document.getElementById("news-content");
+  container.innerHTML = '<p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Отправьте заявку на изменение состава или новость.</p>' +
+    '<div class="form-group"><label>Команда</label><input type="text" id="n-team" class="form-control" placeholder="Название вашей команды"></div>' +
+    '<div class="form-group"><label>Текст изменения</label><textarea id="n-text" class="form-control" rows="4" placeholder="+S1mple&#10;-Nico"></textarea></div>' +
+    '<div class="form-group"><label>Фото (необязательно)</label><div class="file-upload-wrapper" onclick="document.getElementById(\'n-photo\').click()"><img id="n-photo-preview" class="file-upload-preview"><div class="file-upload-label">Прикрепить фото</div><input type="file" id="n-photo" accept="image/*" onchange="previewImage(this, \'n-photo-preview\')"></div></div>' +
+    '<button class="btn" onclick="submitNewsRequest()">Отправить админу</button>';
 }
 
 function submitNewsRequest() {
-  const team = document.getElementById("n-team").value;
-  const text = document.getElementById("n-text").value;
-  const photo = document.getElementById("n-photo-preview").src;
+  var team = document.getElementById("n-team").value;
+  var text = document.getElementById("n-text").value;
+  var photo = document.getElementById("n-photo-preview").src;
 
   if (!team || !text) return alert("Заполните команду и текст!");
-  newsRequests.push({ team, text, photo });
+  newsRequests.push({ team: team, text: text, photo: photo });
   saveRequests();
   alert("Новость отправлена админу!");
   switchTab('ranking');
 }
 
 function loginAdmin() {
-  const pass = document.getElementById("admin-pass").value;
+  var pass = document.getElementById("admin-pass").value;
   if (pass === "hltv26") {
     sessionStorage.setItem("isAdmin", "true");
     document.getElementById("screen-admin-login").classList.add("hidden");
@@ -221,95 +174,60 @@ function loginAdmin() {
 }
 
 function showAdminTab(tab) {
-  const container = document.getElementById("admin-form-container");
+  var container = document.getElementById("admin-form-container");
   if (tab === 'teams') {
-    container.innerHTML = `
-      <input type="text" class="search-input" placeholder="Поиск команды..." oninput="searchAdminTeams(this.value)">
-      <button class="btn btn-outline" style="margin-bottom:20px;" onclick="addTeamAdminForm()">+ Добавить команду</button>
-      <div id="admin-teams-list"></div>
-    `;
+    container.innerHTML = '<input type="text" class="search-input" placeholder="Поиск команды..." oninput="searchAdminTeams(this.value)"><button class="btn btn-outline" style="margin-bottom:20px;" onclick="addTeamAdminForm()">+ Добавить команду</button><div id="admin-teams-list"></div>';
     renderAdminTeamsList(APP_DATA.teams);
   } 
   else if (tab === 'requests') {
-    let html = `<h3 style="margin-bottom:16px;">Заявки на команды</h3>`;
-    if (teamRequests.length === 0) html += `<p style="color:var(--muted)">Нет новых заявок.</p>`;
-    teamRequests.forEach((req, index) => {
-      html += `
-        <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <b>${req.name} (${req.tag})</b>
-            <span style="font-size:12px; color:var(--muted);">${req.contact}</span>
-          </div>
-          <div style="font-size:13px; margin-bottom:10px;">${req.players.map(p => `${p.nick} (${p.role})`).join(', ')}</div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn-green" style="margin:0; padding:8px;" onclick="approveTeamRequest(${index})">Одобрить</button>
-            <button class="btn btn-red" style="margin:0; padding:8px;" onclick="rejectTeamRequest(${index})">Отклонить</button>
-          </div>
-        </div>
-      `;
+    var html = '<h3 style="margin-bottom:16px;">Заявки на команды</h3>';
+    if (teamRequests.length === 0) html += '<p style="color:var(--muted)">Нет новых заявок.</p>';
+    teamRequests.forEach(function(req, index) {
+      html += '<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border);">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b>' + req.name + ' (' + req.tag + ')</b><span style="font-size:12px; color:var(--muted);">' + req.contact + '</span></div>' +
+        '<div style="font-size:13px; margin-bottom:10px;">' + req.players.map(function(p){ return p.nick + ' (' + p.role + ')'; }).join(', ') + '</div>' +
+        '<div style="display:flex; gap:10px;"><button class="btn btn-green" style="margin:0; padding:8px;" onclick="approveTeamRequest(' + index + ')">Одобрить</button><button class="btn btn-red" style="margin:0; padding:8px;" onclick="rejectTeamRequest(' + index + ')">Отклонить</button></div></div>';
     });
-
-    html += `<h3 style="margin-top:30px; margin-bottom:16px;">Заявки на замены / Новости</h3>`;
-    if (newsRequests.length === 0) html += `<p style="color:var(--muted)">Нет новых новостей.</p>`;
-    newsRequests.forEach((req, index) => {
-      html += `
-        <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border);">
-          <b>${req.team}</b>
-          <p style="font-size:13px; margin:8px 0; white-space:pre-wrap;">${req.text}</p>
-          ${req.photo ? `<img src="${req.photo}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">` : ''}
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn-green" style="margin:0; padding:8px;" onclick="approveNews(${index})">В канал</button>
-            <button class="btn btn-red" style="margin:0; padding:8px;" onclick="rejectNews(${index})">Отклонить</button>
-          </div>
-        </div>
-      `;
+    html += '<h3 style="margin-top:30px; margin-bottom:16px;">Заявки на замены / Новости</h3>';
+    if (newsRequests.length === 0) html += '<p style="color:var(--muted)">Нет новых новостей.</p>';
+    newsRequests.forEach(function(req, index) {
+      html += '<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border);">' +
+        '<b>' + req.team + '</b><p style="font-size:13px; margin:8px 0; white-space:pre-wrap;">' + req.text + '</p>' +
+        (req.photo ? '<img src="' + req.photo + '" style="max-width:100%; border-radius:8px; margin-bottom:10px;">' : '') +
+        '<div style="display:flex; gap:10px;"><button class="btn btn-green" style="margin:0; padding:8px;" onclick="approveNews(' + index + ')">В канал</button><button class="btn btn-red" style="margin:0; padding:8px;" onclick="rejectNews(' + index + ')">Отклонить</button></div></div>';
     });
     container.innerHTML = html;
   }
   else if (tab === 'matches') {
-    const options = APP_DATA.teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
-    container.innerHTML = `
-      <h3 style="margin-bottom:16px;">Добавить матч</h3>
-      <div class="form-group"><label>Карта</label><input type="text" id="m-map" class="form-control" value="mirage"></div>
-      <div style="display:flex; gap:10px;">
-        <div class="form-group" style="flex:1;"><label>Команда 1</label><select id="m-t1" class="form-control">${options}</select></div>
-        <div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s1" class="form-control" value="0"></div>
-      </div>
-      <div style="display:flex; gap:10px;">
-        <div class="form-group" style="flex:1;"><label>Команда 2</label><select id="m-t2" class="form-control">${options}</select></div>
-        <div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s2" class="form-control" value="0"></div>
-      </div>
-      <button class="btn" onclick="addMatchAdmin()">Добавить</button>
-    `;
+    var options = APP_DATA.teams.map(function(t){ return '<option value="' + t.name + '">' + t.name + '</option>'; }).join('');
+    container.innerHTML = '<h3 style="margin-bottom:16px;">Добавить матч</h3>' +
+      '<div class="form-group"><label>Карта</label><input type="text" id="m-map" class="form-control" value="mirage"></div>' +
+      '<div style="display:flex; gap:10px;"><div class="form-group" style="flex:1;"><label>Команда 1</label><select id="m-t1" class="form-control">' + options + '</select></div><div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s1" class="form-control" value="0"></div></div>' +
+      '<div style="display:flex; gap:10px;"><div class="form-group" style="flex:1;"><label>Команда 2</label><select id="m-t2" class="form-control">' + options + '</select></div><div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s2" class="form-control" value="0"></div></div>' +
+      '<button class="btn" onclick="addMatchAdmin()">Добавить</button>';
   }
 }
 
 function renderAdminTeamsList(teams) {
-  const list = document.getElementById("admin-teams-list");
+  var list = document.getElementById("admin-teams-list");
   if (!list) return;
-  let html = "";
-  teams.forEach(t => {
-    html += `
-      <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-        <div><b>${t.name}</b> (${t.points} pts)</div>
-        <div style="display:flex; gap:5px;">
-          <button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin('${t.name}')">Ред.</button>
-          <button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeamAdmin('${t.name}')">Удал.</button>
-        </div>
-      </div>
-    `;
+  var html = "";
+  teams.forEach(function(t) {
+    html += '<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">' +
+      '<div><b>' + t.name + '</b> (' + t.points + ' pts)</div>' +
+      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeamAdmin(\'' + t.name + '\')">Удал.</button></div></div>';
   });
   list.innerHTML = html;
 }
 
 function searchAdminTeams(val) {
-  const filtered = APP_DATA.teams.filter(t => t.name.toLowerCase().includes(val.toLowerCase()));
+  var filtered = APP_DATA.teams.filter(function(t) { return t.name.toLowerCase().includes(val.toLowerCase()); });
   renderAdminTeamsList(filtered);
 }
 
 function approveTeamRequest(index) {
-  const req = teamRequests[index];
-  APP_DATA.teams.push({ id: Date.now(), name: req.name, tag: req.tag, points: 0, wins: 0, losses: 0, avatar: req.logo, players: req.players.map(p => ({...p, kills:0, deaths:0, hs:0, rating:0, avatar:""})) });
+  var req = teamRequests[index];
+  APP_DATA.teams.push({ id: Date.now(), name: req.name, tag: req.tag, points: 0, wins: 0, losses: 0, avatar: req.logo, players: req.players.map(function(p){ return { nick: p.nick, role: p.role, kills:0, deaths:0, hs:0, rating:0, avatar:"" }; }) });
   teamRequests.splice(index, 1);
   saveData(); saveRequests();
   showAdminTab('requests');
@@ -322,53 +240,49 @@ function rejectTeamRequest(index) {
   showAdminTab('requests');
 }
 
-// ОТПРАВКА ЧЕРЕЗ ФОРМУ (обход блокировки Telegram)
-function sendViaForm(data) {
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = API_URL;
-  form.target = "hidden_iframe";
-  form.style.display = "none";
-
-  for (const key in data) {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = key;
-    input.value = data[key];
-    form.appendChild(input);
-  }
-  document.body.appendChild(form);
-  form.submit();
-  setTimeout(() => document.body.removeChild(form), 1000);
-}
-
 function approveNews(index) {
-  const req = newsRequests[index];
-  sendViaForm({ action: "approve_news", team: req.team, text: req.text, photo: req.photo || "" });
-  alert("Отправлено в канал!");
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab("requests");
+  var req = newsRequests[index];
+  fetch(API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
+  }).then(function() {
+    alert("Отправлено в канал!");
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab("requests");
+  }).catch(function(err) {
+    alert("ОШИБКА СЕТИ!");
+  });
 }
 
 function rejectNews(index) {
-  const req = newsRequests[index];
-  sendViaForm({ action: "reject_news", team: req.team, text: req.text });
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab("requests");
+  var req = newsRequests[index];
+  fetch(API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'reject_news', team: req.team, text: req.text })
+  }).then(function() {
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab("requests");
+  }).catch(function(err) {
+    alert("ОШИБКА СЕТИ!");
+  });
 }
 
 function addMatchAdmin() {
-  const map = document.getElementById("m-map").value;
-  const t1 = APP_DATA.teams.find(t => t.name === document.getElementById("m-t1").value);
-  const t2 = APP_DATA.teams.find(t => t.name === document.getElementById("m-t2").value);
-  const s1 = parseInt(document.getElementById("m-s1").value);
-  const s2 = parseInt(document.getElementById("m-s2").value);
+  var map = document.getElementById("m-map").value;
+  var t1 = APP_DATA.teams.find(function(t){ return t.name === document.getElementById("m-t1").value; });
+  var t2 = APP_DATA.teams.find(function(t){ return t.name === document.getElementById("m-t2").value; });
+  var s1 = parseInt(document.getElementById("m-s1").value);
+  var s2 = parseInt(document.getElementById("m-s2").value);
 
   if (!t1 || !t2) return alert("Выберите команды");
   APP_DATA.matches.push({
-    id: Date.now(), map, 
+    id: Date.now(), map: map, 
     team1: { name: t1.name, score: s1, players: t1.players },
     team2: { name: t2.name, score: s2, players: t2.players }
   });
@@ -382,56 +296,47 @@ function deleteTeamAdmin(name) { alert("Функция удаления в ра�
 function addTeamAdminForm() { alert("Функция добавления в разработке"); }
 
 function renderMatchesList() {
-  const container = document.getElementById("matches-container");
-  let html = "";
-  APP_DATA.matches.forEach((m, i) => {
-    const t1Win = m.team1.score > m.team2.score;
-    const t2Win = m.team2.score > m.team1.score;
-    const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
-    html += `
-      <div class="match-card-img animate-in" onclick="showMatchDetail(${m.id})">
-        <div class="match-map-bg" style="background-image: url('${mapImg}'), linear-gradient(135deg,#1e1b4b,#0f172a);">
-          <div class="match-map-content">
-            <div class="match-team-name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-            <div class="match-score-big">${m.team1.score} : ${m.team2.score}</div>
-            <div class="match-team-name" style="color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
-          </div>
-        </div>
-      </div>
-    `;
+  var container = document.getElementById("matches-container");
+  var html = "";
+  APP_DATA.matches.forEach(function(m) {
+    var t1Win = m.team1.score > m.team2.score;
+    var t2Win = m.team2.score > m.team1.score;
+    var mapImg = 'maps/' + m.map.toLowerCase().replace("de_", "").trim() + '.jpg';
+    html += '<div class="match-card-img animate-in" onclick="showMatchDetail(' + m.id + ')">' +
+      '<div class="match-map-bg" style="background-image: url(\'' + mapImg + '\'), linear-gradient(135deg,#1e1b4b,#0f172a);">' +
+        '<div class="match-map-content"><div class="match-team-name" style="color:' + (t1Win ? 'var(--win)' : 'var(--text)') + '">' + m.team1.name + '</div>' +
+        '<div class="match-score-big">' + m.team1.score + ' : ' + m.team2.score + '</div>' +
+        '<div class="match-team-name" style="color:' + (t2Win ? 'var(--win)' : 'var(--text)') + '">' + m.team2.name + '</div></div></div></div>';
   });
   container.innerHTML = html || '<p style="color:var(--muted)">Матчей нет</p>';
 }
 
 function showMatchDetail(id) {
-  const m = APP_DATA.matches.find(x => x.id === id);
+  var m = APP_DATA.matches.find(function(x){ return x.id === id; });
   if (!m) return;
   document.getElementById("screen-matches-list").classList.add("hidden");
   document.getElementById("screen-match-detail").classList.remove("hidden");
-  const t1Win = m.team1.score > m.team2.score;
-  const t2Win = m.team2.score > m.team1.score;
-  const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
-  const renderTable = (team, isW) => `
-    <div class="table-wrapper">
-      <div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);">
-        <span style="color:${isW ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
-      </div>
-      <table><thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
-      <tbody>${team.players.map(p => `<tr><td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div>${p.nick}</div></div></td><td>${p.kills}</td><td>${(p.kills/(p.deaths||1)).toFixed(2)}</td><td>${p.hs}%</td></tr>`).join('')}</tbody></table>
-    </div>`;
-  document.getElementById("match-detail-content").innerHTML = `
-    <div class="match-header-card" style="background-image: url('${mapImg}');">
-      <div class="score-board"><div class="score-display"><span class="${t1Win?'win':'lose'}">${m.team1.score}</span> : <span class="${t2Win?'win':'lose'}">${m.team2.score}</span></div></div>
-    </div>
-    ${renderTable(m.team1, t1Win)} ${renderTable(m.team2, t2Win)}
-  `;
+  var t1Win = m.team1.score > m.team2.score;
+  var t2Win = m.team2.score > m.team1.score;
+  var mapImg = 'maps/' + m.map.toLowerCase().replace("de_", "").trim() + '.jpg';
+  
+  function renderTable(team, isW) {
+    return '<div class="table-wrapper"><div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);"><span style="color:' + (isW ? 'var(--win)' : 'var(--text)') + '">' + team.name + '</span></div>' +
+      '<table><thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead><tbody>' +
+      team.players.map(function(p) { return '<tr><td><div class="player-cell"><div class="player-avatar">' + p.nick.charAt(0) + '</div><div>' + p.nick + '</div></div></td><td>' + p.kills + '</td><td>' + (p.kills/(p.deaths||1)).toFixed(2) + '</td><td>' + p.hs + '%</td></tr>'; }).join('') +
+      '</tbody></table></div>';
+  }
+
+  document.getElementById("match-detail-content").innerHTML = '<div class="match-header-card" style="background-image: url(\'' + mapImg + '\');">' +
+    '<div class="score-board"><div class="score-display"><span class="' + (t1Win?'win':'lose') + '">' + m.team1.score + '</span> : <span class="' + (t2Win?'win':'lose') + '">' + m.team2.score + '</span></div></div></div>' +
+    renderTable(m.team1, t1Win) + renderTable(m.team2, t2Win);
 }
 
 function previewImage(input, previewId) {
   if (input.files && input.files[0]) {
-    const reader = new FileReader();
+    var reader = new FileReader();
     reader.onload = function(e) {
-      const img = document.getElementById(previewId);
+      var img = document.getElementById(previewId);
       img.src = e.target.result;
       img.style.display = 'block';
     };
