@@ -64,22 +64,16 @@ function switchTab(tab) {
 
 function renderRanking() {
   var container = document.getElementById("ranking-container");
-  if (!container) return;
-  APP_DATA.teams.sort(function(a,b){return b.points-a.points;});
-  var html = '';
-  APP_DATA.teams.forEach(function(t, i) {
-    var playersStr = (t.players || []).map(function(p) { return p.nick; }).join(' • ') || 'Unknown';
-    var flag = t.tag ? t.tag.substring(0,2).toUpperCase() : 'UN';
-    html += '<div class="hltv-row" onclick="showTeamDetail(\'' + t.name + '\')">';
-    html += '  <div class="hltv-rank">#' + (i+1) + '</div>';
-    html += '  <div class="hltv-star">☆</div>';
-    html += '  <div class="hltv-team-info">';
-    html += '    <div class="hltv-team-name">' + t.name + ' <span class="hltv-flag">' + flag + '</span> <span class="hltv-points">(' + t.points + ' points)</span></div>';
-    html += '    <div class="hltv-players">' + playersStr + '</div>';
-    html += '  </div>';
-    html += '</div>';
+  var html = "";
+  APP_DATA.teams.sort(function(a,b){return b.points-a.points;}).forEach(function(t,i){
+    var teamAvatar = t.avatar ? '<img src="' + t.avatar + '" class="avatar">' : '<div class="avatar">' + t.name.charAt(0) + '</div>';
+    html += '<div class="card animate-in delay-' + Math.min(i+1, 5) + '" onclick="showTeamDetail(\'' + t.name + '\')">' +
+        '<div class="card-num">' + (i+1) + '</div>' + teamAvatar +
+        '<div class="info"><div class="name">' + t.name + ' <span class="team-tag">' + (t.tag || "") + '</span></div>' +
+        '<div class="sub">' + (t.wins + t.losses) + ' матчей</div></div>' +
+        '<div class="points">' + t.points + ' PTS</div></div>';
   });
-  container.innerHTML = html;
+  container.innerHTML = html || '<p style="color:var(--muted); text-align:center; padding:20px;">Команд пока нет</p>';
 }
 
 function showTeamDetail(name) {
@@ -303,15 +297,24 @@ function addTeamAdminForm() { alert("Функция добавления в ра
 function renderMatchesList() {
   var container = document.getElementById("matches-container");
   if (!container) return;
-  var html = '<h1>Сыгранные матчи</h1>';
+  var html = '';
   APP_DATA.matches.forEach(function(m) {
-    var mapBg = m.map ? m.map.toLowerCase() + '.jpg' : 'default.jpg';
-    var t1Class = m.score1 > m.score2 ? 'winner' : '';
-    var t2Class = m.score2 > m.score1 ? 'winner' : '';
-    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\');" onclick="openMatch(\'' + m.id + '\')">';
-    html += '  <div class="match-team ' + t1Class + '">' + m.team1 + '</div>';
-    html += '  <div class="match-score">' + m.score1 + ' : ' + m.score2 + '</div>';
-    html += '  <div class="match-team right ' + t2Class + '">' + m.team2 + '</div>';
+    var t1 = m.team1 || m.t1 || m.teamA || (m.teams && m.teams[0]) || 'Team 1';
+    var t2 = m.team2 || m.t2 || m.teamB || (m.teams && m.teams[1]) || 'Team 2';
+    var s1 = m.score1 !== undefined ? m.score1 : (m.s1 !== undefined ? m.s1 : 0);
+    var s2 = m.score2 !== undefined ? m.score2 : (m.s2 !== undefined ? m.s2 : 0);
+    if (typeof t1 === 'object' && t1 !== null) t1 = t1.name || t1.team || 'Team 1';
+    if (typeof t2 === 'object' && t2 !== null) t2 = t2.name || t2.team || 'Team 2';
+    var mapName = m.map || m.mapName || 'default';
+    if (typeof mapName === 'object' && mapName !== null) mapName = mapName.name || 'default';
+    var mapBg = mapName.toLowerCase() + '.jpg';
+    var matchId = m.id || m.matchId || Date.now();
+    
+    // Используем твои классы, чтобы дизайн остался прежним
+    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\'); cursor:pointer;" onclick="openMatch(\'' + matchId + '\')">';
+    html += '  <div class="match-team">' + t1 + '</div>';
+    html += '  <div class="match-score">' + s1 + ' : ' + s2 + '</div>';
+    html += '  <div class="match-team right">' + t2 + '</div>';
     html += '</div>';
   });
   container.innerHTML = html;
