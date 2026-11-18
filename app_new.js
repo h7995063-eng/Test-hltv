@@ -1,4 +1,4 @@
-const API_URL = "https://snowboard-prague-deutsch-field.trycloudflare.com";
+const API_URL = "https://catalog-ministries-flows-flyer.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -53,6 +53,10 @@ function switchTab(tab) {
   } else if (tab === "register-team") {
     document.getElementById("screen-register-team").classList.remove("hidden");
     renderRegisterTeamForm();
+  } else if (tab === "match-detail") {
+    document.getElementById("screen-match-detail").classList.remove("hidden");
+  } else if (tab === "team-detail") {
+    document.getElementById("screen-team-detail").classList.remove("hidden");
   } else if (tab === "admin") {
     if (sessionStorage.getItem("isAdmin") === "true") {
       document.getElementById("screen-admin-panel").classList.remove("hidden");
