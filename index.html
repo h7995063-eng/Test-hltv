@@ -5,168 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HLTV MiniApp</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  :root {
-    --bg: #0b0e14;
-    --sidebar: #11141c;
-    --card: #1c1f26;
-    --card-hover: #262a33;
-    --accent: #d4af37;
-    --text: #ffffff;
-    --muted: #7a8290;
-    --border: #2a2e38;
-    --win: #10b981;
-    --lose: #ef4444;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden;
-  }
-
-  /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
-  .sidebar {
-    width: 240px; background: var(--sidebar); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; padding: 20px 12px; transition: transform 0.3s ease; z-index: 100;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; padding: 0 12px 24px 12px; letter-spacing: 1px; }
-  .logo svg { width: 24px; height: 24px; fill: var(--text); }
-  .nav-item {
-    display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px;
-    color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 4px; transition: all 0.2s;
-  }
-  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-  .nav-item.active { color: #fff; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); }
-  .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
-  
-  /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
-  .main { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
-  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-  .menu-btn { display: none; background: transparent; border: none; color: var(--text); cursor: pointer; padding: 8px; }
-  .menu-btn svg { width: 24px; height: 24px; fill: currentColor; }
-
-  /* ===== КАРТОЧКИ РЕЙТИНГА ===== */
-  .rank-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px;
-    margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; transition: background 0.2s;
-  }
-  .rank-card:hover { background: var(--card-hover); }
-  .rank-num { font-size: 18px; font-weight: 600; color: var(--muted); width: 30px; text-align: center; }
-  .rank-avatar { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg,#a855f7,#ec4899); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; margin-right: 14px; }
-  .rank-info { flex: 1; }
-  .rank-name { font-size: 16px; font-weight: 600; }
-  .rank-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .rank-points { font-size: 12px; color: var(--accent); border: 1px solid rgba(212,175,55,0.3); padding: 6px 12px; border-radius: 20px; font-weight: 500; }
-
-  /* ===== ДЕТАЛИ КОМАНДЫ ===== */
-  .back-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-  .back-btn:hover { background: var(--card-hover); }
-  .back-btn svg { width: 16px; height: 16px; fill: currentColor; }
-
-  .team-header {
-    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
-    border-radius: 16px; padding: 24px; margin-bottom: 20px;
-    border: 1px solid #312e81; position: relative; overflow: hidden;
-    display: flex; align-items: center; gap: 20px;
-  }
-  .team-header::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop') center/cover;
-    opacity: 0.1; z-index: 0;
-  }
-  .team-header-content { position: relative; z-index: 1; display: flex; align-items: center; gap: 20px; width: 100%; }
-  
-  .team-big-logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg,#a855f7,#ec4899); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: #fff; flex-shrink: 0; }
-  .team-title-info { flex: 1; }
-  .team-title-info h2 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
-  .team-title-info p { font-size: 13px; color: var(--muted); }
-  
-  .team-stats-row { display: flex; gap: 12px; width: 100%; margin-bottom: 20px; }
-  .team-stat-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
-  .team-stat-box .val { font-size: 24px; font-weight: 800; }
-  .team-stat-box .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  /* ===== ТАБЛИЦА ИГРОКОВ КОМАНДЫ ===== */
-  .players-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .players-table th { text-align: left; color: var(--muted); font-weight: 500; padding: 12px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
-  .players-table th:nth-child(n+2) { text-align: center; width: 60px; }
-  .players-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .players-table td:nth-child(n+2) { text-align: center; }
-  .players-table tr:last-child td { border-bottom: none; }
-  
-  .player-cell { display: flex; align-items: center; gap: 10px; }
-  .player-avatar { width: 32px; height: 32px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fff; }
-  .player-nick { font-weight: 600; font-size: 14px; }
-  .stat-val { font-weight: 600; }
-  .stat-kd { color: var(--accent); }
-  .stat-rating { color: var(--win); font-weight: 700; }
-
-  /* ===== СПИСОК МАТЧЕЙ ===== */
-  .match-list-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px; margin-bottom: 12px; cursor: pointer;
-    display: flex; align-items: center; justify-content: space-between;
-    transition: background 0.2s;
-  }
-  .match-list-card:hover { background: var(--card-hover); border-color: #3f3f46; }
-  .match-teams { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; }
-  .team-name { width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .team-name.right { text-align: right; }
-  .score-badge { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 6px; font-family: monospace; font-size: 16px; font-weight: 700; border: 1px solid var(--border); }
-  .match-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-  .match-tourney { font-size: 12px; color: var(--muted); }
-  .match-map { font-size: 11px; background: var(--bg); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
-
-  /* ===== ДЕТАЛИ МАТЧА ===== */
-  .match-header-card {
-    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
-    border-radius: 16px; padding: 20px; margin-bottom: 20px;
-    border: 1px solid #312e81; position: relative; overflow: hidden;
-  }
-  .match-header-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop') center/cover;
-    opacity: 0.1; z-index: 0;
-  }
-  .match-header-content { position: relative; z-index: 1; }
-  .match-top-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
-  .score-board { display: flex; align-items: center; justify-content: center; gap: 20px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px; backdrop-filter: blur(10px); }
-  .team-block { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
-  .team-logo-small { width: 48px; height: 48px; background: #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
-  .team-block .name { font-size: 16px; font-weight: 700; }
-  .score-display { display: flex; align-items: center; gap: 10px; font-size: 32px; font-weight: 800; }
-  .score-display span { padding: 4px 12px; border-radius: 8px; background: rgba(255,255,255,0.1); }
-  .score-display .win { color: var(--win); background: rgba(16, 185, 129, 0.1); }
-  .score-display .lose { color: var(--lose); background: rgba(239, 68, 68, 0.1); }
-
-  .stats-container { display: flex; flex-direction: column; gap: 16px; }
-  .team-stats-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .team-stats-header { padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-
-  /* ===== АДАПТИВ ===== */
-  @media (max-width: 768px) {
-    .sidebar { position: absolute; height: 100%; transform: translateX(-100%); }
-    .sidebar.open { transform: translateX(0); }
-    .menu-btn { display: block; }
-    .overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 90; display: none; }
-    .overlay.open { display: block; }
-    
-    .match-list-card { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .match-meta { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
-    .match-teams { width: 100%; justify-content: space-between; }
-    .team-name { width: auto; }
-    
-    .score-board { flex-direction: row; gap: 10px; }
-    .score-display { font-size: 24px; }
-    
-    .table-wrapper { overflow-x: auto; }
-    .players-table { min-width: 450px; }
-    
-    .team-header { flex-direction: column; text-align: center; }
-    .team-header-content { flex-direction: column; }
-  }
-  .hidden { display: none !important; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -178,17 +17,17 @@
     <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
     HLTV MINI
   </div>
-  <div class="nav-item" id="nav-ranking" data-tab="ranking" onclick="switchTab('ranking')">
-    <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg>
-    Рейтинг
+  <div class="nav-item" id="nav-ranking" onclick="switchTab('ranking')">
+    <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg> Рейтинг
   </div>
-  <div class="nav-item" id="nav-matches" data-tab="matches" onclick="switchTab('matches')">
-    <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zm0 2v2h10V4H7zm-4 6v10h18V10H3zm4 3h4v2H7v-2zm6 0h4v2h-4v-2z"/></svg>
-    Матчи
+  <div class="nav-item" id="nav-matches" onclick="switchTab('matches')">
+    <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zm0 2v2h10V4H7zm-4 6v10h18V10H3zm4 3h4v2H7v-2zm6 0h4v2h-4v-2z"/></svg> Матчи
   </div>
-  <div class="nav-item" id="nav-tournaments" data-tab="tournaments" onclick="switchTab('tournaments')">
-    <svg viewBox="0 0 24 24"><path d="M18 2H6v2H2v4a4 4 0 0 0 4 4h.35A6 6 0 0 0 11 15.9V18H8v2h8v-2h-3v-2.1a6 6 0 0 0 4.65-3.9H18a4 4 0 0 0 4-4V4h-4V2zM6 10a2 2 0 0 1-2-2V6h2v4zm14-2a2 2 0 0 1-2 2V6h2v2z"/></svg>
-    Турниры
+  <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Профиль
+  </div>
+  <div class="nav-item" id="nav-admin" onclick="switchTab('admin')">
+    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg> Админка
   </div>
 </div>
 
@@ -201,317 +40,70 @@
   <!-- ЭКРАН: РЕЙТИНГ -->
   <div id="screen-ranking" class="hidden">
     <h1>Рейтинг команд</h1>
-    <div id="ranking-container" style="margin-top:20px;"></div>
+    <div id="ranking-container"></div>
   </div>
 
   <!-- ЭКРАН: ДЕТАЛИ КОМАНДЫ -->
   <div id="screen-team-detail" class="hidden">
-    <button class="back-btn" onclick="switchTab('ranking')">
-      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-      Назад к рейтингу
-    </button>
+    <button class="back-btn" onclick="switchTab('ranking')">← Назад</button>
     <div id="team-detail-content"></div>
   </div>
 
-  <!-- ЭКРАН: СПИСОК МАТЧЕЙ -->
+  <!-- ЭКРАН: МАТЧИ -->
   <div id="screen-matches-list" class="hidden">
     <h1>Сыгранные матчи</h1>
-    <div id="matches-container" style="margin-top:20px;"></div>
+    <div id="matches-container"></div>
   </div>
-
+  
   <!-- ЭКРАН: ДЕТАЛИ МАТЧА -->
   <div id="screen-match-detail" class="hidden">
-    <button class="back-btn" onclick="switchTab('matches')">
-      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-      Назад к матчам
-    </button>
+    <button class="back-btn" onclick="switchTab('matches')">← Назад</button>
     <div id="match-detail-content"></div>
   </div>
 
-  <!-- ЭКРАН: ТУРНИРЫ -->
-  <div id="screen-tournaments" class="hidden">
-    <h1>Турниры</h1>
-    <div id="tournaments-container" style="margin-top:20px;color:var(--muted);">Турниров пока нет.</div>
+  <!-- ЭКРАН: ПРОФИЛЬ -->
+  <div id="screen-profile" class="hidden">
+    <h1>Мой профиль</h1>
+    <div class="profile-header">
+      <img id="profile-avatar-img" class="profile-avatar" src="" alt="Avatar" onclick="changeMyAvatar()">
+      <div class="profile-name" id="profile-name">Player</div>
+      <div class="profile-role">Игрок</div>
+      
+      <div class="profile-stats">
+        <div class="p-stat"><div class="val" style="color:var(--win)" id="profile-kd">1.25</div><div class="lbl">К/Д</div></div>
+        <div class="p-stat"><div class="val" style="color:var(--accent)" id="profile-avg">85.4</div><div class="lbl">AVG</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН: АДМИНКА (ВХОД) -->
+  <div id="screen-admin-login" class="hidden">
+    <h1>Вход в админку</h1>
+    <div class="form-group">
+      <label>Введите пароль</label>
+      <input type="password" id="admin-pass" class="form-control" placeholder="••••••">
+    </div>
+    <button class="btn" onclick="loginAdmin()">Войти</button>
+    <p id="admin-err" style="color:var(--lose); margin-top:10px; font-size:14px;"></p>
+  </div>
+
+  <!-- ЭКРАН: АДМИНКА (ПАНЕЛЬ) -->
+  <div id="screen-admin-panel" class="hidden">
+    <h1>Админ-панель</h1>
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+      <button class="btn btn-outline" onclick="showAdminForm('team')">+ Команда</button>
+      <button class="btn btn-outline" onclick="showAdminForm('player')">+ Игрок</button>
+      <button class="btn btn-outline" onclick="showAdminForm('match')">+ Матч</button>
+    </div>
+
+    <div id="admin-form-container" style="background:var(--card); padding:20px; border-radius:12px; border:1px solid var(--border);">
+      <p style="color:var(--muted);">Выберите действие выше</p>
+    </div>
   </div>
 
 </div>
 
-<script>
-  const tg = window.Telegram?.WebApp;
-  if (tg) { tg.ready(); tg.expand(); }
-
-  const DATA = {
-    teams: [
-      { 
-        name:"FURIA", points:960, wins:12, losses:4,
-        players: [
-          { nick: "FalleN", kills: 345, deaths: 280, hs: 72, rating: 1.15 },
-          { nick: "yuurih", kills: 410, deaths: 310, hs: 68, rating: 1.22 },
-          { nick: "KSCERATO", kills: 380, deaths: 290, hs: 65, rating: 1.18 },
-          { nick: "molodoy", kills: 290, deaths: 320, hs: 58, rating: 1.02 },
-          { nick: "YEKINDAR", kills: 310, deaths: 340, hs: 55, rating: 1.05 }
-        ]
-      },
-      { 
-        name:"MOUZ", points:808, wins:10, losses:5,
-        players: [
-          { nick: "torzsi", kills: 390, deaths: 300, hs: 74, rating: 1.20 },
-          { nick: "xertioN", kills: 370, deaths: 310, hs: 66, rating: 1.14 },
-          { nick: "Jimpphat", kills: 350, deaths: 280, hs: 62, rating: 1.16 },
-          { nick: "Brollan", kills: 320, deaths: 330, hs: 60, rating: 1.08 },
-          { nick: "Spinx", kills: 300, deaths: 320, hs: 57, rating: 1.05 }
-        ]
-      },
-      { 
-        name:"Team Spirit", points:766, wins:9, losses:6,
-        players: [
-          { nick: "donk", kills: 450, deaths: 250, hs: 82, rating: 1.35 },
-          { nick: "sh1ro", kills: 380, deaths: 270, hs: 75, rating: 1.25 },
-          { nick: "zont1x", kills: 340, deaths: 290, hs: 64, rating: 1.12 },
-          { nick: "magixx", kills: 320, deaths: 310, hs: 61, rating: 1.08 },
-          { nick: "chopper", kills: 280, deaths: 340, hs: 54, rating: 0.98 }
-        ]
-      },
-    ],
-    matches: [
-      {
-        id: 1, map: "de_mirage", tournament: "IEM Katowice 2024",
-        team1: { name: "Team Spirit", score: 13, players: [
-          { nick: "donk", kills: 28, deaths: 10, hs: 82 }, { nick: "sh1ro", kills: 21, deaths: 12, hs: 65 },
-          { nick: "zont1x", kills: 18, deaths: 14, hs: 60 }, { nick: "magixx", kills: 15, deaths: 16, hs: 55 },
-          { nick: "chopper", kills: 12, deaths: 18, hs: 48 },
-        ]},
-        team2: { name: "Vitality", score: 0, players: [
-          { nick: "ZywOo", kills: 18, deaths: 17, hs: 70 }, { nick: "apEX", kills: 14, deaths: 18, hs: 62 },
-          { nick: "flameZ", kills: 12, deaths: 19, hs: 58 }, { nick: "Spinx", kills: 10, deaths: 18, hs: 52 },
-          { nick: "mezii", kills: 8, deaths: 19, hs: 45 },
-        ]}
-      },
-      {
-        id: 2, map: "de_inferno", tournament: "BLAST Premier",
-        team1: { name: "FURIA", score: 9, players: [
-          { nick: "FalleN", kills: 18, deaths: 20, hs: 74 }, { nick: "yuurih", kills: 16, deaths: 19, hs: 65 },
-          { nick: "KSCERATO", kills: 14, deaths: 21, hs: 60 }, { nick: "molodoy", kills: 11, deaths: 22, hs: 55 },
-          { nick: "YEKINDAR", kills: 9, deaths: 23, hs: 48 },
-        ]},
-        team2: { name: "MOUZ", score: 13, players: [
-          { nick: "torzsi", kills: 24, deaths: 14, hs: 70 }, { nick: "xertioN", kills: 22, deaths: 15, hs: 62 },
-          { nick: "Jimpphat", kills: 20, deaths: 13, hs: 58 }, { nick: "Brollan", kills: 18, deaths: 16, hs: 52 },
-          { nick: "Spinx", kills: 16, deaths: 17, hs: 45 },
-        ]}
-      }
-    ]
-  };
-
-  function toggleMenu() {
-    document.getElementById("sidebar").classList.toggle("open");
-    document.getElementById("overlay").classList.toggle("open");
-  }
-
-  function switchTab(tab) {
-    document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
-    document.getElementById(`nav-${tab}`)?.classList.add("active");
-    
-    document.getElementById("screen-ranking").classList.add("hidden");
-    document.getElementById("screen-team-detail").classList.add("hidden");
-    document.getElementById("screen-matches-list").classList.add("hidden");
-    document.getElementById("screen-match-detail").classList.add("hidden");
-    document.getElementById("screen-tournaments").classList.add("hidden");
-
-    if (tab === "ranking") {
-      document.getElementById("screen-ranking").classList.remove("hidden");
-      renderRanking();
-    } else if (tab === "matches") {
-      document.getElementById("screen-matches-list").classList.remove("hidden");
-      renderMatchesList();
-    } else if (tab === "tournaments") {
-      document.getElementById("screen-tournaments").classList.remove("hidden");
-    }
-
-    if (window.innerWidth <= 768) toggleMenu();
-  }
-
-  function renderRanking() {
-    const container = document.getElementById("ranking-container");
-    let html = "";
-    DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
-      html += `
-        <div class="rank-card" onclick="showTeamDetail('${t.name}')">
-          <div class="rank-num">${i+1}</div>
-          <div class="rank-avatar">${t.name.charAt(0)}</div>
-          <div class="rank-info">
-            <div class="rank-name">${t.name}</div>
-            <div class="rank-sub">${t.wins + t.losses} матчей</div>
-          </div>
-          <div class="rank-points">${t.points} PTS</div>
-        </div>
-      `;
-    });
-    container.innerHTML = html;
-  }
-
-  // Показ деталей команды
-  function showTeamDetail(name) {
-    const team = DATA.teams.find(t => t.name === name);
-    if (!team) return;
-
-    document.getElementById("screen-ranking").classList.add("hidden");
-    document.getElementById("screen-team-detail").classList.remove("hidden");
-
-    document.getElementById("team-detail-content").innerHTML = `
-      <div class="team-header">
-        <div class="team-header-content">
-          <div class="team-big-logo">${team.name.charAt(0)}</div>
-          <div class="team-title-info">
-            <h2>${team.name}</h2>
-            <p>Рейтинг команды</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="team-stats-row">
-        <div class="team-stat-box">
-          <div class="val" style="color:var(--accent)">${team.points}</div>
-          <div class="lbl">Поинты</div>
-        </div>
-        <div class="team-stat-box">
-          <div class="val" style="color:var(--win)">${team.wins}</div>
-          <div class="lbl">Победы</div>
-        </div>
-        <div class="team-stat-box">
-          <div class="val" style="color:var(--lose)">${team.losses}</div>
-          <div class="lbl">Поражения</div>
-        </div>
-      </div>
-
-      <div class="team-stats-box">
-        <div class="team-stats-header">
-          <span>Состав команды и статистика</span>
-        </div>
-        <div class="table-wrapper">
-          <table class="players-table">
-            <thead>
-              <tr>
-                <th>Игрок</th>
-                <th>Убийства</th>
-                <th>Смерти</th>
-                <th>К/Д</th>
-                <th>HS%</th>
-                <th>Рейтинг</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${team.players.map(p => {
-                const kd = (p.kills / p.deaths).toFixed(2);
-                return `
-                  <tr>
-                    <td>
-                      <div class="player-cell">
-                        <div class="player-avatar">${p.nick.charAt(0)}</div>
-                        <div class="player-nick">${p.nick}</div>
-                      </div>
-                    </td>
-                    <td class="stat-val">${p.kills}</td>
-                    <td class="stat-val">${p.deaths}</td>
-                    <td class="stat-val stat-kd">${kd}</td>
-                    <td class="stat-val">${p.hs}%</td>
-                    <td class="stat-val stat-rating">${p.rating.toFixed(2)}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderMatchesList() {
-    const container = document.getElementById("matches-container");
-    let html = "";
-    DATA.matches.forEach(m => {
-      const t1Win = m.team1.score > m.team2.score;
-      const t2Win = m.team2.score > m.team1.score;
-      html += `
-        <div class="match-list-card" onclick="showMatchDetail(${m.id})">
-          <div class="match-teams">
-            <div class="team-name right" style="color: ${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-            <div class="score-badge">${m.team1.score} : ${m.team2.score}</div>
-            <div class="team-name" style="color: ${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
-          </div>
-          <div class="match-meta">
-            <div class="match-tourney">${m.tournament}</div>
-            <div class="match-map">${m.map}</div>
-          </div>
-        </div>
-      `;
-    });
-    container.innerHTML = html;
-  }
-
-  function showMatchDetail(id) {
-    const m = DATA.matches.find(x => x.id === id);
-    if (!m) return;
-
-    document.getElementById("screen-matches-list").classList.add("hidden");
-    document.getElementById("screen-match-detail").classList.remove("hidden");
-
-    const t1Win = m.team1.score > m.team2.score;
-    const t2Win = m.team2.score > m.team1.score;
-
-    const renderTeamTable = (team, isWinner) => `
-      <div class="team-stats-box">
-        <div class="team-stats-header">
-          <span style="color: ${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
-          <span style="color:var(--muted);font-weight:400;font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
-        </div>
-        <div class="table-wrapper">
-          <table class="players-table">
-            <thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
-            <tbody>
-              ${team.players.map(p => `
-                <tr>
-                  <td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div class="player-nick">${p.nick}</div></div></td>
-                  <td class="stat-val">${p.kills}</td>
-                  <td class="stat-val stat-kd">${(p.kills / p.deaths).toFixed(2)}</td>
-                  <td class="stat-val">${p.hs}%</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-
-    document.getElementById("match-detail-content").innerHTML = `
-      <div class="match-header-card">
-        <div class="match-header-content">
-          <div class="match-top-info"><span>${m.tournament}</span><span>${m.map}</span></div>
-          <div class="score-board">
-            <div class="team-block">
-              <div class="team-logo-small">${m.team1.name.charAt(0)}</div>
-              <div class="name" style="color: ${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-            </div>
-            <div class="score-display">
-              <span class="${t1Win ? 'win' : 'lose'}">${m.team1.score}</span>
-              <span style="color:var(--muted);font-size:20px;">:</span>
-              <span class="${t2Win ? 'win' : 'lose'}">${m.team2.score}</span>
-            </div>
-            <div class="team-block">
-              <div class="team-logo-small">${m.team2.name.charAt(0)}</div>
-              <div class="name" style="color: ${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="stats-container">
-        ${renderTeamTable(m.team1, t1Win)}
-        ${renderTeamTable(m.team2, t2Win)}
-      </div>
-    `;
-  }
-
-  switchTab('ranking');
-</script>
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
