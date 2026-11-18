@@ -1,10 +1,8 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-// Проверяем, зарегистрирован ли пользователь (LocalStorage)
 let userProfile = JSON.parse(localStorage.getItem("hltv_user"));
 
-// Запускаем логику показа экранов
 window.onload = () => {
   setTimeout(() => {
     document.getElementById("splash-screen").style.opacity = "0";
@@ -19,10 +17,9 @@ window.onload = () => {
         switchTab('ranking');
       }
     }, 500);
-  }, 2000); // 2 секунды показываем логотип
+  }, 1500);
 };
 
-// Регистрация
 function registerUser() {
   const nick = document.getElementById("reg-nick").value;
   const tgId = document.getElementById("reg-id").value || "12345678";
@@ -39,8 +36,6 @@ function registerUser() {
   };
 
   localStorage.setItem("hltv_user", JSON.stringify(userProfile));
-  
-  // Показываем приложение
   document.getElementById("register-screen").style.display = "none";
   document.getElementById("app-container").style.display = "flex";
   switchTab('ranking');
@@ -78,7 +73,6 @@ function switchTab(tab) {
   if (window.innerWidth <= 768) toggleMenu();
 }
 
-// --- РЕНДЕР РЕЙТИНГА ---
 function renderRanking() {
   const container = document.getElementById("ranking-container");
   let html = "";
@@ -146,15 +140,14 @@ function showTeamDetail(name) {
   `;
 }
 
-// --- РЕНДЕР МАТЧЕЙ ---
 function renderMatchesList() {
   const container = document.getElementById("matches-container");
   let html = "";
   
+  // Ищем все возможные форматы картинок
   const getMapImage = (mapName) => {
     let cleanName = mapName.toLowerCase().replace("de_", "").trim();
-    // Пытаемся подставить webp, если jpg нет - браузер сам покажет градиент
-    return `maps/${cleanName}.webp`;
+    return `maps/${cleanName}.jpg`;
   };
 
   DATA.matches.forEach(m => {

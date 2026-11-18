@@ -9,13 +9,11 @@
 </head>
 <body>
 
-<!-- ЭКРАН ЗАГРУЗКИ -->
 <div id="splash-screen">
   <img src="logo.webp" class="splash-logo" alt="Logo" onerror="this.style.display='none'">
   <div class="splash-text">HLTV MINI</div>
 </div>
 
-<!-- ЭКРАН РЕГИСТРАЦИИ -->
 <div id="register-screen" style="display:none;">
   <div class="reg-box">
     <div class="reg-title">Регистрация</div>
@@ -31,7 +29,6 @@
   </div>
 </div>
 
-<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ (скрыто до регистрации) -->
 <div id="app-container" style="display:none; width:100%; height:100%;">
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
@@ -79,25 +76,32 @@
       <div id="match-detail-content"></div>
     </div>
 
+    <!-- НОВЫЙ ПРОФИЛЬ -->
     <div id="screen-profile" class="hidden">
       <input type="file" id="my-avatar-file" accept="image/*" style="display:none;" onchange="changeMyAvatar(this)">
-      <div class="profile-banner"></div>
-      <div class="profile-avatar-container">
-        <img id="profile-avatar-img" class="profile-avatar-big" src="" alt="Avatar" onclick="document.getElementById('my-avatar-file').click()">
-        <div class="profile-info-box">
-          <div class="profile-name-big" id="profile-name">Player</div>
-          <div class="profile-role-tag" id="profile-role">Игрок</div>
+      
+      <div class="profile-container">
+        <div class="profile-banner"></div>
+        
+        <div class="profile-avatar-wrapper" onclick="document.getElementById('my-avatar-file').click()">
+          <img id="profile-avatar-img" class="profile-avatar-img" src="" alt="Avatar">
         </div>
-      </div>
-      <div class="profile-body">
-        <div class="profile-stats-grid">
-          <div class="p-stat-box kd">
-            <div class="val" id="profile-kd">1.25</div>
-            <div class="lbl">К/Д Рейтинг</div>
+        
+        <div class="profile-content">
+          <div class="profile-info">
+            <div class="profile-name" id="profile-name">Player</div>
+            <div class="profile-role-badge" id="profile-role">Игрок</div>
           </div>
-          <div class="p-stat-box avg">
-            <div class="val" id="profile-avg">85.4</div>
-            <div class="lbl">Средний AVG</div>
+          
+          <div class="profile-stats-grid">
+            <div class="p-stat-box kd">
+              <div class="val" id="profile-kd">1.25</div>
+              <div class="lbl">К/Д Рейтинг</div>
+            </div>
+            <div class="p-stat-box avg">
+              <div class="val" id="profile-avg">85.4</div>
+              <div class="lbl">Средний AVG</div>
+            </div>
           </div>
         </div>
       </div>
