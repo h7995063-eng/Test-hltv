@@ -58,7 +58,7 @@ function switchTab(tab) {
   } else if (tab === "team-detail") {
     document.getElementById("screen-team-detail").classList.remove("hidden");
   } else if (tab === "admin") {
-    if (sessionStorage.getItem("isAdmin") === "true") {
+    if (localStorage.getItem("isAdmin") === "true") {
       document.getElementById("screen-admin-panel").classList.remove("hidden");
       showAdminTab('teams');
     } else {
@@ -170,7 +170,7 @@ function submitNewsRequest() {
 function loginAdmin() {
   var pass = document.getElementById("admin-pass").value;
   if (pass === "hltv26") {
-    sessionStorage.setItem("isAdmin", "true");
+    localStorage.setItem("isAdmin", "true");
     document.getElementById("screen-admin-login").classList.add("hidden");
     document.getElementById("screen-admin-panel").classList.remove("hidden");
     showAdminTab('teams');
