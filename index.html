@@ -45,7 +45,20 @@
   .menu-btn { display: none; background: transparent; border: none; color: var(--text); cursor: pointer; padding: 8px; }
   .menu-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
-  /* ===== СПИСОК МАТЧЕЙ (КОМПАКТНЫЙ) ===== */
+  /* ===== КАРТОЧКИ РЕЙТИНГА ===== */
+  .rank-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px;
+    margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; transition: background 0.2s;
+  }
+  .rank-card:hover { background: var(--card-hover); }
+  .rank-num { font-size: 18px; font-weight: 600; color: var(--muted); width: 30px; text-align: center; }
+  .rank-avatar { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg,#a855f7,#ec4899); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; margin-right: 14px; }
+  .rank-info { flex: 1; }
+  .rank-name { font-size: 16px; font-weight: 600; }
+  .rank-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .rank-points { font-size: 12px; color: var(--accent); border: 1px solid rgba(212,175,55,0.3); padding: 6px 12px; border-radius: 20px; font-weight: 500; }
+
+  /* ===== СПИСОК МАТЧЕЙ ===== */
   .match-list-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 12px;
     padding: 16px; margin-bottom: 12px; cursor: pointer;
@@ -53,21 +66,10 @@
     transition: background 0.2s;
   }
   .match-list-card:hover { background: var(--card-hover); border-color: #3f3f46; }
-  
-  .match-teams {
-    display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px;
-  }
+  .match-teams { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; }
   .team-name { width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .team-name.right { text-align: right; }
-  
-  .score-badge {
-    background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 6px;
-    font-family: monospace; font-size: 16px; font-weight: 700;
-    border: 1px solid var(--border);
-  }
-  .score-badge.win { color: var(--win); }
-  .score-badge.lose { color: var(--lose); }
-  
+  .score-badge { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 6px; font-family: monospace; font-size: 16px; font-weight: 700; border: 1px solid var(--border); }
   .match-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
   .match-tourney { font-size: 12px; color: var(--muted); }
   .match-map { font-size: 11px; background: var(--bg); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
@@ -88,18 +90,11 @@
     opacity: 0.1; z-index: 0;
   }
   .match-header-content { position: relative; z-index: 1; }
-  
   .match-top-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
-  
-  .score-board {
-    display: flex; align-items: center; justify-content: center; gap: 20px;
-    background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px;
-    backdrop-filter: blur(10px);
-  }
+  .score-board { display: flex; align-items: center; justify-content: center; gap: 20px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px; backdrop-filter: blur(10px); }
   .team-block { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
   .team-logo { width: 48px; height: 48px; background: #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
   .team-block .name { font-size: 16px; font-weight: 700; }
-  
   .score-display { display: flex; align-items: center; gap: 10px; font-size: 32px; font-weight: 800; }
   .score-display span { padding: 4px 12px; border-radius: 8px; background: rgba(255,255,255,0.1); }
   .score-display .win { color: var(--win); background: rgba(16, 185, 129, 0.1); }
@@ -107,21 +102,17 @@
 
   /* ===== ТАБЛИЦА СТАТИСТИКИ ===== */
   .stats-container { display: flex; flex-direction: column; gap: 16px; }
-  
   .team-stats-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .team-stats-header { padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-  
   .players-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .players-table th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 16px; border-bottom: 1px solid var(--border); }
   .players-table th:nth-child(n+2) { text-align: center; width: 60px; }
   .players-table td { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .players-table td:nth-child(n+2) { text-align: center; }
   .players-table tr:last-child td { border-bottom: none; }
-  
   .player-cell { display: flex; align-items: center; gap: 10px; }
   .player-avatar { width: 28px; height: 28px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #fff; }
   .player-nick { font-weight: 600; }
-  
   .stat-val { font-weight: 600; }
   .stat-kd { color: var(--accent); }
 
@@ -141,7 +132,6 @@
     .score-board { flex-direction: row; gap: 10px; }
     .score-display { font-size: 24px; }
     
-    /* Таблицы на мобилке */
     .table-wrapper { overflow-x: auto; }
     .players-table { min-width: 450px; }
   }
@@ -158,15 +148,15 @@
     <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
     HLTV MINI
   </div>
-  <div class="nav-item" data-tab="ranking" onclick="switchTab('ranking')">
+  <div class="nav-item" id="nav-ranking" data-tab="ranking" onclick="switchTab('ranking')">
     <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg>
     Рейтинг
   </div>
-  <div class="nav-item active" data-tab="matches" onclick="switchTab('matches')">
+  <div class="nav-item active" id="nav-matches" data-tab="matches" onclick="switchTab('matches')">
     <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zm0 2v2h10V4H7zm-4 6v10h18V10H3zm4 3h4v2H7v-2zm6 0h4v2h-4v-2z"/></svg>
     Матчи
   </div>
-  <div class="nav-item" data-tab="tournaments" onclick="switchTab('tournaments')">
+  <div class="nav-item" id="nav-tournaments" data-tab="tournaments" onclick="switchTab('tournaments')">
     <svg viewBox="0 0 24 24"><path d="M18 2H6v2H2v4a4 4 0 0 0 4 4h.35A6 6 0 0 0 11 15.9V18H8v2h8v-2h-3v-2.1a6 6 0 0 0 4.65-3.9H18a4 4 0 0 0 4-4V4h-4V2zM6 10a2 2 0 0 1-2-2V6h2v4zm14-2a2 2 0 0 1-2 2V6h2v2z"/></svg>
     Турниры
   </div>
@@ -178,19 +168,31 @@
     <button class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
   </div>
   
-  <!-- Экран списка матчей -->
-  <div id="matches-list-screen">
+  <!-- ЭКРАН: РЕЙТИНГ -->
+  <div id="screen-ranking" class="hidden">
+    <h1>Рейтинг команд</h1>
+    <div id="ranking-container" style="margin-top:20px;"></div>
+  </div>
+
+  <!-- ЭКРАН: СПИСОК МАТЧЕЙ -->
+  <div id="screen-matches-list" class="hidden">
     <h1>Сыгранные матчи</h1>
     <div id="matches-container" style="margin-top:20px;"></div>
   </div>
 
-  <!-- Экран деталей матча (скрыт по умолчанию) -->
-  <div id="match-detail-screen" class="hidden">
-    <button class="back-btn" onclick="showMatchesList()">
+  <!-- ЭКРАН: ДЕТАЛИ МАТЧА -->
+  <div id="screen-match-detail" class="hidden">
+    <button class="back-btn" onclick="switchTab('matches')">
       <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
       Назад к матчам
     </button>
     <div id="match-detail-content"></div>
+  </div>
+
+  <!-- ЭКРАН: ТУРНИРЫ -->
+  <div id="screen-tournaments" class="hidden">
+    <h1>Турниры</h1>
+    <div id="tournaments-container" style="margin-top:20px;color:var(--muted);">Турниров пока нет.</div>
   </div>
 
 </div>
@@ -200,42 +202,35 @@
   if (tg) { tg.ready(); tg.expand(); }
 
   const DATA = {
+    teams: [
+      { name:"FURIA", points:960, wins:12, losses:4 },
+      { name:"MOUZ", points:808, wins:10, losses:5 },
+      { name:"Team Spirit", points:766, wins:9, losses:6 },
+    ],
     matches: [
       {
-        id: 1,
-        map: "de_mirage",
-        tournament: "IEM Katowice 2024",
+        id: 1, map: "de_mirage", tournament: "IEM Katowice 2024",
         team1: { name: "Team Spirit", score: 13, players: [
-          { nick: "donk", kills: 28, deaths: 10, hs: 82 },
-          { nick: "sh1ro", kills: 21, deaths: 12, hs: 65 },
-          { nick: "zont1x", kills: 18, deaths: 14, hs: 60 },
-          { nick: "magixx", kills: 15, deaths: 16, hs: 55 },
+          { nick: "donk", kills: 28, deaths: 10, hs: 82 }, { nick: "sh1ro", kills: 21, deaths: 12, hs: 65 },
+          { nick: "zont1x", kills: 18, deaths: 14, hs: 60 }, { nick: "magixx", kills: 15, deaths: 16, hs: 55 },
           { nick: "chopper", kills: 12, deaths: 18, hs: 48 },
         ]},
         team2: { name: "Vitality", score: 0, players: [
-          { nick: "ZywOo", kills: 18, deaths: 17, hs: 70 },
-          { nick: "apEX", kills: 14, deaths: 18, hs: 62 },
-          { nick: "flameZ", kills: 12, deaths: 19, hs: 58 },
-          { nick: "Spinx", kills: 10, deaths: 18, hs: 52 },
+          { nick: "ZywOo", kills: 18, deaths: 17, hs: 70 }, { nick: "apEX", kills: 14, deaths: 18, hs: 62 },
+          { nick: "flameZ", kills: 12, deaths: 19, hs: 58 }, { nick: "Spinx", kills: 10, deaths: 18, hs: 52 },
           { nick: "mezii", kills: 8, deaths: 19, hs: 45 },
         ]}
       },
       {
-        id: 2,
-        map: "de_inferno",
-        tournament: "BLAST Premier",
+        id: 2, map: "de_inferno", tournament: "BLAST Premier",
         team1: { name: "FURIA", score: 9, players: [
-          { nick: "FalleN", kills: 18, deaths: 20, hs: 74 },
-          { nick: "yuurih", kills: 16, deaths: 19, hs: 65 },
-          { nick: "KSCERATO", kills: 14, deaths: 21, hs: 60 },
-          { nick: "molodoy", kills: 11, deaths: 22, hs: 55 },
+          { nick: "FalleN", kills: 18, deaths: 20, hs: 74 }, { nick: "yuurih", kills: 16, deaths: 19, hs: 65 },
+          { nick: "KSCERATO", kills: 14, deaths: 21, hs: 60 }, { nick: "molodoy", kills: 11, deaths: 22, hs: 55 },
           { nick: "YEKINDAR", kills: 9, deaths: 23, hs: 48 },
         ]},
         team2: { name: "MOUZ", score: 13, players: [
-          { nick: "torzsi", kills: 24, deaths: 14, hs: 70 },
-          { nick: "xertioN", kills: 22, deaths: 15, hs: 62 },
-          { nick: "Jimpphat", kills: 20, deaths: 13, hs: 58 },
-          { nick: "Brollan", kills: 18, deaths: 16, hs: 52 },
+          { nick: "torzsi", kills: 24, deaths: 14, hs: 70 }, { nick: "xertioN", kills: 22, deaths: 15, hs: 62 },
+          { nick: "Jimpphat", kills: 20, deaths: 13, hs: 58 }, { nick: "Brollan", kills: 18, deaths: 16, hs: 52 },
           { nick: "Spinx", kills: 16, deaths: 17, hs: 45 },
         ]}
       }
@@ -247,29 +242,59 @@
     document.getElementById("overlay").classList.toggle("open");
   }
 
+  // ГЛАВНАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
   function switchTab(tab) {
+    // Подсветка меню
     document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
-    document.querySelector(`.nav-item[data-tab="${tab}"]`)?.classList.add("active");
-    if (window.innerWidth <= 768) toggleMenu();
+    document.getElementById(`nav-${tab}`)?.classList.add("active");
     
-    // Сброс экранов
-    document.getElementById("matches-list-screen").classList.remove("hidden");
-    document.getElementById("match-detail-screen").classList.add("hidden");
-    
-    if (tab === "matches") {
+    // Скрываем ВСЕ экраны
+    document.getElementById("screen-ranking").classList.add("hidden");
+    document.getElementById("screen-matches-list").classList.add("hidden");
+    document.getElementById("screen-match-detail").classList.add("hidden");
+    document.getElementById("screen-tournaments").classList.add("hidden");
+
+    // Показываем нужный
+    if (tab === "ranking") {
+      document.getElementById("screen-ranking").classList.remove("hidden");
+      renderRanking();
+    } else if (tab === "matches") {
+      document.getElementById("screen-matches-list").classList.remove("hidden");
       renderMatchesList();
+    } else if (tab === "tournaments") {
+      document.getElementById("screen-tournaments").classList.remove("hidden");
     }
+
+    if (window.innerWidth <= 768) toggleMenu();
   }
 
-  // Отрисовка КОМПАКТНОГО СПИСКА матчей
+  // Рендер рейтинга
+  function renderRanking() {
+    const container = document.getElementById("ranking-container");
+    let html = "";
+    DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
+      html += `
+        <div class="rank-card">
+          <div class="rank-num">${i+1}</div>
+          <div class="rank-avatar">${t.name.charAt(0)}</div>
+          <div class="rank-info">
+            <div class="rank-name">${t.name}</div>
+            <div class="rank-sub">${t.wins + t.losses} матчей</div>
+          </div>
+          <div class="rank-points">${t.points} PTS</div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  // Рендер списка матчей
   function renderMatchesList() {
     const container = document.getElementById("matches-container");
     let html = "";
-    
     DATA.matches.forEach(m => {
       const t1Win = m.team1.score > m.team2.score;
       const t2Win = m.team2.score > m.team1.score;
-
       html += `
         <div class="match-list-card" onclick="showMatchDetail(${m.id})">
           <div class="match-teams">
@@ -287,67 +312,46 @@
     container.innerHTML = html;
   }
 
-  // Отрисовка ДЕТАЛЕЙ матча (по клику)
+  // Показ деталей матча
   function showMatchDetail(id) {
     const m = DATA.matches.find(x => x.id === id);
     if (!m) return;
 
-    document.getElementById("matches-list-screen").classList.add("hidden");
-    document.getElementById("match-detail-screen").classList.remove("hidden");
+    // Скрываем список, показываем детали
+    document.getElementById("screen-matches-list").classList.add("hidden");
+    document.getElementById("screen-match-detail").classList.remove("hidden");
 
     const t1Win = m.team1.score > m.team2.score;
     const t2Win = m.team2.score > m.team1.score;
 
-    // Функция генерации таблицы для одной команды
-    const renderTeamTable = (team, isWinner) => {
-      return `
-        <div class="team-stats-box">
-          <div class="team-stats-header">
-            <span style="color: ${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
-            <span style="color:var(--muted);font-weight:400;font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
-          </div>
-          <div class="table-wrapper">
-            <table class="players-table">
-              <thead>
-                <tr>
-                  <th>Игрок</th>
-                  <th>Убийства</th>
-                  <th>К/Д</th>
-                  <th>HS%</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${team.players.map(p => {
-                  const kd = (p.kills / p.deaths).toFixed(2);
-                  return `
-                    <tr>
-                      <td>
-                        <div class="player-cell">
-                          <div class="player-avatar">${p.nick.charAt(0)}</div>
-                          <div class="player-nick">${p.nick}</div>
-                        </div>
-                      </td>
-                      <td class="stat-val">${p.kills}</td>
-                      <td class="stat-val stat-kd">${kd}</td>
-                      <td class="stat-val">${p.hs}%</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
+    const renderTeamTable = (team, isWinner) => `
+      <div class="team-stats-box">
+        <div class="team-stats-header">
+          <span style="color: ${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
+          <span style="color:var(--muted);font-weight:400;font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
         </div>
-      `;
-    };
+        <div class="table-wrapper">
+          <table class="players-table">
+            <thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
+            <tbody>
+              ${team.players.map(p => `
+                <tr>
+                  <td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div class="player-nick">${p.nick}</div></div></td>
+                  <td class="stat-val">${p.kills}</td>
+                  <td class="stat-val stat-kd">${(p.kills / p.deaths).toFixed(2)}</td>
+                  <td class="stat-val">${p.hs}%</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
 
     document.getElementById("match-detail-content").innerHTML = `
       <div class="match-header-card">
         <div class="match-header-content">
-          <div class="match-top-info">
-            <span>${m.tournament}</span>
-            <span>${m.map}</span>
-          </div>
-          
+          <div class="match-top-info"><span>${m.tournament}</span><span>${m.map}</span></div>
           <div class="score-board">
             <div class="team-block">
               <div class="team-logo">${m.team1.name.charAt(0)}</div>
@@ -365,7 +369,6 @@
           </div>
         </div>
       </div>
-
       <div class="stats-container">
         ${renderTeamTable(m.team1, t1Win)}
         ${renderTeamTable(m.team2, t2Win)}
@@ -373,13 +376,8 @@
     `;
   }
 
-  function showMatchesList() {
-    document.getElementById("match-detail-screen").classList.add("hidden");
-    document.getElementById("matches-list-screen").classList.remove("hidden");
-  }
-
-  // Инициализация
-  renderMatchesList();
+  // Запуск по умолчанию (открываем Матчи)
+  switchTab('matches');
 </script>
 </body>
 </html>
