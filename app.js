@@ -1,4 +1,4 @@
-const API_URL = "https://bosnia-necessary-structure-life.trycloudflare.com";
+const API_URL = "https://pick-mississippi-catalog-task.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -336,12 +336,14 @@ function approveNews(index) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "approve_news", team: req.team, text: req.text, photo: req.photo })
-  }).then(() => {
-    alert("Отправлено в канал!");
+  }).then(res => {
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab("requests");
-  }).catch(() => alert("Ошибка связи с сервером"));
+  }).catch(err => {
+    console.error(err);
+    alert("ОШИБКА СЕТИ! Проверь соединение с сервером.");
+  });
 }
 
 function rejectNews(index) {
@@ -350,11 +352,13 @@ function rejectNews(index) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "reject_news", team: req.team, text: req.text })
-  }).then(() => {
+  }).then(res => {
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab("requests");
-  }).catch(() => alert("Ошибка связи с сервером"));
+  }).catch(err => {
+    console.error(err);
+  });
 }
 // =====================================================
 
