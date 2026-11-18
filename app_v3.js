@@ -296,7 +296,94 @@ function addMatchAdmin() {
   alert("Матч добавлен!");
 }
 
-function editTeamAdmin(name) { alert("Функция редактирования в разработке"); }
+function editTeamAdmin(teamName) {
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team) return;
+
+  // Создаем модальное окно (или перерисовываем контейнер админки)
+  var adminContent = document.getElementById("admin-content") || document.getElementById("screen-admin-panel");
+  
+  var html = '<button class="back-btn" onclick="showAdminTab(\'teams\')">← Назад к командам</button>';
+  html += '<h2 style="margin-bottom:20px;">Редактирование: ' + team.name + '</h2>';
+  
+  // Форма изменения очков
+  html += '<div style="background:#1a1f24; padding:20px; border-radius:12px; margin-bottom:20px;">';
+  html += '  <label style="display:block; margin-bottom:5px; color:#8b959e;">Очки команды:</label>';
+  html += '  <input type="number" id="edit-points" value="' + team.points + '" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:5px; margin-bottom:15px;">';
+  html += '  <button class="btn btn-green" onclick="saveTeamPoints(\'' + team.name + '\')">Сохранить очки</button>';
+  html += '</div>';
+  
+  // Список игроков
+  html += '<h3>Игроки</h3>';
+  html += '<div id="players-edit-list">';
+  team.players.forEach(function(p, i) {
+    html += '<div style="background:#232b33; padding:15px; border-radius:8px; margin-bottom:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">';
+    html += '  <input type="text" value="' + p.nick + '" id="nick-' + i + '" placeholder="Ник" style="flex:1; padding:8px; background:#111; border:1px solid #333; color:#fff; border-radius:5px;">';
+    html += '  <input type="text" value="' + (p.role || '') + '" id="role-' + i + '" placeholder="Роль" style="flex:1; padding:8px; background:#111; border:1px solid #333; color:#fff; border-radius:5px;">';
+    html += '  <button onclick="savePlayer(\'' + team.name + '\', ' + i + ')" style="background:#2b6cb0; border:none; padding:8px 15px; border-radius:5px; color:#fff; cursor:pointer;">Сохранить</button>';
+    html += '  <button onclick="removePlayer(\'' + team.name + '\', ' + i + ')" style="background:#ef4444; border:none; padding:8px 15px; border-radius:5px; color:#fff; cursor:pointer;">Удалить</button>';
+    html += '</div>';
+  });
+  html += '</div>';
+  
+  // Кнопка добавления игрока
+  html += '<button class="btn" style="margin-top:20px;" onclick="addPlayer(\'' + team.name + '\')">+ Добавить игрока</button>';
+  
+  adminContent.innerHTML = html;
+}
+
+function saveTeamPoints(teamName) {
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team) return;
+  var newPoints = parseInt(document.getElementById("edit-points").value) || 0;
+  team.points = newPoints;
+  saveData();
+  alert("Очки обновлены!");
+  showAdminTab('teams');
+}
+
+function savePlayer(teamName, index) {
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team || !team.players[index]) return;
+  var newNick = document.getElementById("nick-" + index).value.trim();
+  var newRole = document.getElementById("role-" + index).value.trim();
+  if (!newNick) { alert("Ник не может быть пустым!"); return; }
+  team.players[index].nick = newNick;
+  team.players[index].role = newRole;
+  saveData();
+  alert("Игрок обновлен!");
+  showAdminTab('teams');
+}
+
+function removePlayer(teamName, index) {
+  if (!confirm("Удалить этого игрока?")) return;
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team) return;
+  team.players.splice(index, 1);
+  saveData();
+  alert("Игрок удален!");
+  showAdminTab('teams');
+}
+
+function addPlayer(teamName) {
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team) return;
+  var nick = prompt("Введите ник нового игрока:");
+  if (!nick || !nick.trim()) return;
+  var role = prompt("Введите роль (Снайпер, Штурмовик и т.д.):") || "Игрок";
+  team.players.push({ nick: nick.trim(), role: role.trim(), kills: 0, deaths: 0, hs: 0, rating: 0 });
+  saveData();
+  alert("Игрок добавлен!");
+  showAdminTab('teams');
+}
+
+function deleteTeam(teamName) {
+  if (!confirm("Вы уверены, что хотите УДАЛИТЬ команду " + teamName + "?")) return;
+  APP_DATA.teams = APP_DATA.teams.filter(function(t) { return t.name !== teamName; });
+  saveData();
+  alert("Команда удалена!");
+  showAdminTab('teams');
+}
 function deleteTeamAdmin(name) { alert("Функция удаления в разработке"); }
 function addTeamAdminForm() { alert("Функция добавления в разработке"); }
 
@@ -404,4 +491,24 @@ function previewImage(input, previewId) {
     };
     reader.readAsDataURL(input.files[0]);
   }
+}
+
+
+function addNewTeam() {
+  var name = prompt("Введите название команды:");
+  if (!name || !name.trim()) return;
+  var tag = prompt("Введите тег команды (например, NAVI):") || "TAG";
+  
+  APP_DATA.teams.push({
+    id: Date.now(),
+    name: name.trim(),
+    tag: tag.trim().toUpperCase(),
+    points: 0,
+    wins: 0,
+    losses: 0,
+    players: []
+  });
+  saveData();
+  alert("Команда создана!");
+  showAdminTab('teams');
 }
