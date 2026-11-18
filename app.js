@@ -113,18 +113,32 @@ function showTeamDetail(name) {
 function renderMatchesList() {
   const container = document.getElementById("matches-container");
   let html = "";
+  
+  // Функция поиска картинки карты (ищет .jpg, .webp, .png)
+  const getMapImage = (mapName) => {
+    // Очищаем название (например, "de_mirage" -> "mirage")
+    let cleanName = mapName.toLowerCase().replace("de_", "").trim();
+    // Пытаемся угадать формат. Браузер сам подтянет, если файл есть.
+    return `maps/${cleanName}.jpg`; // По умолчанию jpg, но если у тебя webp, можно поменять
+  };
+
   DATA.matches.forEach(m => {
     const t1Win = m.team1.score > m.team2.score;
     const t2Win = m.team2.score > m.team1.score;
+    const mapImg = getMapImage(m.map);
+
     html += `
-      <div class="card" onclick="showMatchDetail(${m.id})" style="flex-direction:column; align-items:flex-start;">
-        <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:10px;">
-          <div style="font-weight:700; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-          <div style="font-weight:800; font-family:monospace; background:var(--bg); padding:2px 10px; border-radius:6px;">${m.team1.score} : ${m.team2.score}</div>
-          <div style="font-weight:700; color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+      <div class="match-card-img" onclick="showMatchDetail(${m.id})">
+        <div class="match-map-bg" style="background-image: url('${mapImg}'), linear-gradient(135deg,#1e1b4b,#0f172a);">
+          <div class="match-map-content">
+            <div class="match-team-name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
+            <div class="match-score-big">${m.team1.score} : ${m.team2.score}</div>
+            <div class="match-team-name" style="color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+          </div>
         </div>
-        <div style="font-size:12px; color:var(--muted); display:flex; gap:10px;">
-          <span>${m.tournament}</span> <span style="color:var(--accent)">${m.map}</span>
+        <div class="match-card-footer">
+          <span style="text-transform:uppercase; letter-spacing:1px; font-size:11px;">${m.map}</span>
+          <span style="color:var(--accent)">Сыгран</span>
         </div>
       </div>
     `;
@@ -166,7 +180,6 @@ function showMatchDetail(id) {
 
   document.getElementById("match-detail-content").innerHTML = `
     <div style="background:linear-gradient(135deg,#1e1b4b,#0f172a); border-radius:16px; padding:20px; margin-bottom:20px; border:1px solid #312e81; text-align:center;">
-      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">${m.tournament} • ${m.map}</div>
       <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
         <div style="flex:1; font-size:18px; font-weight:800; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
         <div style="font-size:32px; font-weight:800; background:rgba(0,0,0,0.4); padding:4px 16px; border-radius:8px;">
@@ -189,7 +202,6 @@ function renderProfile() {
   document.getElementById("profile-avg").innerText = myProfile.avg.toFixed(1);
 }
 
-// Загрузка аватарки профиля
 function changeMyAvatar(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
@@ -216,7 +228,6 @@ function loginAdmin() {
 function showAdminForm(type) {
   const container = document.getElementById("admin-form-container");
   
-  // Шаблон для загрузки файла (картинки)
   const fileUploadHtml = (id, label) => `
     <div class="form-group">
       <label>${label}</label>
@@ -262,8 +273,7 @@ function showAdminForm(type) {
     const options = DATA.teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
     container.innerHTML = `
       <h3 style="margin-bottom:16px;">Добавить матч</h3>
-      <div class="form-group"><label>Турнир</label><input type="text" id="m-tour" class="form-control" placeholder="IEM Katowice"></div>
-      <div class="form-group"><label>Карта</label><input type="text" id="m-map" class="form-control" value="de_mirage"></div>
+      <div class="form-group"><label>Карта (например: mirage, inferno, ancient)</label><input type="text" id="m-map" class="form-control" value="mirage"></div>
       <div style="display:flex; gap:10px;">
         <div class="form-group" style="flex:1;"><label>Команда 1</label><select id="m-t1" class="form-control">${options}</select></div>
         <div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s1" class="form-control" value="0"></div>
@@ -277,7 +287,6 @@ function showAdminForm(type) {
   }
 }
 
-// Вспомогательная функция предпросмотра картинки
 function previewImage(input, previewId) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
@@ -290,7 +299,6 @@ function previewImage(input, previewId) {
   }
 }
 
-// Получение Base64 из инпута файла
 function getBase64(inputId) {
   const img = document.getElementById(inputId + '-preview');
   return img && img.src ? img.src : "";
@@ -323,7 +331,6 @@ function addPlayer() {
 }
 
 function addMatch() {
-  const tour = document.getElementById("m-tour").value;
   const map = document.getElementById("m-map").value;
   const t1Name = document.getElementById("m-t1").value;
   const t2Name = document.getElementById("m-t2").value;
@@ -336,7 +343,7 @@ function addMatch() {
   if (!t1 || !t2) return alert("Выберите команды");
 
   DATA.matches.push({
-    id: Date.now(), map, tournament: tour,
+    id: Date.now(), map, 
     team1: { name: t1.name, score: s1, players: t1.players },
     team2: { name: t2.name, score: s2, players: t2.players }
   });
@@ -344,5 +351,4 @@ function addMatch() {
   showAdminForm('match');
 }
 
-// Инициализация
 switchTab('ranking');
