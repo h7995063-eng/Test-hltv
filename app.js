@@ -332,37 +332,67 @@ function rejectTeamRequest(index) {
 // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ =====
 function approveNews(index) {
   const req = newsRequests[index];
-  fetch(`${API_URL}/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "approve_news", team: req.team, text: req.text, photo: req.photo })
-  }).then(res => {
-    if (!res.ok) throw new Error("Server error");
-    alert("Отправлено в канал!");
-    newsRequests.splice(index, 1);
-    saveRequests();
-    showAdminTab("requests");
-  }).catch(err => {
-    console.error(err);
-    alert("ОШИБКА СЕТИ! Проверь соединение с сервером.");
-  });
+  
+  // Создаем скрытую форму для обхода блокировок Telegram
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = API_URL;
+  form.target = 'hidden_iframe';
+  form.style.display = 'none';
+
+  const fields = {
+    action: 'approve_news',
+    team: req.team,
+    text: req.text,
+    photo: req.photo || ''
+  };
+
+  for (const key in fields) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = fields[key];
+    form.appendChild(input);
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+  
+  alert('Отправлено в канал!');
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
+  
+  setTimeout(() => document.body.removeChild(form), 1000);
 }
 
 function rejectNews(index) {
   const req = newsRequests[index];
-  fetch(`${API_URL}/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "reject_news", team: req.team, text: req.text })
-  }).then(res => {
-    if (!res.ok) throw new Error("Server error");
-    newsRequests.splice(index, 1);
-    saveRequests();
-    showAdminTab("requests");
-  }).catch(err => {
-    console.error(err);
-    alert("ОШИБКА СЕТИ!");
-  });
+  
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = API_URL;
+  form.target = 'hidden_iframe';
+  form.style.display = 'none';
+
+  const fields = { action: 'reject_news', team: req.team, text: req.text };
+
+  for (const key in fields) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = fields[key];
+    form.appendChild(input);
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
+  
+  setTimeout(() => document.body.removeChild(form), 1000);
 }
 // =================================
 
