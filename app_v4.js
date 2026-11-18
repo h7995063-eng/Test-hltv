@@ -512,10 +512,41 @@ function addNewTeam() {
   alert("Команда создана!");
   showAdminTab('teams');
 }
+
+
+// === ВЕРИФИКАЦИЯ КОМАНД ===
 function toggleVerify(teamName) {
   var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
   if (!team) return;
+  
   team.verified = !team.verified;
   saveData();
   showAdminTab('teams');
+  
+  fetch(API_URL + "/api/verify-team", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ team: teamName, verified: team.verified })
+  }).catch(function(err) {
+    console.warn("Демо-режим: сервер не отвечает", err);
+  });
+}
+
+// === ВЕРИФИКАЦИЯ ИГРОКОВ ===
+function togglePlayerVerify(teamName, playerIndex) {
+  var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
+  if (!team || !team.players[playerIndex]) return;
+  
+  var player = team.players[playerIndex];
+  player.verified = !player.verified;
+  saveData();
+  editTeamAdmin(teamName);
+  
+  fetch(API_URL + "/api/verify-player", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ team: teamName, playerNick: player.nick, verified: player.verified })
+  }).catch(function(err) {
+    console.warn("Демо-режим: сервер не отвечает", err);
+  });
 }
