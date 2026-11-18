@@ -1,4 +1,4 @@
-const API_URL = "https://realtor-charger-effectively-avoid.trycloudflare.com";
+const API_URL = "https://classic-represent-cluster-gary.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -332,45 +332,32 @@ function rejectTeamRequest(index) {
 // ===== ПРАВИЛЬНЫЕ ФУНКЦИИ (fetch + URLSearchParams) =====
 function approveNews(index) {
   const req = newsRequests[index];
-  const formData = new URLSearchParams();
-  formData.append('action', 'approve_news');
-  formData.append('team', req.team);
-  formData.append('text', req.text);
-  formData.append('photo', req.photo || '');
-
   fetch(API_URL, {
     method: 'POST',
-    body: formData
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
   }).then(res => {
-    if (!res.ok) throw new Error("Server error");
-    alert("Отправлено в канал!");
+    alert('Отправлено в канал!');
     newsRequests.splice(index, 1);
     saveRequests();
-    showAdminTab("requests");
+    showAdminTab('requests');
   }).catch(err => {
-    console.error(err);
-    alert("ОШИБКА СЕТИ! Проверь соединение с сервером.");
+    alert('ОШИБКА СЕТИ!');
   });
 }
 
 function rejectNews(index) {
   const req = newsRequests[index];
-  const formData = new URLSearchParams();
-  formData.append('action', 'reject_news');
-  formData.append('team', req.team);
-  formData.append('text', req.text);
-
   fetch(API_URL, {
     method: 'POST',
-    body: formData
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'reject_news', team: req.team, text: req.text })
   }).then(res => {
-    if (!res.ok) throw new Error("Server error");
     newsRequests.splice(index, 1);
     saveRequests();
-    showAdminTab("requests");
+    showAdminTab('requests');
   }).catch(err => {
-    console.error(err);
-    alert("ОШИБКА СЕТИ!");
+    alert('ОШИБКА СЕТИ!');
   });
 }
 // =======================================================
