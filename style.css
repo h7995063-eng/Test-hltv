@@ -22,7 +22,28 @@ body {
   color: var(--text); display: flex; height: 100vh; overflow: hidden;
 }
 
-/* Экран загрузки (Splash) */
+/* ===== АНИМАЦИИ ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.animate-in {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0; /* Изначально скрыто, анимация сделает видимым */
+}
+/* Задержки для каскадного появления */
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+
+/* Экран загрузки */
 #splash-screen {
   position: fixed; top:0; left:0; right:0; bottom:0;
   background: var(--bg-gradient);
@@ -30,20 +51,7 @@ body {
   z-index: 9999; transition: opacity 0.5s;
 }
 .splash-logo { width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px; animation: pulse 2s infinite; }
-@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 .splash-text { font-size: 20px; font-weight: 800; letter-spacing: 2px; color: #fff; }
-
-/* Экран регистрации */
-#register-screen {
-  position: fixed; top:0; left:0; right:0; bottom:0;
-  background: var(--bg-gradient);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 9000; padding: 20px;
-}
-.reg-box { background: var(--card); padding: 30px 20px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
-.reg-title { text-align: center; font-size: 22px; font-weight: 800; margin-bottom: 20px; }
-.reg-btn { background: var(--accent-gradient); color: #fff; border: none; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 16px; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transition: transform 0.2s; }
-.reg-btn:active { transform: scale(0.98); }
 
 /* Боковая панель */
 .sidebar {
@@ -71,10 +79,10 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 /* Карточки рейтинга */
 .card {
   background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px;
-  margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; transition: background 0.2s;
+  margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
   backdrop-filter: blur(10px);
 }
-.card:hover { background: var(--card-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.card:hover { background: var(--card-hover); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 .card-num { font-size: 18px; font-weight: 700; color: var(--muted); width: 30px; text-align: center; }
 .avatar { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: #fff; margin-right: 14px; flex-shrink: 0; object-fit: cover; }
 .info { flex: 1; }
@@ -83,8 +91,9 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 .points { font-size: 12px; color: #fff; background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.4); padding: 6px 12px; border-radius: 20px; font-weight: 700; }
 
 /* Кнопки */
-.btn { background: var(--accent-gradient); color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; transition: opacity 0.2s; width: 100%; text-align: center; display: block; margin-top: 10px; font-family: 'Manrope', sans-serif; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
+.btn { background: var(--accent-gradient); color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; transition: opacity 0.2s, transform 0.1s; width: 100%; text-align: center; display: block; margin-top: 10px; font-family: 'Manrope', sans-serif; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
 .btn:hover { opacity: 0.9; }
+.btn:active { transform: scale(0.98); }
 .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); box-shadow: none; }
 .back-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 10px; font-size: 14px; margin-bottom: 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; backdrop-filter: blur(10px); }
 
@@ -94,6 +103,15 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 .form-control { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 10px; font-size: 14px; outline: none; font-family: 'Manrope', sans-serif; transition: border 0.2s; }
 .form-control:focus { border-color: var(--accent); }
 
+/* Строка игрока (для админки) */
+.player-row-admin {
+  display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;
+  background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+}
+.player-row-admin .num {
+  font-weight: 700; color: var(--muted); width: 20px; text-align: center; margin-top: 12px;
+}
+
 /* Загрузка файла */
 .file-upload-wrapper { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); border: 1px dashed var(--border); padding: 10px; border-radius: 10px; cursor: pointer; }
 .file-upload-wrapper:hover { border-color: var(--accent); }
@@ -101,25 +119,9 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 .file-upload-label { font-size: 14px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .file-upload-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--card); }
 
-/* Профиль */
-.profile-container { position: relative; margin-bottom: 20px; }
-.profile-banner { height: 160px; background: var(--accent-gradient); border-radius: 24px; position: relative; z-index: 1; }
-.profile-avatar-wrapper { width: 110px; height: 110px; border-radius: 28px; background: var(--bg); padding: 4px; position: absolute; top: 105px; left: 20px; z-index: 2; cursor: pointer; transition: transform 0.2s; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-.profile-avatar-wrapper:hover { transform: scale(1.05); }
-.profile-avatar-img { width: 100%; height: 100%; border-radius: 24px; object-fit: cover; }
-.profile-body { background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 24px 24px; padding: 70px 20px 20px 20px; position: relative; z-index: 0; margin-top: -20px; backdrop-filter: blur(10px); }
-.profile-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-.profile-name { font-size: 26px; font-weight: 800; line-height: 1; }
-.profile-role-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.5); color: #a78bfa; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
-.profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.p-stat-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 16px; padding: 16px; text-align: center; }
-.p-stat-box .val { font-size: 26px; font-weight: 800; }
-.p-stat-box .lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-top: 4px; }
-.p-stat-box.kd .val { color: var(--win); }
-.p-stat-box.avg .val { color: var(--accent); }
-
-/* Карточки матчей (список) */
-.match-card-img { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 16px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s; backdrop-filter: blur(10px); }
+/* Карточки матчей */
+.match-card-img { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 16px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; backdrop-filter: blur(10px); }
+.match-card-img:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 .match-map-bg { height: 140px; width: 100%; background-size: cover; background-position: center; position: relative; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
 .match-map-bg::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to right, rgba(15,18,26,0.9) 0%, rgba(15,18,26,0.3) 50%, rgba(15,18,26,0.9) 100%); z-index: 0; }
 .match-map-content { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -127,17 +129,13 @@ h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.
 .match-score-big { font-size: 24px; font-weight: 800; font-family: monospace; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
 .match-card-footer { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); font-weight: 600; }
 
-/* ДЕТАЛИ МАТЧА (Обновлено) */
+/* ДЕТАЛИ МАТЧА */
 .match-header-card {
   border-radius: 20px; padding: 30px 20px; margin-bottom: 24px;
   border: 1px solid var(--border); position: relative; overflow: hidden;
   background-size: cover; background-position: center;
 }
-.match-header-card::before {
-  content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
-  background: rgba(15, 18, 26, 0.85); /* Затемнение картинки */
-  z-index: 0;
-}
+.match-header-card::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(15, 18, 26, 0.85); z-index: 0; }
 .match-header-content { position: relative; z-index: 1; }
 .match-top-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
 .score-board { display: flex; align-items: center; justify-content: center; gap: 20px; }
@@ -180,10 +178,8 @@ td:nth-child(n+2) { text-align: center; }
   .overlay.open { display: block; }
   .team-header { flex-direction: column; text-align: center; }
   .team-stats-row { flex-direction: column; }
-  .profile-banner { height: 120px; }
-  .profile-avatar-wrapper { width: 90px; height: 90px; top: 75px; border-radius: 22px; }
-  .profile-avatar-img { border-radius: 18px; }
-  .profile-body { padding-top: 50px; }
   .score-display { font-size: 28px; }
   .team-block .name { font-size: 16px; }
+  .player-row-admin { flex-direction: column; }
+  .player-row-admin .num { margin-top: 0; text-align: left; }
 }

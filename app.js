@@ -47,7 +47,7 @@ function renderRanking() {
   DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
     let teamAvatar = t.avatar ? `<img src="${t.avatar}" class="avatar">` : `<div class="avatar">${t.name.charAt(0)}</div>`;
     html += `
-      <div class="card" onclick="showTeamDetail('${t.name}')">
+      <div class="card animate-in delay-${Math.min(i+1, 5)}" onclick="showTeamDetail('${t.name}')">
         <div class="card-num">${i+1}</div>
         ${teamAvatar}
         <div class="info">
@@ -70,16 +70,16 @@ function showTeamDetail(name) {
   let teamAvatar = team.avatar ? `<img src="${team.avatar}" class="team-big-logo">` : `<div class="team-big-logo">${team.name.charAt(0)}</div>`;
   
   document.getElementById("team-detail-content").innerHTML = `
-    <div class="team-header">
+    <div class="team-header animate-in">
       ${teamAvatar}
       <div class="team-title-info"><h2>${team.name}</h2><p>Рейтинг команды</p></div>
     </div>
-    <div class="team-stats-row">
+    <div class="team-stats-row animate-in delay-1">
       <div class="team-stat-box"><div class="val" style="color:var(--accent)">${team.points}</div><div class="lbl">Поинты</div></div>
       <div class="team-stat-box"><div class="val" style="color:var(--win)">${team.wins}</div><div class="lbl">Победы</div></div>
       <div class="team-stat-box"><div class="val" style="color:var(--lose)">${team.losses}</div><div class="lbl">Поражения</div></div>
     </div>
-    <div class="table-wrapper">
+    <div class="table-wrapper animate-in delay-2">
       <table>
         <thead><tr><th>Игрок</th><th>Убийства</th><th>Смерти</th><th>К/Д</th><th>HS%</th><th>AVG</th></tr></thead>
         <tbody>
@@ -104,13 +104,13 @@ function renderMatchesList() {
   let html = "";
   const getMapImage = (mapName) => `maps/${mapName.toLowerCase().replace("de_", "").trim()}.jpg`;
 
-  DATA.matches.forEach(m => {
+  DATA.matches.forEach((m, i) => {
     const t1Win = m.team1.score > m.team2.score;
     const t2Win = m.team2.score > m.team1.score;
     const mapImg = getMapImage(m.map);
 
     html += `
-      <div class="match-card-img" onclick="showMatchDetail(${m.id})">
+      <div class="match-card-img animate-in delay-${Math.min(i+1, 5)}" onclick="showMatchDetail(${m.id})">
         <div class="match-map-bg" style="background-image: url('${mapImg}'), linear-gradient(135deg,#1e1b4b,#0f172a);">
           <div class="match-map-content">
             <div class="match-team-name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
@@ -139,8 +139,8 @@ function showMatchDetail(id) {
   const t2Win = m.team2.score > m.team1.score;
   const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
 
-  const renderTeamTable = (team, isWinner) => `
-    <div class="table-wrapper">
+  const renderTeamTable = (team, isWinner, delay) => `
+    <div class="table-wrapper animate-in delay-${delay}">
       <div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);">
         <span style="color:${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
         <span style="color:var(--muted); font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
@@ -160,7 +160,7 @@ function showMatchDetail(id) {
   `;
 
   document.getElementById("match-detail-content").innerHTML = `
-    <div class="match-header-card" style="background-image: url('${mapImg}');">
+    <div class="match-header-card animate-in" style="background-image: url('${mapImg}');">
       <div class="match-header-content">
         <div class="match-top-info">
           <span>${m.map}</span>
@@ -181,8 +181,8 @@ function showMatchDetail(id) {
         </div>
       </div>
     </div>
-    ${renderTeamTable(m.team1, t1Win)}
-    ${renderTeamTable(m.team2, t2Win)}
+    ${renderTeamTable(m.team1, t1Win, 1)}
+    ${renderTeamTable(m.team2, t2Win, 2)}
   `;
 }
 
@@ -197,8 +197,13 @@ function loginAdmin() {
   }
 }
 
+// Роли для селекта
+const ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
+
 function showAdminForm(type) {
   const container = document.getElementById("admin-form-container");
+  
+  // Вспомогательная функция для загрузки файла
   const fileUploadHtml = (id, label) => `
     <div class="form-group">
       <label>${label}</label>
@@ -214,31 +219,38 @@ function showAdminForm(type) {
   `;
 
   if (type === 'team') {
+    // Генерируем 5 строк для игроков
+    let playersHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      playersHtml += `
+        <div class="player-row-admin">
+          <div class="num">${i}.</div>
+          <div style="flex:1; display:flex; gap:10px;">
+            <div style="flex:2;">
+              <input type="text" id="p-nick-${i}" class="form-control" placeholder="Ник игрока" style="padding:10px;">
+            </div>
+            <div style="flex:1;">
+              <select id="p-role-${i}" class="form-control" style="padding:10px;">
+                ${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     container.innerHTML = `
       <h3 style="margin-bottom:16px;">Добавить команду</h3>
-      <div class="form-group"><label>Название</label><input type="text" id="t-name" class="form-control" placeholder="Например: NAVI"></div>
+      <div class="form-group"><label>Название команды</label><input type="text" id="t-name" class="form-control" placeholder="Например: NAVI"></div>
       <div class="form-group"><label>Поинты</label><input type="number" id="t-points" class="form-control" value="0"></div>
       ${fileUploadHtml('t-avatar-file', 'Логотип команды')}
-      <button class="btn" onclick="addTeam()">Добавить команду</button>
-    `;
-  } else if (type === 'player') {
-    const options = DATA.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-    container.innerHTML = `
-      <h3 style="margin-bottom:16px;">Добавить игрока</h3>
-      <div class="form-group"><label>Команда</label><select id="p-team" class="form-control">${options}</select></div>
-      <div class="form-group"><label>Ник</label><input type="text" id="p-nick" class="form-control" placeholder="s1mple"></div>
-      <div class="form-group">
-        <label>Роль</label>
-        <select id="p-role" class="form-control">
-          <option value="Снайпер">Снайпер (AWP)</option>
-          <option value="Капитан">Капитан (IGL)</option>
-          <option value="Штурмовик">Штурмовик (Entry)</option>
-          <option value="Поддержка">Поддержка (Support)</option>
-          <option value="Люркер">Люркер (Lurker)</option>
-        </select>
+      
+      <div class="form-group" style="margin-top:20px;">
+        <label>Состав команды (5 игроков)</label>
+        ${playersHtml}
       </div>
-      ${fileUploadHtml('p-avatar-file', 'Аватарка игрока')}
-      <button class="btn" onclick="addPlayer()">Добавить игрока</button>
+      
+      <button class="btn" onclick="addTeam()">Сохранить команду</button>
     `;
   } else if (type === 'match') {
     const options = DATA.teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
@@ -275,28 +287,27 @@ function getBase64(inputId) {
   return img && img.src ? img.src : "";
 }
 
+// Обновленная функция добавления команды с игроками
 function addTeam() {
   const name = document.getElementById("t-name").value;
   const points = parseInt(document.getElementById("t-points").value) || 0;
   const avatar = getBase64('t-avatar-file');
-  if (!name) return alert("Введите название");
-  DATA.teams.push({ id: Date.now(), name, points, wins: 0, losses: 0, avatar, players: [] });
-  alert("Команда добавлена!");
-  showAdminForm('team');
-}
+  
+  if (!name) return alert("Введите название команды");
 
-function addPlayer() {
-  const teamId = parseInt(document.getElementById("p-team").value);
-  const nick = document.getElementById("p-nick").value;
-  const role = document.getElementById("p-role").value;
-  const avatar = getBase64('p-avatar-file');
-  if (!nick) return alert("Введите ник");
-  const team = DATA.teams.find(t => t.id === teamId);
-  if (team) {
-    team.players.push({ nick, role, kills: 0, deaths: 0, hs: 0, rating: 1.0, avatar });
-    alert("Игрок добавлен!");
-    showAdminForm('player');
+  // Собираем игроков
+  const players = [];
+  for (let i = 1; i <= 5; i++) {
+    const nick = document.getElementById(`p-nick-${i}`).value.trim();
+    const role = document.getElementById(`p-role-${i}`).value;
+    if (nick) {
+      players.push({ nick, role, kills: 0, deaths: 0, hs: 0, rating: 1.0, avatar: "" });
+    }
   }
+
+  DATA.teams.push({ id: Date.now(), name, points, wins: 0, losses: 0, avatar, players });
+  alert("Команда и состав добавлены!");
+  showAdminForm('team');
 }
 
 function addMatch() {
