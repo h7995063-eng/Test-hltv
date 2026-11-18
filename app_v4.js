@@ -585,32 +585,124 @@ function addMatchAdmin() {
   
   var teams = APP_DATA.teams || [];
   if (teams.length < 2) {
-    container.innerHTML = '<p style="color:#ef4444;">Нужно минимум 2 команды для создания матча.</p>';
+    container.innerHTML = '<p style="color:#ef4444; text-align:center; padding:20px;">Нужно минимум 2 команды для создания матча.</p>';
     return;
   }
   
   var options = teams.map(function(t) { return '<option value="' + t.name + '">' + t.name + '</option>'; }).join('');
   
-  var html = '<h2 style="margin-bottom:20px;">Создание матча</h2>';
+  var html = '<div style="background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748; margin-bottom:20px;">';
+  html += '<h2 style="margin:0 0 20px 0; color:#fff;">Создание матча</h2>';
   
-  // Выбор команд
+  // Выбор команд (красиво)
   html += '<div style="display:flex; gap:15px; margin-bottom:20px;">';
-  html += '  <div style="flex:1;"><label style="color:#8b959e; font-size:12px;">Команда 1</label><select id="add-m-t1" class="input" style="width:100%; padding:10px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px;" onchange="loadMatchStatsForm()">' + options + '</select></div>';
-  html += '  <div style="flex:1;"><label style="color:#8b959e; font-size:12px;">Команда 2</label><select id="add-m-t2" class="input" style="width:100%; padding:10px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px;" onchange="loadMatchStatsForm()">' + options + '</select></div>';
+  html += '  <div style="flex:1; background:#171a1f; padding:15px; border-radius:8px; border:1px solid #333;">';
+  html += '    <label style="color:#8b959e; font-size:12px; text-transform:uppercase; margin-bottom:8px; display:block;">Команда 1</label>';
+  html += '    <select id="add-m-t1" style="width:100%; padding:10px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:6px; font-size:16px; font-weight:bold;" onchange="loadMatchStatsForm()">' + options + '</select>';
+  html += '  </div>';
+  html += '  <div style="flex:1; background:#171a1f; padding:15px; border-radius:8px; border:1px solid #333;">';
+  html += '    <label style="color:#8b959e; font-size:12px; text-transform:uppercase; margin-bottom:8px; display:block;">Команда 2</label>';
+  html += '    <select id="add-m-t2" style="width:100%; padding:10px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:6px; font-size:16px; font-weight:bold;" onchange="loadMatchStatsForm()">' + options + '</select>';
+  html += '  </div>';
   html += '</div>';
   
   // Карта
-  html += '<div style="margin-bottom:20px;"><label style="color:#8b959e; font-size:12px;">Карта (например, de_mirage)</label><input type="text" id="add-m-map" value="de_mirage" class="input" style="width:100%; padding:10px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px;"></div>';
+  html += '<div style="margin-bottom:20px;">';
+  html += '  <label style="color:#8b959e; font-size:12px; text-transform:uppercase; margin-bottom:8px; display:block;">Карта</label>';
+  html += '  <select id="add-m-map" style="width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; font-size:14px;">';
+  html += '    <option value="de_mirage">Mirage</option><option value="de_inferno">Inferno</option><option value="de_dust2">Dust II</option><option value="de_vertigo">Vertigo</option><option value="de_nuke">Nuke</option><option value="de_ancient">Ancient</option>';
+  html += '  </select>';
+  html += '</div>';
   
-  // Контейнер для статистики (заполнится через JS)
+  html += '</div>'; // конец верхней карточки
+  
+  // Контейнер для статистики
   html += '<div id="match-stats-container"></div>';
   
-  html += '<button class="btn btn-green" style="margin-top:20px;" onclick="saveNewMatch()">Добавить матч</button>';
+  html += '<button class="btn btn-green" style="margin-top:20px; padding:15px; font-size:16px; font-weight:bold; border-radius:8px;" onclick="saveNewMatch()">Добавить матч</button>';
   
   container.innerHTML = html;
-  
-  // Сразу загружаем форму для выбранных команд
   loadMatchStatsForm();
+}
+
+function loadMatchStatsForm() {
+  var t1Name = document.getElementById("add-m-t1").value;
+  var t2Name = document.getElementById("add-m-t2").value;
+  
+  var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
+  var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
+  
+  var container = document.getElementById("match-stats-container");
+  if (!container) return;
+  if (!t1 || !t2) { container.innerHTML = ''; return; }
+  
+  var html = '<div style="display:flex; gap:15px; flex-wrap:wrap;">';
+  
+  // Функция для рендера карточки команды
+  function renderTeamCard(team, prefix, scoreId) {
+    var card = '<div style="flex:1; min-width:280px; background:#232b33; border-radius:12px; overflow:hidden; border:1px solid #2d3748;">';
+    
+    // Шапка с названием и счетом
+    card += '<div style="background:#1a1f24; padding:15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d3748;">';
+    card += '  <div style="font-size:18px; font-weight:bold; color:#fff;">' + team.name + '</div>';
+    card += '  <input type="number" id="' + scoreId + '" value="0" style="width:60px; padding:8px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; text-align:center; font-size:18px; font-weight:bold;">';
+    card += '</div>';
+    
+    // Таблица игроков
+    card += '<div style="padding:10px;">';
+    card += '  <div style="display:flex; font-size:11px; color:#8b959e; text-transform:uppercase; padding:5px 10px;">';
+    card += '    <div style="flex:2;">Игрок</div><div style="flex:1; text-align:center;">K</div><div style="flex:1; text-align:center;">D</div><div style="flex:1; text-align:center;">HS%</div>';
+    card += '  </div>';
+    
+    team.players.forEach(function(p, i) {
+      card += '<div style="display:flex; align-items:center; padding:8px 10px; border-top:1px solid #2d3748;">';
+      card += '  <div style="flex:2; color:#fff; font-size:14px;">' + p.nick + '</div>';
+      card += '  <div style="flex:1; text-align:center;"><input type="number" id="' + prefix + '-k-' + i + '" value="0" style="width:40px; padding:5px; background:#171a1f; border:1px solid #333; color:#fff; border-radius:4px; text-align:center;"></div>';
+      card += '  <div style="flex:1; text-align:center;"><input type="number" id="' + prefix + '-d-' + i + '" value="0" style="width:40px; padding:5px; background:#171a1f; border:1px solid #333; color:#fff; border-radius:4px; text-align:center;"></div>';
+      card += '  <div style="flex:1; text-align:center;"><input type="number" id="' + prefix + '-hs-' + i + '" value="0" style="width:40px; padding:5px; background:#171a1f; border:1px solid #333; color:#fff; border-radius:4px; text-align:center;"></div>';
+      card += '</div>';
+    });
+    
+    card += '</div></div>';
+    return card;
+  }
+  
+  html += renderTeamCard(t1, 't1', 'add-m-s1');
+  html += renderTeamCard(t2, 't2', 'add-m-s2');
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function saveNewMatch() {
+  var t1Name = document.getElementById("add-m-t1").value;
+  var t2Name = document.getElementById("add-m-t2").value;
+  var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
+  var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
+  
+  if (!t1 || !t2) { alert("Ошибка: команды не найдены"); return; }
+  if (t1Name === t2Name) { alert("Нельзя выбрать одинаковые команды!"); return; }
+  
+  var map = document.getElementById("add-m-map").value || "de_mirage";
+  var s1 = parseInt(document.getElementById("add-m-s1").value) || 0;
+  var s2 = parseInt(document.getElementById("add-m-s2").value) || 0;
+  
+  var p1 = t1.players.map(function(p, i) {
+    return { nick: p.nick, kills: parseInt(document.getElementById("t1-k-" + i).value) || 0, deaths: parseInt(document.getElementById("t1-d-" + i).value) || 0, hs: parseInt(document.getElementById("t1-hs-" + i).value) || 0 };
+  });
+  var p2 = t2.players.map(function(p, i) {
+    return { nick: p.nick, kills: parseInt(document.getElementById("t2-k-" + i).value) || 0, deaths: parseInt(document.getElementById("t2-d-" + i).value) || 0, hs: parseInt(document.getElementById("t2-hs-" + i).value) || 0 };
+  });
+  
+  APP_DATA.matches.push({
+    id: Date.now(), map: map, tournament: "Добавлено вручную",
+    team1: { name: t1.name, score: s1, players: p1 },
+    team2: { name: t2.name, score: s2, players: p2 }
+  });
+  saveData();
+  
+  showToast("Матч добавлен!");
+  showAdminTab('match');
 }
 
 function loadMatchStatsForm() {
