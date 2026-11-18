@@ -2,11 +2,9 @@ const API_URL = "https://budget-gaps-associate-eggs.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-// Инициализация данных, если их нет в LocalStorage
 if (!localStorage.getItem("hltv_data")) {
   localStorage.setItem("hltv_data", JSON.stringify(DATA));
 }
-// Глобальные переменные
 let APP_DATA = JSON.parse(localStorage.getItem("hltv_data"));
 let teamRequests = JSON.parse(localStorage.getItem("hltv_team_requests")) || [];
 let newsRequests = JSON.parse(localStorage.getItem("hltv_news_requests")) || [];
@@ -60,11 +58,9 @@ function switchTab(tab) {
       document.getElementById("screen-admin-login").classList.remove("hidden");
     }
   }
-
   if (window.innerWidth <= 768) toggleMenu();
 }
 
-// ---------------- РЕЙТИНГ ----------------
 function renderRanking() {
   const container = document.getElementById("ranking-container");
   let html = "";
@@ -122,7 +118,6 @@ function showTeamDetail(name) {
   `;
 }
 
-// ---------------- РЕГИСТРАЦИЯ КОМАНДЫ ----------------
 function renderRegisterTeamForm() {
   const container = document.getElementById("register-team-content");
   const ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
@@ -183,7 +178,6 @@ function submitTeamRequest() {
   switchTab('ranking');
 }
 
-// ---------------- НОВОСТИ (ЗАМЕНЫ) ----------------
 function renderNewsForm() {
   const container = document.getElementById("news-content");
   container.innerHTML = `
@@ -219,7 +213,6 @@ function submitNewsRequest() {
   switchTab('ranking');
 }
 
-// ---------------- АДМИНКА ----------------
 function loginAdmin() {
   const pass = document.getElementById("admin-pass").value;
   if (pass === "hltv26") {
@@ -236,7 +229,6 @@ function showAdminTab(tab) {
   const container = document.getElementById("admin-form-container");
   
   if (tab === 'teams') {
-    // Поиск и список команд
     let html = `
       <input type="text" class="search-input" placeholder="Поиск команды..." oninput="searchAdminTeams(this.value)">
       <button class="btn btn-outline" style="margin-bottom:20px;" onclick="addTeamAdminForm()">+ Добавить команду</button>
@@ -332,27 +324,39 @@ function approveTeamRequest(index) {
 }
 
 function rejectTeamRequest(index) {
-  // В реальном приложении тут отправляется сообщение в тг через API.
-  // Пока просто удаляем.
   teamRequests.splice(index, 1);
   saveRequests();
   showAdminTab('requests');
 }
 
+// ===== ОБНОВЛЕННЫЕ ФУНКЦИИ С ОТПРАВКОЙ НА СЕРВЕР =====
 function approveNews(index) {
-  // Логика отправки в канал будет в Python-боте. Пока просто удаляем.
   const req = newsRequests[index];
-  alert("Новость одобрена и будет отправлена в канал (через бота).");
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab('requests');
+  fetch(`${API_URL}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "approve_news", team: req.team, text: req.text, photo: req.photo })
+  }).then(() => {
+    alert("Отправлено в канал!");
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab("requests");
+  }).catch(() => alert("Ошибка связи с сервером"));
 }
 
 function rejectNews(index) {
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab('requests');
+  const req = newsRequests[index];
+  fetch(`${API_URL}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "reject_news", team: req.team, text: req.text })
+  }).then(() => {
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab("requests");
+  }).catch(() => alert("Ошибка связи с сервером"));
 }
+// =====================================================
 
 function addMatchAdmin() {
   const map = document.getElementById("m-map").value;
@@ -369,18 +373,15 @@ function addMatchAdmin() {
     team2: { name: t2.name, score: s2, players: t2.players }
   });
   
-  // Обновляем статистику
   if (s1 > s2) { t1.wins++; t2.losses++; } else { t2.wins++; t1.losses++; }
-
   saveData();
   alert("Матч добавлен!");
 }
 
-// Заглушки для редактирования (следующий шаг)
 function editTeamAdmin(name) { alert("Функция редактирования в разработке"); }
 function deleteTeamAdmin(name) { alert("Функция удаления в разработке"); }
+function addTeamAdminForm() { alert("Функция добавления в разработке"); }
 
-// ---------------- МАТЧИ (ОТОБРАЖЕНИЕ) ----------------
 function renderMatchesList() {
   const container = document.getElementById("matches-container");
   let html = "";
@@ -404,7 +405,6 @@ function renderMatchesList() {
 }
 
 function showMatchDetail(id) {
-  // ... (остается как было)
   const m = APP_DATA.matches.find(x => x.id === id);
   if (!m) return;
   document.getElementById("screen-matches-list").classList.add("hidden");
