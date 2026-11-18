@@ -170,48 +170,90 @@ function showNewsType(type) {
   var area = document.getElementById("news-form-area");
   if (!area) return;
   
+  var formStyle = "background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748; display:flex; flex-direction:column; gap:15px;";
+  var inputStyle = "width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; box-sizing:border-box; font-family:inherit; font-size:14px;";
+  var labelStyle = "color:#8b959e; font-size:12px; margin-bottom:5px; display:block;";
+  
   if (type === 'roster') {
     area.innerHTML = `
-      <div style="background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748;">
-        <h3 style="margin-top:0; margin-bottom:15px;">Смена состава</h3>
-        <input type="text" id="roster-team" placeholder="Название команды" style="width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; margin-bottom:10px;">
-        <textarea id="roster-changes" placeholder="Какие изменения? (кто ушел, кто пришел)" style="width:100%; height:80px; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; margin-bottom:10px;"></textarea>
-        <input type="text" id="roster-photo" placeholder="Ссылка на фото (необязательно)" style="width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; margin-bottom:15px;">
-        <button class="btn" style="background:#10b981;" onclick="submitRosterChange()">Отправить</button>
+      <div style="${formStyle}">
+        <h3 style="margin:0 0 10px 0; color:#fff;">Смена состава</h3>
+        
+        <div>
+          <label style="${labelStyle}">Название команды</label>
+          <input type="text" id="roster-team" style="${inputStyle}">
+        </div>
+        
+        <div>
+          <label style="${labelStyle}">Какие изменения? (кто ушел, кто пришел)</label>
+          <textarea id="roster-changes" style="${inputStyle} height:100px; resize:vertical;"></textarea>
+        </div>
+        
+        <div>
+          <label style="${labelStyle}">Фото (необязательно)</label>
+          <input type="file" id="roster-photo" accept="image/*" style="${inputStyle} padding:8px;">
+        </div>
+        
+        <button class="btn" style="background:#10b981; margin-top:10px;" onclick="submitRosterChange()">Отправить</button>
       </div>
     `;
   } else if (type === 'match') {
     area.innerHTML = `
-      <div style="background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748;">
-        <h3 style="margin-top:0; margin-bottom:15px;">Регистрация матча</h3>
-        <p style="color:#ef4444; font-size:12px; margin-bottom:10px;">* Фото обязательно</p>
+      <div style="${formStyle}">
+        <h3 style="margin:0 0 5px 0; color:#fff;">Регистрация матча</h3>
+        <p style="color:#ef4444; font-size:12px; margin:0;">* Фото обязательно</p>
         
-        <input type="text" id="match-photo" placeholder="Ссылка на скриншот (обязательно)" style="width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; margin-bottom:15px;">
+        <div>
+          <label style="${labelStyle}">Скриншот (обязательно)</label>
+          <input type="file" id="match-photo" accept="image/*" style="${inputStyle} padding:8px;">
+        </div>
         
-        <div style="display:flex; gap:15px; margin-bottom:15px;">
-          <div style="flex:1; background:#171a1f; padding:10px; border-radius:6px;">
-            <h4 style="margin-top:0; margin-bottom:10px; color:#8b959e;">Команда 1</h4>
-            <input type="text" id="m1-name" placeholder="Название" style="width:100%; padding:8px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:4px; margin-bottom:5px;">
-            <input type="text" id="m1-players" placeholder="Ники (через запятую)" style="width:100%; padding:8px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:4px; margin-bottom:5px;">
-            <select id="m1-result" style="width:100%; padding:8px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:4px;">
-              <option value="win">Победа</option>
-              <option value="lose">Поражение</option>
-            </select>
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px; background:#171a1f; padding:15px; border-radius:8px;">
+            <h4 style="margin:0 0 10px 0; color:#fff;">Команда 1</h4>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Название</label>
+              <input type="text" id="m1-name" style="${inputStyle}">
+            </div>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Ники игроков</label>
+              <input type="text" id="m1-players" placeholder="через запятую" style="${inputStyle}">
+            </div>
+            <div>
+              <label style="${labelStyle}">Результат</label>
+              <select id="m1-result" style="${inputStyle}">
+                <option value="win">Победа</option>
+                <option value="lose">Поражение</option>
+              </select>
+            </div>
           </div>
-          <div style="flex:1; background:#171a1f; padding:10px; border-radius:6px;">
-            <h4 style="margin-top:0; margin-bottom:10px; color:#8b959e;">Команда 2</h4>
-            <input type="text" id="m2-name" placeholder="Название" style="width:100%; padding:8px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:4px; margin-bottom:5px;">
-            <input type="text" id="m2-players" placeholder="Ники (через запятую)" style="width:100%; padding:8px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:4px; margin-bottom:5px;">
-            <select id="m2-result" style="width:100%; padding:8px; background:#232b33; border:1px solid #2d3748; color:#fff; border-radius:4px;">
-              <option value="lose">Поражение</option>
-              <option value="win">Победа</option>
-            </select>
+          
+          <div style="flex:1; min-width:200px; background:#171a1f; padding:15px; border-radius:8px;">
+            <h4 style="margin:0 0 10px 0; color:#fff;">Команда 2</h4>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Название</label>
+              <input type="text" id="m2-name" style="${inputStyle}">
+            </div>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Ники игроков</label>
+              <input type="text" id="m2-players" placeholder="через запятую" style="${inputStyle}">
+            </div>
+            <div>
+              <label style="${labelStyle}">Результат</label>
+              <select id="m2-result" style="${inputStyle}">
+                <option value="lose">Поражение</option>
+                <option value="win">Победа</option>
+              </select>
+            </div>
           </div>
         </div>
         
-        <input type="text" id="match-score" placeholder="Счет (например, 13:9)" style="width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; margin-bottom:15px;">
+        <div>
+          <label style="${labelStyle}">Счет (например, 13:9)</label>
+          <input type="text" id="match-score" style="${inputStyle}">
+        </div>
         
-        <button class="btn" style="background:#10b981;" onclick="submitMatchRegistration()">Отправить</button>
+        <button class="btn" style="background:#10b981; margin-top:10px;" onclick="submitMatchRegistration()">Отправить</button>
       </div>
     `;
   }
@@ -228,83 +270,134 @@ function showToast(msg) {
 function submitRosterChange() {
   var team = document.getElementById("roster-team").value;
   var changes = document.getElementById("roster-changes").value;
-  var photo = document.getElementById("roster-photo").value;
+  var fileInput = document.getElementById("roster-photo");
   
   if (!team || !changes) { showToast("Заполните все поля!"); return; }
   
-  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
-  reqs.push({ type: 'roster', team: team, changes: changes, photo: photo, id: Date.now() });
-  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
-  
-  showToast("Отправлено!");
-  showNewsType('roster'); // Очищаем форму
+  var saveRequest = function(photoData) {
+    var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+    reqs.push({ type: 'roster', team: team, changes: changes, photo: photoData, id: Date.now() });
+    localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+    showToast("Отправлено!");
+    showNewsType('roster');
+  };
+
+  if (fileInput.files.length > 0) {
+    var reader = new FileReader();
+    reader.onload = function(e) { saveRequest(e.target.result); };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    saveRequest("");
+  }
 }
 
 function submitMatchRegistration() {
-  var photo = document.getElementById("match-photo").value;
-  if (!photo) { showToast("Прикрепите фото (ссылку)!"); return; }
+  var fileInput = document.getElementById("match-photo");
+  if (fileInput.files.length === 0) { showToast("Прикрепите скриншот!"); return; }
   
-  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
-  reqs.push({
-    type: 'match',
-    photo: photo,
-    m1: { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value },
-    m2: { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value },
-    score: document.getElementById("match-score").value,
-    id: Date.now()
-  });
-  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+  var m1 = { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value };
+  var m2 = { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value };
+  var score = document.getElementById("match-score").value;
   
-  showToast("Отправлено!");
-  showNewsType('match'); // Очищаем форму
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+    reqs.push({ type: 'match', photo: e.target.result, m1: m1, m2: m2, score: score, id: Date.now() });
+    localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+    showToast("Отправлено!");
+    showNewsType('match');
+  };
+  reader.readAsDataURL(fileInput.files[0]);
 }
 
 function showNewsType(type) {
   var area = document.getElementById("news-form-area");
   if (!area) return;
   
+  var formStyle = "background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748; display:flex; flex-direction:column; gap:15px;";
+  var inputStyle = "width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; box-sizing:border-box; font-family:inherit; font-size:14px;";
+  var labelStyle = "color:#8b959e; font-size:12px; margin-bottom:5px; display:block;";
+  
   if (type === 'roster') {
     area.innerHTML = `
-      <div class="card" style="padding:20px;">
-        <h3>Смена состава</h3>
-        <input type="text" id="roster-team" placeholder="Название команды" class="input" style="width:100%; margin-bottom:10px;">
-        <textarea id="roster-changes" placeholder="Какие изменения? (кто ушел, кто пришел)" class="input" style="width:100%; height:80px; margin-bottom:10px;"></textarea>
-        <input type="text" id="roster-photo" placeholder="Ссылка на фото (необязательно)" class="input" style="width:100%; margin-bottom:10px;">
-        <button class="btn btn-green" onclick="submitRosterChange()">Отправить</button>
+      <div style="${formStyle}">
+        <h3 style="margin:0 0 10px 0; color:#fff;">Смена состава</h3>
+        
+        <div>
+          <label style="${labelStyle}">Название команды</label>
+          <input type="text" id="roster-team" style="${inputStyle}">
+        </div>
+        
+        <div>
+          <label style="${labelStyle}">Какие изменения? (кто ушел, кто пришел)</label>
+          <textarea id="roster-changes" style="${inputStyle} height:100px; resize:vertical;"></textarea>
+        </div>
+        
+        <div>
+          <label style="${labelStyle}">Фото (необязательно)</label>
+          <input type="file" id="roster-photo" accept="image/*" style="${inputStyle} padding:8px;">
+        </div>
+        
+        <button class="btn" style="background:#10b981; margin-top:10px;" onclick="submitRosterChange()">Отправить</button>
       </div>
     `;
   } else if (type === 'match') {
     area.innerHTML = `
-      <div class="card" style="padding:20px;">
-        <h3>Регистрация матча</h3>
-        <p style="color:#ef4444; font-size:12px; margin-bottom:10px;">* Фото обязательно</p>
+      <div style="${formStyle}">
+        <h3 style="margin:0 0 5px 0; color:#fff;">Регистрация матча</h3>
+        <p style="color:#ef4444; font-size:12px; margin:0;">* Фото обязательно</p>
         
-        <input type="text" id="match-photo" placeholder="Ссылка на скриншот (обязательно)" class="input" style="width:100%; margin-bottom:10px;">
+        <div>
+          <label style="${labelStyle}">Скриншот (обязательно)</label>
+          <input type="file" id="match-photo" accept="image/*" style="${inputStyle} padding:8px;">
+        </div>
         
-        <div style="display:flex; gap:10px;">
-          <div style="flex:1;">
-            <h4>Команда 1</h4>
-            <input type="text" id="m1-name" placeholder="Название" class="input" style="width:100%; margin-bottom:5px;">
-            <input type="text" id="m1-players" placeholder="Ники (через запятую)" class="input" style="width:100%; margin-bottom:5px;">
-            <select id="m1-result" class="input" style="width:100%;">
-              <option value="win">Победа</option>
-              <option value="lose">Поражение</option>
-            </select>
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px; background:#171a1f; padding:15px; border-radius:8px;">
+            <h4 style="margin:0 0 10px 0; color:#fff;">Команда 1</h4>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Название</label>
+              <input type="text" id="m1-name" style="${inputStyle}">
+            </div>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Ники игроков</label>
+              <input type="text" id="m1-players" placeholder="через запятую" style="${inputStyle}">
+            </div>
+            <div>
+              <label style="${labelStyle}">Результат</label>
+              <select id="m1-result" style="${inputStyle}">
+                <option value="win">Победа</option>
+                <option value="lose">Поражение</option>
+              </select>
+            </div>
           </div>
-          <div style="flex:1;">
-            <h4>Команда 2</h4>
-            <input type="text" id="m2-name" placeholder="Название" class="input" style="width:100%; margin-bottom:5px;">
-            <input type="text" id="m2-players" placeholder="Ники (через запятую)" class="input" style="width:100%; margin-bottom:5px;">
-            <select id="m2-result" class="input" style="width:100%;">
-              <option value="lose">Поражение</option>
-              <option value="win">Победа</option>
-            </select>
+          
+          <div style="flex:1; min-width:200px; background:#171a1f; padding:15px; border-radius:8px;">
+            <h4 style="margin:0 0 10px 0; color:#fff;">Команда 2</h4>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Название</label>
+              <input type="text" id="m2-name" style="${inputStyle}">
+            </div>
+            <div style="margin-bottom:10px;">
+              <label style="${labelStyle}">Ники игроков</label>
+              <input type="text" id="m2-players" placeholder="через запятую" style="${inputStyle}">
+            </div>
+            <div>
+              <label style="${labelStyle}">Результат</label>
+              <select id="m2-result" style="${inputStyle}">
+                <option value="lose">Поражение</option>
+                <option value="win">Победа</option>
+              </select>
+            </div>
           </div>
         </div>
         
-        <input type="text" id="match-score" placeholder="Счет (например, 13:9)" class="input" style="width:100%; margin-top:10px; margin-bottom:10px;">
+        <div>
+          <label style="${labelStyle}">Счет (например, 13:9)</label>
+          <input type="text" id="match-score" style="${inputStyle}">
+        </div>
         
-        <button class="btn btn-green" onclick="submitMatchRegistration()">Отправить</button>
+        <button class="btn" style="background:#10b981; margin-top:10px;" onclick="submitMatchRegistration()">Отправить</button>
       </div>
     `;
   }
@@ -321,35 +414,44 @@ function showToast(msg) {
 function submitRosterChange() {
   var team = document.getElementById("roster-team").value;
   var changes = document.getElementById("roster-changes").value;
-  var photo = document.getElementById("roster-photo").value;
+  var fileInput = document.getElementById("roster-photo");
   
   if (!team || !changes) { showToast("Заполните все поля!"); return; }
   
-  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
-  reqs.push({ type: 'roster', team: team, changes: changes, photo: photo, id: Date.now() });
-  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
-  
-  showToast("Отправлено!");
-  showNewsType('roster'); // Очищаем форму
+  var saveRequest = function(photoData) {
+    var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+    reqs.push({ type: 'roster', team: team, changes: changes, photo: photoData, id: Date.now() });
+    localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+    showToast("Отправлено!");
+    showNewsType('roster');
+  };
+
+  if (fileInput.files.length > 0) {
+    var reader = new FileReader();
+    reader.onload = function(e) { saveRequest(e.target.result); };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    saveRequest("");
+  }
 }
 
 function submitMatchRegistration() {
-  var photo = document.getElementById("match-photo").value;
-  if (!photo) { showToast("Прикрепите фото (ссылку)!"); return; }
+  var fileInput = document.getElementById("match-photo");
+  if (fileInput.files.length === 0) { showToast("Прикрепите скриншот!"); return; }
   
-  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
-  reqs.push({
-    type: 'match',
-    photo: photo,
-    m1: { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value },
-    m2: { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value },
-    score: document.getElementById("match-score").value,
-    id: Date.now()
-  });
-  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+  var m1 = { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value };
+  var m2 = { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value };
+  var score = document.getElementById("match-score").value;
   
-  showToast("Отправлено!");
-  showNewsType('match'); // Очищаем форму
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+    reqs.push({ type: 'match', photo: e.target.result, m1: m1, m2: m2, score: score, id: Date.now() });
+    localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+    showToast("Отправлено!");
+    showNewsType('match');
+  };
+  reader.readAsDataURL(fileInput.files[0]);
 }
 
 function submitNewsRequest() {
@@ -758,29 +860,42 @@ function renderAdminRequests() {
   
   var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
   
-  var html = '<h2>Заявки</h2>';
+  var html = '<h2 style="margin-bottom:20px;">Заявки</h2>';
   if (reqs.length === 0) {
     html += '<p style="color:#8b959e;">Нет новых заявок</p>';
   } else {
     reqs.forEach(function(r, i) {
-      html += '<div class="card" style="margin-bottom:15px; padding:15px; border-left:4px solid ' + (r.type === 'match' ? '#10b981' : '#3b82f6') + ';">';
+      html += '<div style="background:#232b33; margin-bottom:15px; padding:20px; border-radius:12px; border-left:4px solid ' + (r.type === 'match' ? '#10b981' : '#3b82f6') + '; box-shadow:0 4px 6px rgba(0,0,0,0.1);">';
       
       if (r.type === 'roster') {
-        html += '<h3>Смена состава: ' + r.team + '</h3>';
-        html += '<p>Изменения: ' + r.changes + '</p>';
-        if (r.photo) html += '<img src="' + r.photo + '" style="max-width:100px; border-radius:5px; margin-bottom:10px;">';
+        html += '<h3 style="margin:0 0 10px 0; font-size:18px;">Смена состава: <span style="color:#3b82f6;">' + r.team + '</span></h3>';
+        html += '<p style="margin:0 0 15px 0; color:#e1e1e1; font-size:14px; line-height:1.5;"><b>Изменения:</b><br>' + r.changes.replace(/
+/g, '<br>') + '</p>';
+        if (r.photo) html += '<img src="' + r.photo + '" style="max-height:150px; border-radius:8px; margin-bottom:15px; display:block;">';
+        
         html += '<div style="display:flex; gap:10px;">';
-        html += '<button class="btn btn-green" onclick="approveRequest(' + i + ')">Состав изменён</button>';
-        html += '<button class="btn" style="background:#ef4444;" onclick="rejectRequest(' + i + ')">Отклонено</button>';
+        html += '<button class="btn" style="background:#10b981; flex:1; margin:0;" onclick="approveRequest(' + i + ')">Состав изменён</button>';
+        html += '<button class="btn" style="background:#ef4444; flex:1; margin:0;" onclick="rejectRequest(' + i + ')">Отклонено</button>';
         html += '</div>';
       } else if (r.type === 'match') {
-        html += '<h3>Регистрация матча</h3>';
-        html += '<img src="' + r.photo + '" style="max-width:100%; border-radius:5px; margin-bottom:10px;">';
-        html += '<p><b>' + r.m1.name + '</b> (' + r.m1.result + ') vs <b>' + r.m2.name + '</b> (' + r.m2.result + ')</p>';
-        html += '<p>Счет: ' + r.score + '</p>';
+        html += '<h3 style="margin:0 0 10px 0; font-size:18px;">Регистрация матча</h3>';
+        html += '<img src="' + r.photo + '" style="max-width:100%; max-height:300px; border-radius:8px; margin-bottom:15px; display:block; border:1px solid #444;">';
+        
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; background:#171a1f; padding:15px; border-radius:8px; margin-bottom:15px;">';
+        html += '  <div style="flex:1; text-align:center;">';
+        html += '    <div style="font-weight:bold; font-size:16px; color:' + (r.m1.result === 'win' ? '#10b981' : '#fff') + ';">' + r.m1.name + '</div>';
+        html += '    <div style="font-size:12px; color:#8b959e; margin-top:5px;">' + r.m1.players + '</div>';
+        html += '  </div>';
+        html += '  <div style="font-size:24px; font-weight:900; padding:0 15px;">' + r.score + '</div>';
+        html += '  <div style="flex:1; text-align:center;">';
+        html += '    <div style="font-weight:bold; font-size:16px; color:' + (r.m2.result === 'win' ? '#10b981' : '#fff') + ';">' + r.m2.name + '</div>';
+        html += '    <div style="font-size:12px; color:#8b959e; margin-top:5px;">' + r.m2.players + '</div>';
+        html += '  </div>';
+        html += '</div>';
+        
         html += '<div style="display:flex; gap:10px;">';
-        html += '<button class="btn btn-green" onclick="approveRequest(' + i + ')">Засчитано</button>';
-        html += '<button class="btn" style="background:#ef4444;" onclick="rejectRequest(' + i + ')">Отклонено</button>';
+        html += '<button class="btn" style="background:#10b981; flex:1; margin:0;" onclick="approveRequest(' + i + ')">Засчитано</button>';
+        html += '<button class="btn" style="background:#ef4444; flex:1; margin:0;" onclick="rejectRequest(' + i + ')">Отклонено</button>';
         html += '</div>';
       }
       
