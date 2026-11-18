@@ -1,3 +1,4 @@
+const API_URL = "https://budget-gaps-associate-eggs.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
