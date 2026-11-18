@@ -64,16 +64,22 @@ function switchTab(tab) {
 
 function renderRanking() {
   var container = document.getElementById("ranking-container");
-  var html = "";
-  APP_DATA.teams.sort(function(a,b){return b.points-a.points;}).forEach(function(t,i){
-    var teamAvatar = t.avatar ? '<img src="' + t.avatar + '" class="avatar">' : '<div class="avatar">' + t.name.charAt(0) + '</div>';
-    html += '<div class="card animate-in delay-' + Math.min(i+1, 5) + '" onclick="showTeamDetail(\'' + t.name + '\')">' +
-        '<div class="card-num">' + (i+1) + '</div>' + teamAvatar +
-        '<div class="info"><div class="name">' + t.name + ' <span class="team-tag">' + (t.tag || "") + '</span></div>' +
-        '<div class="sub">' + (t.wins + t.losses) + ' матчей</div></div>' +
-        '<div class="points">' + t.points + ' PTS</div></div>';
+  if (!container) return;
+  APP_DATA.teams.sort(function(a,b){return b.points-a.points;});
+  var html = '';
+  APP_DATA.teams.forEach(function(t, i) {
+    var playersStr = (t.players || []).map(function(p) { return p.nick; }).join(' • ') || 'Unknown';
+    var flag = t.tag ? t.tag.substring(0,2).toUpperCase() : 'UN';
+    html += '<div class="hltv-row" onclick="showTeamDetail(\'' + t.name + '\')">';
+    html += '  <div class="hltv-rank">#' + (i+1) + '</div>';
+    html += '  <div class="hltv-star">☆</div>';
+    html += '  <div class="hltv-team-info">';
+    html += '    <div class="hltv-team-name">' + t.name + ' <span class="hltv-flag">' + flag + '</span> <span class="hltv-points">(' + t.points + ' points)</span></div>';
+    html += '    <div class="hltv-players">' + playersStr + '</div>';
+    html += '  </div>';
+    html += '</div>';
   });
-  container.innerHTML = html || '<p style="color:var(--muted); text-align:center; padding:20px;">Команд пока нет</p>';
+  container.innerHTML = html;
 }
 
 function showTeamDetail(name) {
@@ -296,18 +302,19 @@ function addTeamAdminForm() { alert("Функция добавления в ра
 
 function renderMatchesList() {
   var container = document.getElementById("matches-container");
-  var html = "";
+  if (!container) return;
+  var html = '<h1>Сыгранные матчи</h1>';
   APP_DATA.matches.forEach(function(m) {
-    var t1Win = m.team1.score > m.team2.score;
-    var t2Win = m.team2.score > m.team1.score;
-    var mapImg = 'maps/' + m.map.toLowerCase().replace("de_", "").trim() + '.jpg';
-    html += '<div class="match-card-img animate-in" onclick="showMatchDetail(' + m.id + ')">' +
-      '<div class="match-map-bg" style="background-image: url(\'' + mapImg + '\'), linear-gradient(135deg,#1e1b4b,#0f172a);">' +
-        '<div class="match-map-content"><div class="match-team-name" style="color:' + (t1Win ? 'var(--win)' : 'var(--text)') + '">' + m.team1.name + '</div>' +
-        '<div class="match-score-big">' + m.team1.score + ' : ' + m.team2.score + '</div>' +
-        '<div class="match-team-name" style="color:' + (t2Win ? 'var(--win)' : 'var(--text)') + '">' + m.team2.name + '</div></div></div></div>';
+    var mapBg = m.map ? m.map.toLowerCase() + '.jpg' : 'default.jpg';
+    var t1Class = m.score1 > m.score2 ? 'winner' : '';
+    var t2Class = m.score2 > m.score1 ? 'winner' : '';
+    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\');" onclick="openMatch(\'' + m.id + '\')">';
+    html += '  <div class="match-team ' + t1Class + '">' + m.team1 + '</div>';
+    html += '  <div class="match-score">' + m.score1 + ' : ' + m.score2 + '</div>';
+    html += '  <div class="match-team right ' + t2Class + '">' + m.team2 + '</div>';
+    html += '</div>';
   });
-  container.innerHTML = html || '<p style="color:var(--muted)">Матчей нет</p>';
+  container.innerHTML = html;
 }
 
 function showMatchDetail(id) {
