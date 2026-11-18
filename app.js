@@ -242,18 +242,29 @@ function rejectTeamRequest(index) {
 
 function approveNews(index) {
   const req = newsRequests[index];
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://nashville-kitchen-verification-phantom.trycloudflare.com/'; // Ссылка на твой сервер
+  form.target = '_blank';
+  form.style.display = 'none';
+
   const data = { action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' };
-  
-  if (tg && tg.sendData) {
-    tg.sendData(JSON.stringify(data));
-    alert('Отправлено в канал!');
-  } else {
-    alert('Ошибка: Telegram WebApp API недоступен.');
+  for (const key in data) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = data[key];
+    form.appendChild(input);
   }
+
+  document.body.appendChild(form);
+  form.submit();
   
+  alert('Запрос отправлен на сервер!');
   newsRequests.splice(index, 1);
   saveRequests();
   showAdminTab('requests');
+  setTimeout(() => document.body.removeChild(form), 2000);
 }
 
 function rejectNews(index) {
