@@ -1,4 +1,4 @@
-const API_URL = "https://meditation-breaking-lucia-locking.trycloudflare.com";
+const API_URL = "https://realtor-charger-effectively-avoid.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
