@@ -869,8 +869,11 @@ function renderAdminRequests() {
       
       if (r.type === 'roster') {
         html += '<h3 style="margin:0 0 10px 0; font-size:18px;">Смена состава: <span style="color:#3b82f6;">' + r.team + '</span></h3>';
-        html += '<p style="margin:0 0 15px 0; color:#e1e1e1; font-size:14px; line-height:1.5;"><b>Изменения:</b><br>' + r.changes.replace(/
-/g, '<br>') + '</p>';
+        
+        // Безопасный перенос строк (без регулярок)
+        var changesText = r.changes.split('\n').join('<br>');
+        html += '<p style="margin:0 0 15px 0; color:#e1e1e1; font-size:14px; line-height:1.5;"><b>Изменения:</b><br>' + changesText + '</p>';
+        
         if (r.photo) html += '<img src="' + r.photo + '" style="max-height:150px; border-radius:8px; margin-bottom:15px; display:block;">';
         
         html += '<div style="display:flex; gap:10px;">';
@@ -905,7 +908,6 @@ function renderAdminRequests() {
   
   container.innerHTML = html;
 }
-
 function approveRequest(index) {
   var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
   var r = reqs[index];
