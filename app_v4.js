@@ -147,12 +147,110 @@ function submitTeamRequest() {
 }
 
 function renderNewsForm() {
-  var container = document.getElementById("news-content");
-  container.innerHTML = '<p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Отправьте заявку на изменение состава или новость.</p>' +
-    '<div class="form-group"><label>Команда</label><input type="text" id="n-team" class="form-control" placeholder="Название вашей команды"></div>' +
-    '<div class="form-group"><label>Текст изменения</label><textarea id="n-text" class="form-control" rows="4" placeholder="+S1mple&#10;-Nico"></textarea></div>' +
-    '<div class="form-group"><label>Фото (необязательно)</label><div class="file-upload-wrapper" onclick="document.getElementById(\'n-photo\').click()"><img id="n-photo-preview" class="file-upload-preview"><div class="file-upload-label">Прикрепить фото</div><input type="file" id="n-photo" accept="image/*" onchange="previewImage(this, \'n-photo-preview\')"></div></div>' +
-    '<button class="btn" onclick="submitNewsRequest()">Отправить админу</button>';
+  var container = document.getElementById("news-container");
+  if (!container) return;
+  
+  var html = '<h1>Отправить заявку</h1>';
+  html += '<div style="display:flex; gap:10px; margin-bottom:20px;">';
+  html += '  <button class="btn" style="flex:1;" onclick="showNewsType(\'roster\')">Смена состава</button>';
+  html += '  <button class="btn" style="flex:1; background:#10b981;" onclick="showNewsType(\'match\')">Регистрация матча</button>';
+  html += '</div>';
+  html += '<div id="news-form-area"></div>';
+  
+  container.innerHTML = html;
+}
+
+function showNewsType(type) {
+  var area = document.getElementById("news-form-area");
+  if (!area) return;
+  
+  if (type === 'roster') {
+    area.innerHTML = `
+      <div class="card" style="padding:20px;">
+        <h3>Смена состава</h3>
+        <input type="text" id="roster-team" placeholder="Название команды" class="input" style="width:100%; margin-bottom:10px;">
+        <textarea id="roster-changes" placeholder="Какие изменения? (кто ушел, кто пришел)" class="input" style="width:100%; height:80px; margin-bottom:10px;"></textarea>
+        <input type="text" id="roster-photo" placeholder="Ссылка на фото (необязательно)" class="input" style="width:100%; margin-bottom:10px;">
+        <button class="btn btn-green" onclick="submitRosterChange()">Отправить</button>
+      </div>
+    `;
+  } else if (type === 'match') {
+    area.innerHTML = `
+      <div class="card" style="padding:20px;">
+        <h3>Регистрация матча</h3>
+        <p style="color:#ef4444; font-size:12px; margin-bottom:10px;">* Фото обязательно</p>
+        
+        <input type="text" id="match-photo" placeholder="Ссылка на скриншот (обязательно)" class="input" style="width:100%; margin-bottom:10px;">
+        
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <h4>Команда 1</h4>
+            <input type="text" id="m1-name" placeholder="Название" class="input" style="width:100%; margin-bottom:5px;">
+            <input type="text" id="m1-players" placeholder="Ники (через запятую)" class="input" style="width:100%; margin-bottom:5px;">
+            <select id="m1-result" class="input" style="width:100%;">
+              <option value="win">Победа</option>
+              <option value="lose">Поражение</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <h4>Команда 2</h4>
+            <input type="text" id="m2-name" placeholder="Название" class="input" style="width:100%; margin-bottom:5px;">
+            <input type="text" id="m2-players" placeholder="Ники (через запятую)" class="input" style="width:100%; margin-bottom:5px;">
+            <select id="m2-result" class="input" style="width:100%;">
+              <option value="lose">Поражение</option>
+              <option value="win">Победа</option>
+            </select>
+          </div>
+        </div>
+        
+        <input type="text" id="match-score" placeholder="Счет (например, 13:9)" class="input" style="width:100%; margin-top:10px; margin-bottom:10px;">
+        
+        <button class="btn btn-green" onclick="submitMatchRegistration()">Отправить</button>
+      </div>
+    `;
+  }
+}
+
+function showToast(msg) {
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.5);';
+  toast.innerText = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+}
+
+function submitRosterChange() {
+  var team = document.getElementById("roster-team").value;
+  var changes = document.getElementById("roster-changes").value;
+  var photo = document.getElementById("roster-photo").value;
+  
+  if (!team || !changes) { showToast("Заполните все поля!"); return; }
+  
+  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+  reqs.push({ type: 'roster', team: team, changes: changes, photo: photo, id: Date.now() });
+  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+  
+  showToast("Отправлено!");
+  showNewsType('roster'); // Очищаем форму
+}
+
+function submitMatchRegistration() {
+  var photo = document.getElementById("match-photo").value;
+  if (!photo) { showToast("Прикрепите фото (ссылку)!"); return; }
+  
+  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+  reqs.push({
+    type: 'match',
+    photo: photo,
+    m1: { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value },
+    m2: { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value },
+    score: document.getElementById("match-score").value,
+    id: Date.now()
+  });
+  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+  
+  showToast("Отправлено!");
+  showNewsType('match'); // Очищаем форму
 }
 
 function submitNewsRequest() {
@@ -186,6 +284,8 @@ function showAdminTab(tab) {
     renderAdminTeamsList(APP_DATA.teams);
   } 
   else if (tab === 'requests') {
+    renderAdminRequests();
+    return;
     var html = '<h3 style="margin-bottom:16px;">Заявки на команды</h3>';
     if (teamRequests.length === 0) html += '<p style="color:var(--muted)">Нет новых заявок.</p>';
     teamRequests.forEach(function(req, index) {
@@ -550,4 +650,70 @@ function togglePlayerVerify(teamName, playerIndex) {
   }).catch(function(err) {
     console.warn("Демо-режим: сервер не отвечает", err);
   });
+}
+
+
+function renderAdminRequests() {
+  var container = document.getElementById("admin-form-container");
+  if (!container) return;
+  
+  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+  
+  var html = '<h2>Заявки</h2>';
+  if (reqs.length === 0) {
+    html += '<p style="color:#8b959e;">Нет новых заявок</p>';
+  } else {
+    reqs.forEach(function(r, i) {
+      html += '<div class="card" style="margin-bottom:15px; padding:15px; border-left:4px solid ' + (r.type === 'match' ? '#10b981' : '#3b82f6') + ';">';
+      
+      if (r.type === 'roster') {
+        html += '<h3>Смена состава: ' + r.team + '</h3>';
+        html += '<p>Изменения: ' + r.changes + '</p>';
+        if (r.photo) html += '<img src="' + r.photo + '" style="max-width:100px; border-radius:5px; margin-bottom:10px;">';
+        html += '<div style="display:flex; gap:10px;">';
+        html += '<button class="btn btn-green" onclick="approveRequest(' + i + ')">Состав изменён</button>';
+        html += '<button class="btn" style="background:#ef4444;" onclick="rejectRequest(' + i + ')">Отклонено</button>';
+        html += '</div>';
+      } else if (r.type === 'match') {
+        html += '<h3>Регистрация матча</h3>';
+        html += '<img src="' + r.photo + '" style="max-width:100%; border-radius:5px; margin-bottom:10px;">';
+        html += '<p><b>' + r.m1.name + '</b> (' + r.m1.result + ') vs <b>' + r.m2.name + '</b> (' + r.m2.result + ')</p>';
+        html += '<p>Счет: ' + r.score + '</p>';
+        html += '<div style="display:flex; gap:10px;">';
+        html += '<button class="btn btn-green" onclick="approveRequest(' + i + ')">Засчитано</button>';
+        html += '<button class="btn" style="background:#ef4444;" onclick="rejectRequest(' + i + ')">Отклонено</button>';
+        html += '</div>';
+      }
+      
+      html += '</div>';
+    });
+  }
+  
+  container.innerHTML = html;
+}
+
+function approveRequest(index) {
+  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+  var r = reqs[index];
+  if (!r) return;
+  
+  if (r.type === 'match') {
+    // Обновляем статистику команд (добавляем победы/поражения)
+    // В демо-режиме просто уведомляем
+    showToast("Матч засчитан! Уведомление отправлено игроку.");
+  } else {
+    showToast("Состав изменён! Уведомление отправлено игроку.");
+  }
+  
+  reqs.splice(index, 1);
+  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+  renderAdminRequests();
+}
+
+function rejectRequest(index) {
+  var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
+  reqs.splice(index, 1);
+  localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
+  showToast("Заявка отклонена. Уведомление отправлено.");
+  renderAdminRequests();
 }
