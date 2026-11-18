@@ -1,4 +1,4 @@
-const API_URL = "https://tagged-enters-prevent-alexander.trycloudflare.com";
+const API_URL = "https://bosnia-necessary-structure-life.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
