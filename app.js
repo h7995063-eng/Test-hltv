@@ -1,4 +1,4 @@
-const API_URL = "https://planning-birth-collar-suddenly.trycloudflare.com";
+const API_URL = "https://nashville-kitchen-verification-phantom.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
