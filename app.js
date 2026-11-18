@@ -1,4 +1,4 @@
-const API_URL = "https://planning-birth-collar-suddenly.trycloudflare.com";
+const API_URL = https://planning-birth-collar-suddenly.trycloudflare.com;
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -322,37 +322,41 @@ function rejectTeamRequest(index) {
   showAdminTab('requests');
 }
 
+// ОТПРАВКА ЧЕРЕЗ ФОРМУ (обход блокировки Telegram)
+function sendViaForm(data) {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = API_URL;
+  form.target = "hidden_iframe";
+  form.style.display = "none";
+
+  for (const key in data) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = data[key];
+    form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => document.body.removeChild(form), 1000);
+}
+
 function approveNews(index) {
   const req = newsRequests[index];
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
-  }).then(function(res) {
-    if (!res.ok) throw new Error('Server error');
-    alert('Отправлено в канал!');
-    newsRequests.splice(index, 1);
-    saveRequests();
-    showAdminTab('requests');
-  }).catch(function(err) {
-    alert('ОШИБКА СЕТИ!');
-  });
+  sendViaForm({ action: "approve_news", team: req.team, text: req.text, photo: req.photo || "" });
+  alert("Отправлено в канал!");
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab("requests");
 }
 
 function rejectNews(index) {
   const req = newsRequests[index];
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'reject_news', team: req.team, text: req.text })
-  }).then(function(res) {
-    if (!res.ok) throw new Error('Server error');
-    newsRequests.splice(index, 1);
-    saveRequests();
-    showAdminTab('requests');
-  }).catch(function(err) {
-    alert('ОШИБКА СЕТИ!');
-  });
+  sendViaForm({ action: "reject_news", team: req.team, text: req.text });
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab("requests");
 }
 
 function addMatchAdmin() {
