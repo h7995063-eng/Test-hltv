@@ -1,6 +1,21 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
+// Инициализация данных, если их нет в LocalStorage
+if (!localStorage.getItem("hltv_data")) {
+  localStorage.setItem("hltv_data", JSON.stringify(DATA));
+}
+// Глобальные переменные
+let APP_DATA = JSON.parse(localStorage.getItem("hltv_data"));
+let teamRequests = JSON.parse(localStorage.getItem("hltv_team_requests")) || [];
+let newsRequests = JSON.parse(localStorage.getItem("hltv_news_requests")) || [];
+
+function saveData() { localStorage.setItem("hltv_data", JSON.stringify(APP_DATA)); }
+function saveRequests() { 
+  localStorage.setItem("hltv_team_requests", JSON.stringify(teamRequests)); 
+  localStorage.setItem("hltv_news_requests", JSON.stringify(newsRequests));
+}
+
 window.onload = () => {
   setTimeout(() => {
     document.getElementById("splash-screen").style.opacity = "0";
@@ -19,9 +34,9 @@ function toggleMenu() {
 
 function switchTab(tab) {
   document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
-  document.getElementById(`nav-${tab}`)?.classList.add("active");
+  if (document.getElementById(`nav-${tab}`)) document.getElementById(`nav-${tab}`).classList.add("active");
   
-  const screens = ["ranking", "team-detail", "matches-list", "match-detail", "admin-login", "admin-panel"];
+  const screens = ["ranking", "team-detail", "register-team", "matches-list", "match-detail", "news", "admin-login", "admin-panel"];
   screens.forEach(s => document.getElementById(`screen-${s}`).classList.add("hidden"));
 
   if (tab === "ranking") {
@@ -30,9 +45,16 @@ function switchTab(tab) {
   } else if (tab === "matches") {
     document.getElementById("screen-matches-list").classList.remove("hidden");
     renderMatchesList();
+  } else if (tab === "news") {
+    document.getElementById("screen-news").classList.remove("hidden");
+    renderNewsForm();
+  } else if (tab === "register-team") {
+    document.getElementById("screen-register-team").classList.remove("hidden");
+    renderRegisterTeamForm();
   } else if (tab === "admin") {
     if (sessionStorage.getItem("isAdmin") === "true") {
       document.getElementById("screen-admin-panel").classList.remove("hidden");
+      showAdminTab('teams');
     } else {
       document.getElementById("screen-admin-login").classList.remove("hidden");
     }
@@ -41,38 +63,38 @@ function switchTab(tab) {
   if (window.innerWidth <= 768) toggleMenu();
 }
 
+// ---------------- РЕЙТИНГ ----------------
 function renderRanking() {
   const container = document.getElementById("ranking-container");
   let html = "";
-  DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
+  APP_DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
     let teamAvatar = t.avatar ? `<img src="${t.avatar}" class="avatar">` : `<div class="avatar">${t.name.charAt(0)}</div>`;
     html += `
       <div class="card animate-in delay-${Math.min(i+1, 5)}" onclick="showTeamDetail('${t.name}')">
         <div class="card-num">${i+1}</div>
         ${teamAvatar}
         <div class="info">
-          <div class="name">${t.name}</div>
+          <div class="name">${t.name} <span class="team-tag">${t.tag || ""}</span></div>
           <div class="sub">${t.wins + t.losses} матчей</div>
         </div>
         <div class="points">${t.points} PTS</div>
       </div>
     `;
   });
-  container.innerHTML = html;
+  container.innerHTML = html || '<p style="color:var(--muted); text-align:center; padding:20px;">Команд пока нет</p>';
 }
 
 function showTeamDetail(name) {
-  const team = DATA.teams.find(t => t.name === name);
+  const team = APP_DATA.teams.find(t => t.name === name);
   if (!team) return;
   document.getElementById("screen-ranking").classList.add("hidden");
   document.getElementById("screen-team-detail").classList.remove("hidden");
-  
   let teamAvatar = team.avatar ? `<img src="${team.avatar}" class="team-big-logo">` : `<div class="team-big-logo">${team.name.charAt(0)}</div>`;
   
   document.getElementById("team-detail-content").innerHTML = `
     <div class="team-header animate-in">
       ${teamAvatar}
-      <div class="team-title-info"><h2>${team.name}</h2><p>Рейтинг команды</p></div>
+      <div class="team-title-info"><h2>${team.name} <span class="team-tag">${team.tag || ""}</span></h2><p>Рейтинг команды</p></div>
     </div>
     <div class="team-stats-row animate-in delay-1">
       <div class="team-stat-box"><div class="val" style="color:var(--accent)">${team.points}</div><div class="lbl">Поинты</div></div>
@@ -99,164 +121,170 @@ function showTeamDetail(name) {
   `;
 }
 
-function renderMatchesList() {
-  const container = document.getElementById("matches-container");
-  let html = "";
-  const getMapImage = (mapName) => `maps/${mapName.toLowerCase().replace("de_", "").trim()}.jpg`;
-
-  DATA.matches.forEach((m, i) => {
-    const t1Win = m.team1.score > m.team2.score;
-    const t2Win = m.team2.score > m.team1.score;
-    const mapImg = getMapImage(m.map);
-
-    html += `
-      <div class="match-card-img animate-in delay-${Math.min(i+1, 5)}" onclick="showMatchDetail(${m.id})">
-        <div class="match-map-bg" style="background-image: url('${mapImg}'), linear-gradient(135deg,#1e1b4b,#0f172a);">
-          <div class="match-map-content">
-            <div class="match-team-name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-            <div class="match-score-big">${m.team1.score} : ${m.team2.score}</div>
-            <div class="match-team-name" style="color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
-          </div>
-        </div>
-        <div class="match-card-footer">
-          <span style="text-transform:uppercase; letter-spacing:1px; font-size:11px;">${m.map}</span>
-          <span style="color:var(--accent)">Сыгран</span>
+// ---------------- РЕГИСТРАЦИЯ КОМАНДЫ ----------------
+function renderRegisterTeamForm() {
+  const container = document.getElementById("register-team-content");
+  const ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
+  let playersHtml = '';
+  for (let i = 1; i <= 5; i++) {
+    playersHtml += `
+      <div class="player-row-admin">
+        <div class="num">${i}.</div>
+        <div style="flex:1; display:flex; gap:10px;">
+          <div style="flex:2;"><input type="text" id="rt-nick-${i}" class="form-control" placeholder="Ник" style="padding:10px;"></div>
+          <div style="flex:1;"><select id="rt-role-${i}" class="form-control" style="padding:10px;">${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
         </div>
       </div>
     `;
-  });
-  container.innerHTML = html || '<p style="color:var(--muted)">Матчей нет</p>';
-}
+  }
 
-function showMatchDetail(id) {
-  const m = DATA.matches.find(x => x.id === id);
-  if (!m) return;
-
-  document.getElementById("screen-matches-list").classList.add("hidden");
-  document.getElementById("screen-match-detail").classList.remove("hidden");
-
-  const t1Win = m.team1.score > m.team2.score;
-  const t2Win = m.team2.score > m.team1.score;
-  const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
-
-  const renderTeamTable = (team, isWinner, delay) => `
-    <div class="table-wrapper animate-in delay-${delay}">
-      <div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);">
-        <span style="color:${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
-        <span style="color:var(--muted); font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
-      </div>
-      <table>
-        <thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
-        <tbody>
-          ${team.players.map(p => `
-            <tr>
-              <td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div class="player-nick">${p.nick}</div></div></td>
-              <td>${p.kills}</td><td style="color:var(--accent)">${(p.kills/(p.deaths||1)).toFixed(2)}</td><td>${p.hs}%</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  document.getElementById("match-detail-content").innerHTML = `
-    <div class="match-header-card animate-in" style="background-image: url('${mapImg}');">
-      <div class="match-header-content">
-        <div class="match-top-info">
-          <span>${m.map}</span>
-          <span style="color:var(--accent)">Завершен</span>
+  container.innerHTML = `
+    <div class="form-group"><label>Название команды</label><input type="text" id="rt-name" class="form-control" placeholder="Team Spirit"></div>
+    <div class="form-group"><label>Тег (до 6 букв)</label><input type="text" id="rt-tag" class="form-control" maxlength="6" placeholder="TS"></div>
+    
+    <div class="form-group">
+      <label>Логотип</label>
+      <div class="file-upload-wrapper" onclick="document.getElementById('rt-logo').click()">
+        <img id="rt-logo-preview" class="file-upload-preview">
+        <div class="file-upload-label">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Загрузить
         </div>
-        <div class="score-board">
-          <div class="team-block">
-            <div class="name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-          </div>
-          <div class="score-display">
-            <span class="${t1Win ? 'win' : 'lose'}">${m.team1.score}</span>
-            <span style="background:transparent; border:none; color:var(--muted); font-size:24px;">:</span>
-            <span class="${t2Win ? 'win' : 'lose'}">${m.team2.score}</span>
-          </div>
-          <div class="team-block">
-            <div class="name" style="color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
-          </div>
-        </div>
+        <input type="file" id="rt-logo" accept="image/*" onchange="previewImage(this, 'rt-logo-preview')">
       </div>
     </div>
-    ${renderTeamTable(m.team1, t1Win, 1)}
-    ${renderTeamTable(m.team2, t2Win, 2)}
+
+    <div class="form-group"><label>Состав</label>${playersHtml}</div>
+    <div class="form-group"><label>Ваш Telegram (@username)</label><input type="text" id="rt-contact" class="form-control" placeholder="@username"></div>
+    
+    <button class="btn" onclick="submitTeamRequest()">Отправить заявку</button>
   `;
 }
 
+function submitTeamRequest() {
+  const name = document.getElementById("rt-name").value;
+  const tag = document.getElementById("rt-tag").value;
+  const logo = document.getElementById("rt-logo-preview").src;
+  const contact = document.getElementById("rt-contact").value;
+
+  if (!name || !tag || !contact) return alert("Заполните все поля!");
+
+  const players = [];
+  for (let i = 1; i <= 5; i++) {
+    const nick = document.getElementById(`rt-nick-${i}`).value;
+    if (!nick) return alert(`Введите ник игрока ${i}`);
+    players.push({ nick: nick, role: document.getElementById(`rt-role-${i}`).value });
+  }
+
+  teamRequests.push({ name, tag, logo, contact, players });
+  saveRequests();
+  alert("Заявка отправлена на модерацию!");
+  switchTab('ranking');
+}
+
+// ---------------- НОВОСТИ (ЗАМЕНЫ) ----------------
+function renderNewsForm() {
+  const container = document.getElementById("news-content");
+  container.innerHTML = `
+    <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Отправьте заявку на изменение состава или новость. Админ проверит и опубликует.</p>
+    
+    <div class="form-group"><label>Команда</label><input type="text" id="n-team" class="form-control" placeholder="Название вашей команды"></div>
+    <div class="form-group">
+      <label>Текст изменения</label>
+      <textarea id="n-text" class="form-control" rows="4" placeholder="+S1mple&#10;-Nico"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Фото (необязательно)</label>
+      <div class="file-upload-wrapper" onclick="document.getElementById('n-photo').click()">
+        <img id="n-photo-preview" class="file-upload-preview">
+        <div class="file-upload-label">Прикрепить фото</div>
+        <input type="file" id="n-photo" accept="image/*" onchange="previewImage(this, 'n-photo-preview')">
+      </div>
+    </div>
+    <button class="btn" onclick="submitNewsRequest()">Отправить админу</button>
+  `;
+}
+
+function submitNewsRequest() {
+  const team = document.getElementById("n-team").value;
+  const text = document.getElementById("n-text").value;
+  const photo = document.getElementById("n-photo-preview").src;
+
+  if (!team || !text) return alert("Заполните команду и текст!");
+
+  newsRequests.push({ team, text, photo });
+  saveRequests();
+  alert("Новость отправлена админу!");
+  switchTab('ranking');
+}
+
+// ---------------- АДМИНКА ----------------
 function loginAdmin() {
   const pass = document.getElementById("admin-pass").value;
   if (pass === "hltv26") {
     sessionStorage.setItem("isAdmin", "true");
     document.getElementById("screen-admin-login").classList.add("hidden");
     document.getElementById("screen-admin-panel").classList.remove("hidden");
+    showAdminTab('teams');
   } else {
     document.getElementById("admin-err").innerText = "Неверный пароль";
   }
 }
 
-// Роли для селекта
-const ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
-
-function showAdminForm(type) {
+function showAdminTab(tab) {
   const container = document.getElementById("admin-form-container");
   
-  // Вспомогательная функция для загрузки файла
-  const fileUploadHtml = (id, label) => `
-    <div class="form-group">
-      <label>${label}</label>
-      <div class="file-upload-wrapper" onclick="document.getElementById('${id}').click()">
-        <img id="${id}-preview" class="file-upload-preview" src="" style="display:none;">
-        <div class="file-upload-label">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          Выбрать из галереи
-        </div>
-        <input type="file" id="${id}" accept="image/*" onchange="previewImage(this, '${id}-preview')">
-      </div>
-    </div>
-  `;
-
-  if (type === 'team') {
-    // Генерируем 5 строк для игроков
-    let playersHtml = '';
-    for (let i = 1; i <= 5; i++) {
-      playersHtml += `
-        <div class="player-row-admin">
-          <div class="num">${i}.</div>
-          <div style="flex:1; display:flex; gap:10px;">
-            <div style="flex:2;">
-              <input type="text" id="p-nick-${i}" class="form-control" placeholder="Ник игрока" style="padding:10px;">
-            </div>
-            <div style="flex:1;">
-              <select id="p-role-${i}" class="form-control" style="padding:10px;">
-                ${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}
-              </select>
-            </div>
+  if (tab === 'teams') {
+    // Поиск и список команд
+    let html = `
+      <input type="text" class="search-input" placeholder="Поиск команды..." oninput="searchAdminTeams(this.value)">
+      <button class="btn btn-outline" style="margin-bottom:20px;" onclick="addTeamAdminForm()">+ Добавить команду</button>
+      <div id="admin-teams-list"></div>
+    `;
+    container.innerHTML = html;
+    renderAdminTeamsList(APP_DATA.teams);
+  } 
+  else if (tab === 'requests') {
+    let html = `<h3 style="margin-bottom:16px;">Заявки на команды</h3>`;
+    if (teamRequests.length === 0) html += `<p style="color:var(--muted)">Нет новых заявок.</p>`;
+    teamRequests.forEach((req, index) => {
+      html += `
+        <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b>${req.name} (${req.tag})</b>
+            <span style="font-size:12px; color:var(--muted);">${req.contact}</span>
+          </div>
+          <div style="font-size:13px; margin-bottom:10px;">${req.players.map(p => `${p.nick} (${p.role})`).join(', ')}</div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-green" style="margin:0; padding:8px;" onclick="approveTeamRequest(${index})">Одобрить</button>
+            <button class="btn btn-red" style="margin:0; padding:8px;" onclick="rejectTeamRequest(${index})">Отклонить</button>
           </div>
         </div>
       `;
-    }
+    });
 
-    container.innerHTML = `
-      <h3 style="margin-bottom:16px;">Добавить команду</h3>
-      <div class="form-group"><label>Название команды</label><input type="text" id="t-name" class="form-control" placeholder="Например: NAVI"></div>
-      <div class="form-group"><label>Поинты</label><input type="number" id="t-points" class="form-control" value="0"></div>
-      ${fileUploadHtml('t-avatar-file', 'Логотип команды')}
-      
-      <div class="form-group" style="margin-top:20px;">
-        <label>Состав команды (5 игроков)</label>
-        ${playersHtml}
-      </div>
-      
-      <button class="btn" onclick="addTeam()">Сохранить команду</button>
-    `;
-  } else if (type === 'match') {
-    const options = DATA.teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+    html += `<h3 style="margin-top:30px; margin-bottom:16px;">Заявки на замены / Новости</h3>`;
+    if (newsRequests.length === 0) html += `<p style="color:var(--muted)">Нет новых новостей.</p>`;
+    newsRequests.forEach((req, index) => {
+      html += `
+        <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border);">
+          <b>${req.team}</b>
+          <p style="font-size:13px; margin:8px 0; white-space:pre-wrap;">${req.text}</p>
+          ${req.photo ? `<img src="${req.photo}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">` : ''}
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-green" style="margin:0; padding:8px;" onclick="approveNews(${index})">В канал</button>
+            <button class="btn btn-red" style="margin:0; padding:8px;" onclick="rejectNews(${index})">Отклонить</button>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+  else if (tab === 'matches') {
+    const options = APP_DATA.teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
     container.innerHTML = `
       <h3 style="margin-bottom:16px;">Добавить матч</h3>
-      <div class="form-group"><label>Карта (например: mirage, inferno, ancient)</label><input type="text" id="m-map" class="form-control" value="mirage"></div>
+      <div class="form-group"><label>Карта</label><input type="text" id="m-map" class="form-control" value="mirage"></div>
       <div style="display:flex; gap:10px;">
         <div class="form-group" style="flex:1;"><label>Команда 1</label><select id="m-t1" class="form-control">${options}</select></div>
         <div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s1" class="form-control" value="0"></div>
@@ -265,9 +293,138 @@ function showAdminForm(type) {
         <div class="form-group" style="flex:1;"><label>Команда 2</label><select id="m-t2" class="form-control">${options}</select></div>
         <div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s2" class="form-control" value="0"></div>
       </div>
-      <button class="btn" onclick="addMatch()">Добавить матч</button>
+      <button class="btn" onclick="addMatchAdmin()">Добавить</button>
     `;
   }
+}
+
+function renderAdminTeamsList(teams) {
+  const list = document.getElementById("admin-teams-list");
+  if (!list) return;
+  let html = "";
+  teams.forEach(t => {
+    html += `
+      <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <div><b>${t.name}</b> (${t.points} pts)</div>
+        <div style="display:flex; gap:5px;">
+          <button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin('${t.name}')">Ред.</button>
+          <button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeamAdmin('${t.name}')">Удал.</button>
+        </div>
+      </div>
+    `;
+  });
+  list.innerHTML = html;
+}
+
+function searchAdminTeams(val) {
+  const filtered = APP_DATA.teams.filter(t => t.name.toLowerCase().includes(val.toLowerCase()));
+  renderAdminTeamsList(filtered);
+}
+
+function approveTeamRequest(index) {
+  const req = teamRequests[index];
+  APP_DATA.teams.push({ id: Date.now(), name: req.name, tag: req.tag, points: 0, wins: 0, losses: 0, avatar: req.logo, players: req.players.map(p => ({...p, kills:0, deaths:0, hs:0, rating:0, avatar:""})) });
+  teamRequests.splice(index, 1);
+  saveData(); saveRequests();
+  showAdminTab('requests');
+  alert("Команда одобрена!");
+}
+
+function rejectTeamRequest(index) {
+  // В реальном приложении тут отправляется сообщение в тг через API.
+  // Пока просто удаляем.
+  teamRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
+}
+
+function approveNews(index) {
+  // Логика отправки в канал будет в Python-боте. Пока просто удаляем.
+  const req = newsRequests[index];
+  alert("Новость одобрена и будет отправлена в канал (через бота).");
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
+}
+
+function rejectNews(index) {
+  newsRequests.splice(index, 1);
+  saveRequests();
+  showAdminTab('requests');
+}
+
+function addMatchAdmin() {
+  const map = document.getElementById("m-map").value;
+  const t1 = APP_DATA.teams.find(t => t.name === document.getElementById("m-t1").value);
+  const t2 = APP_DATA.teams.find(t => t.name === document.getElementById("m-t2").value);
+  const s1 = parseInt(document.getElementById("m-s1").value);
+  const s2 = parseInt(document.getElementById("m-s2").value);
+
+  if (!t1 || !t2) return alert("Выберите команды");
+  
+  APP_DATA.matches.push({
+    id: Date.now(), map, 
+    team1: { name: t1.name, score: s1, players: t1.players },
+    team2: { name: t2.name, score: s2, players: t2.players }
+  });
+  
+  // Обновляем статистику
+  if (s1 > s2) { t1.wins++; t2.losses++; } else { t2.wins++; t1.losses++; }
+
+  saveData();
+  alert("Матч добавлен!");
+}
+
+// Заглушки для редактирования (следующий шаг)
+function editTeamAdmin(name) { alert("Функция редактирования в разработке"); }
+function deleteTeamAdmin(name) { alert("Функция удаления в разработке"); }
+
+// ---------------- МАТЧИ (ОТОБРАЖЕНИЕ) ----------------
+function renderMatchesList() {
+  const container = document.getElementById("matches-container");
+  let html = "";
+  APP_DATA.matches.forEach((m, i) => {
+    const t1Win = m.team1.score > m.team2.score;
+    const t2Win = m.team2.score > m.team1.score;
+    const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
+    html += `
+      <div class="match-card-img animate-in" onclick="showMatchDetail(${m.id})">
+        <div class="match-map-bg" style="background-image: url('${mapImg}'), linear-gradient(135deg,#1e1b4b,#0f172a);">
+          <div class="match-map-content">
+            <div class="match-team-name" style="color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
+            <div class="match-score-big">${m.team1.score} : ${m.team2.score}</div>
+            <div class="match-team-name" style="color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html || '<p style="color:var(--muted)">Матчей нет</p>';
+}
+
+function showMatchDetail(id) {
+  // ... (остается как было)
+  const m = APP_DATA.matches.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById("screen-matches-list").classList.add("hidden");
+  document.getElementById("screen-match-detail").classList.remove("hidden");
+  const t1Win = m.team1.score > m.team2.score;
+  const t2Win = m.team2.score > m.team1.score;
+  const mapImg = `maps/${m.map.toLowerCase().replace("de_", "").trim()}.jpg`;
+  const renderTable = (team, isW) => `
+    <div class="table-wrapper">
+      <div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);">
+        <span style="color:${isW ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
+      </div>
+      <table><thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead>
+      <tbody>${team.players.map(p => `<tr><td><div class="player-cell"><div class="player-avatar">${p.nick.charAt(0)}</div><div>${p.nick}</div></div></td><td>${p.kills}</td><td>${(p.kills/(p.deaths||1)).toFixed(2)}</td><td>${p.hs}%</td></tr>`).join('')}</tbody></table>
+    </div>`;
+  document.getElementById("match-detail-content").innerHTML = `
+    <div class="match-header-card" style="background-image: url('${mapImg}');">
+      <div class="score-board"><div class="score-display"><span class="${t1Win?'win':'lose'}">${m.team1.score}</span> : <span class="${t2Win?'win':'lose'}">${m.team2.score}</span></div></div>
+    </div>
+    ${renderTable(m.team1, t1Win)} ${renderTable(m.team2, t2Win)}
+  `;
 }
 
 function previewImage(input, previewId) {
@@ -280,51 +437,4 @@ function previewImage(input, previewId) {
     };
     reader.readAsDataURL(input.files[0]);
   }
-}
-
-function getBase64(inputId) {
-  const img = document.getElementById(inputId + '-preview');
-  return img && img.src ? img.src : "";
-}
-
-// Обновленная функция добавления команды с игроками
-function addTeam() {
-  const name = document.getElementById("t-name").value;
-  const points = parseInt(document.getElementById("t-points").value) || 0;
-  const avatar = getBase64('t-avatar-file');
-  
-  if (!name) return alert("Введите название команды");
-
-  // Собираем игроков
-  const players = [];
-  for (let i = 1; i <= 5; i++) {
-    const nick = document.getElementById(`p-nick-${i}`).value.trim();
-    const role = document.getElementById(`p-role-${i}`).value;
-    if (nick) {
-      players.push({ nick, role, kills: 0, deaths: 0, hs: 0, rating: 1.0, avatar: "" });
-    }
-  }
-
-  DATA.teams.push({ id: Date.now(), name, points, wins: 0, losses: 0, avatar, players });
-  alert("Команда и состав добавлены!");
-  showAdminForm('team');
-}
-
-function addMatch() {
-  const map = document.getElementById("m-map").value;
-  const t1Name = document.getElementById("m-t1").value;
-  const t2Name = document.getElementById("m-t2").value;
-  const s1 = parseInt(document.getElementById("m-s1").value) || 0;
-  const s2 = parseInt(document.getElementById("m-s2").value) || 0;
-  const t1 = DATA.teams.find(t => t.name === t1Name);
-  const t2 = DATA.teams.find(t => t.name === t2Name);
-  if (!t1 || !t2) return alert("Выберите команды");
-
-  DATA.matches.push({
-    id: Date.now(), map, 
-    team1: { name: t1.name, score: s1, players: t1.players },
-    team2: { name: t2.name, score: s2, players: t2.players }
-  });
-  alert("Матч добавлен!");
-  showAdminForm('match');
 }
