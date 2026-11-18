@@ -319,7 +319,7 @@ function renderMatchesList() {
     var t2Class = s2 > s1 ? 'match-winner' : '';
 
     // Используем классы, которые уже есть в твоем style.css (или добавим стили прямо тут)
-    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\'); cursor:pointer; margin-bottom:10px; padding:20px; display:flex; justify-content:space-between; align-items:center; border-radius:12px;" onclick="openMatch(' + m.id + ')">';
+    html += '<div class="match-card" style="background-image: url(\'maps/' + mapBg + '\'); cursor:pointer; margin-bottom:10px; padding:20px; display:flex; justify-content:space-between; align-items:center; border-radius:12px;" onclick="showMatchDetail(' + m.id + ')">';
     html += '  <div class="match-team ' + t1Class + '" style="font-weight:bold; color:#fff; font-size:16px;">' + t1 + '</div>';
     html += '  <div class="match-score" style="background:rgba(0,0,0,0.7); padding:5px 15px; border-radius:5px; color:#fff; font-weight:bold; font-size:18px;">' + s1 + ' : ' + s2 + '</div>';
     html += '  <div class="match-team right ' + t2Class + '" style="font-weight:bold; color:#fff; font-size:16px; text-align:right;">' + t2 + '</div>';
