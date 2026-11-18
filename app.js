@@ -1,5 +1,4 @@
 const API_URL = "https://snowboard-prague-deutsch-field.trycloudflare.com";
-const API_URL = "https://snowboard-prague-deutsch-field.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -262,7 +261,6 @@ function approveNews(index) {
 function rejectNews(index) {
   const req = newsRequests[index];
   const data = { action: 'reject_news', team: req.team, text: req.text };
-  const API_URL = "https://snowboard-prague-deutsch-field.trycloudflare.com";
   fetch(API_URL + "/api/news", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
