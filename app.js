@@ -332,67 +332,42 @@ function rejectTeamRequest(index) {
 // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ =====
 function approveNews(index) {
   const req = newsRequests[index];
-  
-  // Создаем скрытую форму для обхода блокировок Telegram
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = API_URL;
-  form.target = 'hidden_iframe';
-  form.style.display = 'none';
+  const formData = new URLSearchParams();
+  formData.append('action', 'approve_news');
+  formData.append('team', req.team);
+  formData.append('text', req.text);
+  formData.append('photo', req.photo || '');
 
-  const fields = {
-    action: 'approve_news',
-    team: req.team,
-    text: req.text,
-    photo: req.photo || ''
-  };
-
-  for (const key in fields) {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = key;
-    input.value = fields[key];
-    form.appendChild(input);
-  }
-
-  document.body.appendChild(form);
-  form.submit();
-  
-  alert('Отправлено в канал!');
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab('requests');
-  
-  setTimeout(() => document.body.removeChild(form), 1000);
+  fetch(API_URL, {
+    method: 'POST',
+    body: formData
+  }).then(res => {
+    alert('Отправлено в канал!');
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab('requests');
+  }).catch(err => {
+    alert('ОШИБКА СЕТИ!');
+  });
 }
 
 function rejectNews(index) {
   const req = newsRequests[index];
-  
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = API_URL;
-  form.target = 'hidden_iframe';
-  form.style.display = 'none';
+  const formData = new URLSearchParams();
+  formData.append('action', 'reject_news');
+  formData.append('team', req.team);
+  formData.append('text', req.text);
 
-  const fields = { action: 'reject_news', team: req.team, text: req.text };
-
-  for (const key in fields) {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = key;
-    input.value = fields[key];
-    form.appendChild(input);
-  }
-
-  document.body.appendChild(form);
-  form.submit();
-
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab('requests');
-  
-  setTimeout(() => document.body.removeChild(form), 1000);
+  fetch(API_URL, {
+    method: 'POST',
+    body: formData
+  }).then(res => {
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab('requests');
+  }).catch(err => {
+    alert('ОШИБКА СЕТИ!');
+  });
 }
 // =================================
 
