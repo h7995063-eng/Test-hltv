@@ -27,8 +27,10 @@ window.onload = function() {
 };
 
 function toggleMenu() {
-  document.getElementById("sidebar").classList.toggle("open");
-  document.getElementById("overlay").classList.toggle("open");
+  var sidebar = document.getElementById("sidebar");
+  var overlay = document.getElementById("overlay");
+  if (sidebar) sidebar.classList.toggle("open");
+  if (overlay) overlay.classList.toggle("open");
 }
 
 function switchTab(tab) {
