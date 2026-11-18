@@ -119,7 +119,7 @@ function renderMatchesList() {
     // Очищаем название (например, "de_mirage" -> "mirage")
     let cleanName = mapName.toLowerCase().replace("de_", "").trim();
     // Пытаемся угадать формат. Браузер сам подтянет, если файл есть.
-    return `maps/${cleanName}.jpg`; // По умолчанию jpg, но если у тебя webp, можно поменять
+    return `maps/${cleanName}.webp`;
   };
 
   DATA.matches.forEach(m => {
