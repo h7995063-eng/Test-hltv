@@ -221,7 +221,7 @@ function renderAdminTeamsList(teams) {
   teams.forEach(function(t) {
     html += '<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">' +
       '<div><b>' + t.name + '</b> (' + t.points + ' pts)</div>' +
-      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeamAdmin(\'' + t.name + '\')">Удал.</button></div></div>';
+      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeam(\'' + t.name + '\')">Удал.</button></div></div>';
   });
   list.innerHTML = html;
 }
@@ -384,7 +384,7 @@ function deleteTeam(teamName) {
   alert("Команда удалена!");
   showAdminTab('teams');
 }
-function deleteTeamAdmin(name) { alert("Функция удаления в разработке"); }
+
 function addTeamAdminForm() { alert("Функция добавления в разработке"); }
 
 function renderMatchesList() {
