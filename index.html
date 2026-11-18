@@ -7,15 +7,13 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
-    --bg: #f5f7fa;
-    --card: #ffffff;
-    --accent: #f5a623;
-    --accent-dark: #d68910;
-    --text: #1a2028;
-    --muted: #6b7a8a;
-    --border: #e1e8ed;
-    --win: #00ba7c;
-    --lose: #f4212e;
+    --bg: #0b0e14;
+    --card: #1c1f26;
+    --card-hover: #262a33;
+    --accent: #d4af37;
+    --text: #ffffff;
+    --muted: #7a8290;
+    --border: #2a2e38;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -26,15 +24,13 @@
     padding-bottom: 40px;
   }
   h1 {
-    font-size: 22px;
+    font-size: 20px;
     margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    color: var(--text);
+    font-weight: 600;
   }
-  h1 svg { width: 28px; height: 28px; fill: var(--accent); }
 
-  /* ===== КНОПКИ РАЗДЕЛОВ — СВЕРХУ СЛЕВА, ВЕРТИКАЛЬНО ===== */
+  /* КНОПКИ РАЗДЕЛОВ (сверху слева) */
   .tabs {
     display: flex;
     flex-direction: column;
@@ -46,58 +42,102 @@
     background: var(--card);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 10px 16px;
+    padding: 8px 16px;
     border-radius: 10px;
     font-size: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 160px;
-    text-align: left;
-    transition: all 0.15s;
+    min-width: 140px;
   }
-  .tab:hover { border-color: var(--accent); }
   .tab.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: #fff;
+    color: #000;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(245, 166, 35, 0.3);
   }
-  .tab svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+  .tab svg { width: 16px; height: 16px; fill: currentColor; }
 
+  /* КАРТОЧКА КОМАНДЫ (как на скрине) */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
+    border-radius: 20px;
+    padding: 12px 16px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: var(--text);
   }
-  .card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-  .card:active { opacity: 0.7; }
+  .card:active { background: var(--card-hover); }
+  
+  /* Место (цифра) */
   .rank {
     font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    width: 32px;
-  }
-  .team-name { font-size: 16px; font-weight: 600; flex: 1; color: var(--text); }
-  .points {
-    font-size: 14px;
+    font-weight: 600;
     color: var(--muted);
+    width: 30px;
+    text-align: center;
+  }
+
+  /* Аватарка */
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-right: 14px;
+    flex-shrink: 0;
+    /* Градиент по умолчанию */
+    background: linear-gradient(135deg, #a855f7, #ec4899);
   }
-  .points svg { width: 14px; height: 14px; fill: var(--accent); }
-  .hidden { display: none; }
+  /* Разные градиенты для разнообразия */
+  .avatar.c1 { background: linear-gradient(135deg, #a855f7, #ec4899); }
+  .avatar.c2 { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+  .avatar.c3 { background: linear-gradient(135deg, #10b981, #3b82f6); }
+  .avatar.c4 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .avatar.c5 { background: linear-gradient(135deg, #6366f1, #a855f7); }
 
+  /* Информация о команде */
+  .info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .info .name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .info .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Плашка с поинтами */
+  .points {
+    font-size: 12px;
+    color: var(--accent);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Экран команды */
+  .hidden { display: none; }
   .team-detail {
     background: var(--card);
     border: 1px solid var(--border);
@@ -110,7 +150,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text);
   }
   .team-detail h2 svg { width: 22px; height: 22px; fill: var(--accent); }
 
@@ -125,14 +164,12 @@
   }
   .stat .val { font-size: 18px; font-weight: 700; color: var(--text); }
   .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .stat.win .val { color: var(--win); }
-  .stat.lose .val { color: var(--lose); }
 
   .player {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 0;
+    padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
   .player:last-child { border-bottom: none; }
@@ -148,7 +185,7 @@
     font-size: 12px;
     color: var(--muted);
   }
-  .player .nick { font-size: 15px; color: var(--text); }
+  .player .nick { font-size: 15px; }
 
   .back-btn {
     background: var(--card);
@@ -159,23 +196,18 @@
     font-size: 14px;
     margin-bottom: 16px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
   }
-  .back-btn:hover { border-color: var(--accent); }
   .back-btn svg { width: 16px; height: 16px; fill: currentColor; }
-
   .empty { color: var(--muted); text-align: center; padding: 30px 0; }
 </style>
 </head>
 <body>
 
 <div id="main-screen">
-  <h1>
-    <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-    HLTV Rating
-  </h1>
+  <h1>Рейтинг команд</h1>
 
   <!-- КНОПКИ РАЗДЕЛОВ СВЕРХУ СЛЕВА -->
   <div class="tabs">
@@ -208,19 +240,20 @@
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
 
+  // Данные с картинками (или просто буквами для аватарок)
   const DATA = {
     teams: [
+      { name:"Ninao", points:0, wins:0, losses:0, players:["Player1","Player2","Player3","Player4","Player5"] },
+      { name:"werf1", points:0, wins:0, losses:0, players:["Player1","Player2","Player3","Player4","Player5"] },
+      { name:"storm", points:0, wins:0, losses:0, players:["Player1","Player2","Player3","Player4","Player5"] },
       { name:"FURIA", points:960, wins:12, losses:4, players:["FalleN","yuurih","KSCERATO","molodoy","YEKINDAR"] },
       { name:"MOUZ", points:808, wins:10, losses:5, players:["torzsi","xertioN","Jimpphat","Brollan","Spinx"] },
-      { name:"Spirit", points:766, wins:9, losses:6, players:["donk","sh1ro","zont1x","magixx","chopper"] },
     ],
     matches: [
       { team1:"FURIA", team2:"MOUZ", score1:2, score2:1, tournament:"IEM Katowice" },
-      { team1:"Spirit", team2:"FURIA", score1:0, score2:2, tournament:"ESL Pro League" },
     ],
     tournaments: [
       { name:"IEM Katowice", prize:"$1,000,000" },
-      { name:"ESL Pro League", prize:"$850,000" },
     ]
   };
 
@@ -228,22 +261,41 @@
 
   function render() {
     const content = document.getElementById("content");
+    
     if (currentTab === "ranking") {
       let html = "";
+      // Сортируем по поинтам
       DATA.teams.sort((a,b)=>b.points-a.points).forEach((t,i)=>{
-        html += `<div class="card" onclick="showTeam('${t.name}')"><span class="rank">${i+1}</span><span class="team-name">${t.name}</span><span class="points"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>${t.points}</span></div>`;
+        // Берем первую букву для аватарки
+        const letter = t.name.charAt(0).toUpperCase();
+        // Класс цвета (просто чередуем 1-5)
+        const colorClass = `c${(i % 5) + 1}`;
+        
+        html += `
+          <div class="card" onclick="showTeam('${t.name}')">
+            <div class="rank">${i+1}</div>
+            <div class="avatar ${colorClass}">${letter}</div>
+            <div class="info">
+              <div class="name">${t.name}</div>
+              <div class="sub">${t.wins + t.losses} матчей</div>
+            </div>
+            <div class="points">${t.points} Поинтов</div>
+          </div>
+        `;
       });
       content.innerHTML = html;
-    } else if (currentTab === "matches") {
+    } 
+    else if (currentTab === "matches") {
       let html = "";
       DATA.matches.forEach(m=>{
-        html += `<div class="card"><span class="team-name">${m.team1} <b>${m.score1}:${m.score2}</b> ${m.team2}</span></div><div style="color:var(--muted);font-size:12px;margin:-4px 0 12px 16px;">${m.tournament}</div>`;
+        html += `<div class="card"><span style="font-weight:600">${m.team1}</span> <span style="color:var(--accent);margin:0 10px">${m.score1}:${m.score2}</span> <span style="font-weight:600">${m.team2}</span></div>`;
       });
       content.innerHTML = html || '<div class="empty">Матчей пока нет</div>';
-    } else if (currentTab === "tournaments") {
+    } 
+    else if (currentTab === "tournaments") {
       let html = "";
       DATA.tournaments.forEach(t=>{
-        html += `<div class="card"><span class="team-name">${t.name}</span><span class="points">${t.prize}</span></div>`;
+        html += `<div class="card"><span style="font-weight:600">${t.name}</span> <span class="points">${t.prize}</span></div>`;
       });
       content.innerHTML = html || '<div class="empty">Турниров пока нет</div>';
     }
@@ -254,17 +306,27 @@
     if (!team) return;
     document.getElementById("main-screen").classList.add("hidden");
     document.getElementById("team-screen").classList.remove("hidden");
+    
+    // Формируем состав
+    const playersHtml = team.players.map((p,i)=>`
+      <div class="player">
+        <span class="slot">${i+1}</span>
+        <span class="nick">${p}</span>
+      </div>
+    `).join("");
+
     document.getElementById("team-content").innerHTML = `
       <div class="team-detail">
-        <h2><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>${team.name}</h2>
+        <h2>${team.name}</h2>
         <div class="stats">
           <div class="stat"><div class="val">${team.points}</div><div class="lbl">Поинты</div></div>
-          <div class="stat win"><div class="val">${team.wins}</div><div class="lbl">Победы</div></div>
-          <div class="stat lose"><div class="val">${team.losses}</div><div class="lbl">Поражения</div></div>
+          <div class="stat"><div class="val" style="color:#00ba7c">${team.wins}</div><div class="lbl">Победы</div></div>
+          <div class="stat"><div class="val" style="color:#f4212e">${team.losses}</div><div class="lbl">Поражения</div></div>
         </div>
         <h3 style="font-size:14px;color:var(--muted);margin-bottom:8px;">СОСТАВ</h3>
-        ${team.players.map((p,i)=>`<div class="player"><span class="slot">${i+1}</span><span class="nick">${p}</span></div>`).join("")}
-      </div>`;
+        ${playersHtml}
+      </div>
+    `;
   }
 
   function showMain() {
@@ -272,6 +334,7 @@
     document.getElementById("main-screen").classList.remove("hidden");
   }
 
+  // Переключение вкладок
   document.querySelectorAll(".tab").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
