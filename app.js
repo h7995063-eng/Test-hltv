@@ -329,7 +329,7 @@ function rejectTeamRequest(index) {
   showAdminTab('requests');
 }
 
-// ===== ОБНОВЛЕННЫЕ ФУНКЦИИ С ОТПРАВКОЙ НА СЕРВЕР =====
+// ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ =====
 function approveNews(index) {
   const req = newsRequests[index];
   fetch(`${API_URL}/`, {
@@ -337,6 +337,8 @@ function approveNews(index) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "approve_news", team: req.team, text: req.text, photo: req.photo })
   }).then(res => {
+    if (!res.ok) throw new Error("Server error");
+    alert("Отправлено в канал!");
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab("requests");
@@ -353,14 +355,16 @@ function rejectNews(index) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "reject_news", team: req.team, text: req.text })
   }).then(res => {
+    if (!res.ok) throw new Error("Server error");
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab("requests");
   }).catch(err => {
     console.error(err);
+    alert("ОШИБКА СЕТИ!");
   });
 }
-// =====================================================
+// =================================
 
 function addMatchAdmin() {
   const map = document.getElementById("m-map").value;
