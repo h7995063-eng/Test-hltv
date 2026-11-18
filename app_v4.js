@@ -580,21 +580,124 @@ function rejectNews(index) {
 
 
 function addMatchAdmin() {
-  var map = document.getElementById("m-map").value;
-  var t1 = APP_DATA.teams.find(function(t){ return t.name === document.getElementById("m-t1").value; });
-  var t2 = APP_DATA.teams.find(function(t){ return t.name === document.getElementById("m-t2").value; });
-  var s1 = parseInt(document.getElementById("m-s1").value);
-  var s2 = parseInt(document.getElementById("m-s2").value);
+  var container = document.getElementById("admin-form-container");
+  if (!container) return;
+  
+  var teams = APP_DATA.teams || [];
+  if (teams.length < 2) {
+    container.innerHTML = '<p style="color:#ef4444;">Нужно минимум 2 команды для создания матча.</p>';
+    return;
+  }
+  
+  var options = teams.map(function(t) { return '<option value="' + t.name + '">' + t.name + '</option>'; }).join('');
+  
+  var html = '<h2 style="margin-bottom:20px;">Создание матча</h2>';
+  
+  // Выбор команд
+  html += '<div style="display:flex; gap:15px; margin-bottom:20px;">';
+  html += '  <div style="flex:1;"><label style="color:#8b959e; font-size:12px;">Команда 1</label><select id="add-m-t1" class="input" style="width:100%; padding:10px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px;" onchange="loadMatchStatsForm()">' + options + '</select></div>';
+  html += '  <div style="flex:1;"><label style="color:#8b959e; font-size:12px;">Команда 2</label><select id="add-m-t2" class="input" style="width:100%; padding:10px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px;" onchange="loadMatchStatsForm()">' + options + '</select></div>';
+  html += '</div>';
+  
+  // Карта
+  html += '<div style="margin-bottom:20px;"><label style="color:#8b959e; font-size:12px;">Карта (например, de_mirage)</label><input type="text" id="add-m-map" value="de_mirage" class="input" style="width:100%; padding:10px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px;"></div>';
+  
+  // Контейнер для статистики (заполнится через JS)
+  html += '<div id="match-stats-container"></div>';
+  
+  html += '<button class="btn btn-green" style="margin-top:20px;" onclick="saveNewMatch()">Добавить матч</button>';
+  
+  container.innerHTML = html;
+  
+  // Сразу загружаем форму для выбранных команд
+  loadMatchStatsForm();
+}
 
-  if (!t1 || !t2) return alert("Выберите команды");
-  APP_DATA.matches.push({
-    id: Date.now(), map: map, 
-    team1: { name: t1.name, score: s1, players: t1.players },
-    team2: { name: t2.name, score: s2, players: t2.players }
+function loadMatchStatsForm() {
+  var t1Name = document.getElementById("add-m-t1").value;
+  var t2Name = document.getElementById("add-m-t2").value;
+  
+  var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
+  var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
+  
+  var container = document.getElementById("match-stats-container");
+  if (!container) return;
+  
+  if (!t1 || !t2) { container.innerHTML = ''; return; }
+  
+  var html = '<div style="display:flex; gap:15px; flex-wrap:wrap;">';
+  
+  // Форма для 1 команды
+  html += '<div style="flex:1; min-width:250px; background:#232b33; padding:15px; border-radius:8px;">';
+  html += '  <h4 style="color:#fff; margin-bottom:10px;">' + t1.name + '</h4>';
+  html += '  <input type="number" id="add-m-s1" placeholder="Счет команды 1" value="0" style="width:100%; margin-bottom:15px; padding:8px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:4px;">';
+  html += '  <table style="width:100%; font-size:12px; color:#8b959e; text-align:left;">';
+  html += '    <tr><th>Ник</th><th>K</th><th>D</th><th>HS%</th></tr>';
+  t1.players.forEach(function(p, i) {
+    html += '<tr>';
+    html += '<td style="padding:4px 0;">' + p.nick + '</td>';
+    html += '<td><input type="number" id="t1-k-' + i + '" value="0" style="width:40px; background:#171a1f; border:1px solid #333; color:#fff;"></td>';
+    html += '<td><input type="number" id="t1-d-' + i + '" value="0" style="width:40px; background:#171a1f; border:1px solid #333; color:#fff;"></td>';
+    html += '<td><input type="number" id="t1-hs-' + i + '" value="0" style="width:40px; background:#171a1f; border:1px solid #333; color:#fff;"></td>';
+    html += '</tr>';
   });
-  if (s1 > s2) { t1.wins++; t2.losses++; } else { t2.wins++; t1.losses++; }
+  html += '  </table>';
+  html += '</div>';
+  
+  // Форма для 2 команды
+  html += '<div style="flex:1; min-width:250px; background:#232b33; padding:15px; border-radius:8px;">';
+  html += '  <h4 style="color:#fff; margin-bottom:10px;">' + t2.name + '</h4>';
+  html += '  <input type="number" id="add-m-s2" placeholder="Счет команды 2" value="0" style="width:100%; margin-bottom:15px; padding:8px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:4px;">';
+  html += '  <table style="width:100%; font-size:12px; color:#8b959e; text-align:left;">';
+  html += '    <tr><th>Ник</th><th>K</th><th>D</th><th>HS%</th></tr>';
+  t2.players.forEach(function(p, i) {
+    html += '<tr>';
+    html += '<td style="padding:4px 0;">' + p.nick + '</td>';
+    html += '<td><input type="number" id="t2-k-' + i + '" value="0" style="width:40px; background:#171a1f; border:1px solid #333; color:#fff;"></td>';
+    html += '<td><input type="number" id="t2-d-' + i + '" value="0" style="width:40px; background:#171a1f; border:1px solid #333; color:#fff;"></td>';
+    html += '<td><input type="number" id="t2-hs-' + i + '" value="0" style="width:40px; background:#171a1f; border:1px solid #333; color:#fff;"></td>';
+    html += '</tr>';
+  });
+  html += '  </table>';
+  html += '</div>';
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function saveNewMatch() {
+  var t1Name = document.getElementById("add-m-t1").value;
+  var t2Name = document.getElementById("add-m-t2").value;
+  var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
+  var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
+  
+  if (!t1 || !t2) { alert("Ошибка: команды не найдены"); return; }
+  
+  var map = document.getElementById("add-m-map").value || "de_mirage";
+  var s1 = parseInt(document.getElementById("add-m-s1").value) || 0;
+  var s2 = parseInt(document.getElementById("add-m-s2").value) || 0;
+  
+  // Собираем статистику
+  var p1 = t1.players.map(function(p, i) {
+    return { nick: p.nick, kills: parseInt(document.getElementById("t1-k-" + i).value) || 0, deaths: parseInt(document.getElementById("t1-d-" + i).value) || 0, hs: parseInt(document.getElementById("t1-hs-" + i).value) || 0 };
+  });
+  var p2 = t2.players.map(function(p, i) {
+    return { nick: p.nick, kills: parseInt(document.getElementById("t2-k-" + i).value) || 0, deaths: parseInt(document.getElementById("t2-d-" + i).value) || 0, hs: parseInt(document.getElementById("t2-hs-" + i).value) || 0 };
+  });
+  
+  var newMatch = {
+    id: Date.now(),
+    map: map,
+    tournament: "Добавлено вручную",
+    team1: { name: t1.name, score: s1, players: p1 },
+    team2: { name: t2.name, score: s2, players: p2 }
+  };
+  
+  APP_DATA.matches.push(newMatch);
   saveData();
+  
   alert("Матч добавлен!");
+  showAdminTab('match'); // Очищаем форму (или возвращаемся)
 }
 
 function editTeamAdmin(teamName) {
