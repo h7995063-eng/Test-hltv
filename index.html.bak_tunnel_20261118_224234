@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HLTV MiniApp</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="style.css?v=999">
+</head>
+<body>
+
+<div id="splash-screen">
+  <img src="logo.webp" class="splash-logo" alt="Logo" onerror="this.style.display='none'">
+  <div class="splash-text">HLTV MINI</div>
+</div>
+
+<div id="app-container" style="display:none; width:100%; height:100%;">
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <img src="logo.webp" alt="Logo" onerror="this.style.display='none'">
+      HLTV MINI
+    </div>
+    <div class="nav-item" id="nav-ranking" onclick="switchTab('ranking')">
+      <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg> Рейтинг
+    </div>
+    <div class="nav-item" id="nav-matches" onclick="switchTab('matches')">
+      <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zm0 2v2h10V4H7zm-4 6v10h18V10H3zm4 3h4v2H7v-2zm6 0h4v2h-4v-2z"/></svg> Матчи
+    </div>
+    <div class="nav-item" id="nav-news" onclick="switchTab('news')">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg> Новости
+    </div>
+    <div class="nav-item" id="nav-admin" onclick="switchTab('admin')">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg> Админка
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <button class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+    </div>
+    
+    <div id="screen-ranking" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 style="margin-bottom:0;">Рейтинг команд</h1>
+        <button class="btn" style="width:auto; margin:0; padding:8px 16px; font-size:12px;" onclick="switchTab('register-team')">+ Заявить команду</button>
+      </div>
+      <div id="ranking-container"></div>
+    </div>
+
+    <div id="screen-register-team" class="hidden">
+      <button class="back-btn" onclick="switchTab('ranking')">← Назад</button>
+      <h1>Заявка на регистрацию</h1>
+      <div id="register-team-content" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);"></div>
+    </div>
+
+    <div id="screen-matches-list" class="hidden">
+      <h1>Сыгранные матчи</h1>
+      <div id="matches-container"></div>
+    </div>
+    
+    <div id="screen-match-detail" class="hidden">
+      <button class="back-btn" onclick="switchTab('matches')">← Назад</button>
+      <div id="match-detail-content"></div>
+    </div>
+
+    <div id="screen-team-detail" class="hidden">
+      <button class="back-btn" onclick="switchTab('ranking')">← Назад</button>
+      <div id="team-detail-content"></div>
+    </div>
+
+    <div id="screen-news" class="hidden">
+      <h1>Новости / Замены</h1>
+      <div id="news-content" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);"></div>
+    </div>
+
+    <div id="screen-admin-login" class="hidden">
+      <h1>Вход в админку</h1>
+      <div class="form-group">
+        <label>Введите пароль</label>
+        <input type="password" id="admin-pass" class="form-control" placeholder="••••••">
+      </div>
+      <button class="btn" onclick="loginAdmin()">Войти</button>
+      <p id="admin-err" style="color:var(--lose); margin-top:10px; font-size:14px;"></p>
+    </div>
+
+    <div id="screen-admin-panel" class="hidden">
+      <h1>Админ-панель</h1>
+      <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+        <button class="btn btn-outline" style="width:auto; flex:1;" onclick="showAdminTab('teams')">Все команды</button>
+        <button class="btn btn-outline" style="width:auto; flex:1;" onclick="showAdminTab('requests')">Заявки</button>
+        <button class="btn btn-outline" style="width:auto; flex:1;" onclick="showAdminTab('matches')">+ Матч</button>
+      </div>
+      <div id="admin-form-container" style="background:var(--card); padding:20px; border-radius:12px; border:1px solid var(--border);"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="data.js?v=999"></script>
+<script src="app.js?v=1003
+</body>
+</html>

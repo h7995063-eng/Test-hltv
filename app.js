@@ -1,4 +1,4 @@
-const API_URL = "https://officially-colorado-extreme-impact.trycloudflare.com";
+const API_URL = "https://inherited-cloudy-coupled-featured.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -242,26 +242,26 @@ function rejectTeamRequest(index) {
 
 function approveNews(index) {
   const req = newsRequests[index];
-  const data = { action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' };
-  const API_URL = "https://officially-colorado-extreme-impact.trycloudflare.com";
-  fetch(API_URL + "/api/news", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(r => r.json())
-  .then(d => alert(d.ok ? "✅ Заявка отправлена" : "❌ Ошибка: " + (d.error || "")))
-  .catch(e => alert("❌ Сеть: " + e.message));
-  newsRequests.splice(index, 1);
-  saveRequests();
-  showAdminTab('requests');
+  fetch(API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
+  }).then(function() {
+    alert('Отправлено в чат админов!');
+    newsRequests.splice(index, 1);
+    saveRequests();
+    showAdminTab('requests');
+  }).catch(function(err) {
+    alert('ОШИБКА СЕТИ!');
+  });
 }
 
 
 function rejectNews(index) {
   const req = newsRequests[index];
   const data = { action: 'reject_news', team: req.team, text: req.text };
-  const API_URL = "https://officially-colorado-extreme-impact.trycloudflare.com";
+  const API_URL = "https://inherited-cloudy-coupled-featured.trycloudflare.com";
   fetch(API_URL + "/api/news", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
