@@ -92,7 +92,7 @@ function showTeamDetail(name) {
   var playersHtml = team.players.map(function(p) {
     var kd = (p.kills / (p.deaths || 1)).toFixed(2);
     var pAvatar = p.avatar ? '<img src="' + p.avatar + '" class="player-avatar">' : '<div class="player-avatar">' + p.nick.charAt(0) + '</div>';
-    return '<tr><td><div class="player-cell">' + pAvatar + '<div><span class="player-nick">' + p.nick + (p.verified ? ' <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle; margin-left:4px;" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#3b82f6"/><path d="M7 12.5L10.5 16L17 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') + '</span>' + (p.role ? '<span class="role-badge">' + p.role + '</span>' : '') + '</div></div></td>' +
+    return '<tr><td><div class="player-cell">' + pAvatar + '<div><span class="player-nick" style="display:flex; align-items:center;">' + p.nick + (p.verified ? ' <svg width="16" height="16" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; margin-left:6px; margin-top:-2px;" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#3b82f6"/><path d="M7 12.5L10.5 16L17 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') + '</span>' + (p.role ? '<span class="role-badge">' + p.role + '</span>' : '') + '</div></div></td>' +
            '<td>' + p.kills + '</td><td>' + p.deaths + '</td><td style="color:var(--accent)">' + kd + '</td><td>' + p.hs + '%</td><td>' + p.rating.toFixed(2) + '</td></tr>';
   }).join('');
 
@@ -465,7 +465,7 @@ function showMatchDetail(id) {
       tHtml += '<tr style="border-top:1px solid #2d3748;">';
       tHtml += '<td style="padding:12px 20px; display:flex; align-items:center; gap:10px;">';
       tHtml += '<div style="width:30px; height:30px; background:#2d3748; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#fff;">' + p.nick.charAt(0) + '</div>';
-      tHtml += '<span style="font-weight:500;">' + p.nick + (p.verified ? ' <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle; margin-left:4px;" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#3b82f6"/><path d="M7 12.5L10.5 16L17 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') + '</span></td>';
+      tHtml += '<span style="font-weight:500; display:inline-flex; align-items:center;">' + p.nick + (p.verified ? ' <svg width="16" height="16" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; margin-left:6px; margin-top:-2px;" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#3b82f6"/><path d="M7 12.5L10.5 16L17 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') + '</span></td>';
       tHtml += '<td style="padding:12px 10px;">' + p.kills + '</td>';
       tHtml += '<td style="padding:12px 10px; color:' + (kd >= 1 ? '#4ade80' : '#ef4444') + ';">' + kd + '</td>';
       tHtml += '<td style="padding:12px 10px;">' + p.hs + '%</td>';
