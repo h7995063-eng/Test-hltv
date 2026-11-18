@@ -336,22 +336,58 @@ function renderMatchesList() {
 function showMatchDetail(id) {
   var m = APP_DATA.matches.find(function(x){ return x.id === id; });
   if (!m) return;
-  document.getElementById("screen-matches-list").classList.add("hidden");
-  document.getElementById("screen-match-detail").classList.remove("hidden");
+  
+  switchTab('match-detail');
+  var container = document.getElementById("match-detail-content");
+  
+  var mapName = m.map ? m.map.replace('de_', '').toLowerCase() : 'default';
+  var mapBg = 'maps/' + mapName + '.jpg';
+  
   var t1Win = m.team1.score > m.team2.score;
   var t2Win = m.team2.score > m.team1.score;
-  var mapImg = 'maps/' + m.map.toLowerCase().replace("de_", "").trim() + '.jpg';
   
-  function renderTable(team, isW) {
-    return '<div class="table-wrapper"><div style="padding:12px 16px; font-weight:700; display:flex; justify-content:space-between; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.1);"><span style="color:' + (isW ? 'var(--win)' : 'var(--text)') + '">' + team.name + '</span></div>' +
-      '<table><thead><tr><th>Игрок</th><th>Убийства</th><th>К/Д</th><th>HS%</th></tr></thead><tbody>' +
-      team.players.map(function(p) { return '<tr><td><div class="player-cell"><div class="player-avatar">' + p.nick.charAt(0) + '</div><div>' + p.nick + '</div></div></td><td>' + p.kills + '</td><td>' + (p.kills/(p.deaths||1)).toFixed(2) + '</td><td>' + p.hs + '%</td></tr>'; }).join('') +
-      '</tbody></table></div>';
+  var html = '<button class="back-btn" onclick="switchTab(\'matches\')">← Назад</button>';
+  
+  // 1. БАННЕР С КАРТОЙ (ЯРКИЙ)
+  html += '<div style="position:relative; width:100%; height:200px; border-radius:12px; overflow:hidden; margin-bottom:20px; background: url(\'' + mapBg + '\') center/cover no-repeat;">';
+  // Легкое затемнение только по краям для читаемости текста
+  html += '  <div style="position:absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%);"></div>';
+  
+  // Команды и счет
+  html += '  <div style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; justify-content:space-between; align-items:center; padding:0 20px;">';
+  html += '    <div style="color:' + (t1Win ? '#4ade80' : '#fff') + '; font-size:20px; font-weight:bold; text-shadow:0 2px 4px #000;">' + m.team1.name + '</div>';
+  html += '    <div style="background:rgba(0,0,0,0.8); padding:10px 20px; border-radius:8px; color:#fff; font-size:28px; font-weight:900; border:1px solid #444;">' + m.team1.score + ' : ' + m.team2.score + '</div>';
+  html += '    <div style="color:' + (t2Win ? '#4ade80' : '#fff') + '; font-size:20px; font-weight:bold; text-shadow:0 2px 4px #000;">' + m.team2.name + '</div>';
+  html += '  </div>';
+  html += '</div>';
+  
+  // 2. ТАБЛИЦА СТАТИСТИКИ (ФУНКЦИЯ ДЛЯ РЕНДЕРА)
+  function renderTable(team, color) {
+    var tHtml = '<div style="background:#1a1f24; border-radius:12px; margin-bottom:20px; overflow:hidden; border:1px solid #2d3748;">';
+    tHtml += '<div style="padding:15px 20px; font-size:18px; font-weight:bold; color:' + color + '; border-bottom:1px solid #2d3748;">' + team.name + '</div>';
+    tHtml += '<table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px;">';
+    tHtml += '<thead><tr style="color:#8b959e; font-size:12px; text-transform:uppercase;"><th style="padding:10px 20px;">Игрок</th><th style="padding:10px;">Убийства</th><th style="padding:10px;">К/Д</th><th style="padding:10px;">HS%</th></tr></thead><tbody>';
+    
+    team.players.forEach(function(p) {
+      var kd = p.deaths > 0 ? (p.kills / p.deaths).toFixed(2) : p.kills.toFixed(2);
+      tHtml += '<tr style="border-top:1px solid #2d3748;">';
+      tHtml += '<td style="padding:12px 20px; display:flex; align-items:center; gap:10px;">';
+      tHtml += '<div style="width:30px; height:30px; background:#2d3748; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#fff;">' + p.nick.charAt(0) + '</div>';
+      tHtml += '<span style="font-weight:500;">' + p.nick + '</span></td>';
+      tHtml += '<td style="padding:12px 10px;">' + p.kills + '</td>';
+      tHtml += '<td style="padding:12px 10px; color:' + (kd >= 1 ? '#4ade80' : '#ef4444') + ';">' + kd + '</td>';
+      tHtml += '<td style="padding:12px 10px;">' + p.hs + '%</td>';
+      tHtml += '</tr>';
+    });
+    
+    tHtml += '</tbody></table></div>';
+    return tHtml;
   }
-
-  document.getElementById("match-detail-content").innerHTML = '<div class="match-header-card" style="background-image: url(\'' + mapImg + '\');">' +
-    '<div class="score-board"><div class="score-display"><span class="' + (t1Win?'win':'lose') + '">' + m.team1.score + '</span> : <span class="' + (t2Win?'win':'lose') + '">' + m.team2.score + '</span></div></div></div>' +
-    renderTable(m.team1, t1Win) + renderTable(m.team2, t2Win);
+  
+  html += renderTable(m.team1, '#fff');
+  html += renderTable(m.team2, '#fff');
+  
+  container.innerHTML = html;
 }
 
 function previewImage(input, previewId) {
