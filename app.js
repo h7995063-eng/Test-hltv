@@ -1,4 +1,4 @@
-const API_URL = "https://classic-represent-cluster-gary.trycloudflare.com";
+const API_URL = "https://planner-edward-noble-spaces.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -142,10 +142,7 @@ function renderRegisterTeamForm() {
       <label>Логотип</label>
       <div class="file-upload-wrapper" onclick="document.getElementById('rt-logo').click()">
         <img id="rt-logo-preview" class="file-upload-preview">
-        <div class="file-upload-label">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          Загрузить
-        </div>
+        <div class="file-upload-label">Загрузить</div>
         <input type="file" id="rt-logo" accept="image/*" onchange="previewImage(this, 'rt-logo-preview')">
       </div>
     </div>
@@ -181,8 +178,7 @@ function submitTeamRequest() {
 function renderNewsForm() {
   const container = document.getElementById("news-content");
   container.innerHTML = `
-    <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Отправьте заявку на изменение состава или новость. Админ проверит и опубликует.</p>
-    
+    <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Отправьте заявку на изменение состава или новость.</p>
     <div class="form-group"><label>Команда</label><input type="text" id="n-team" class="form-control" placeholder="Название вашей команды"></div>
     <div class="form-group">
       <label>Текст изменения</label>
@@ -206,7 +202,6 @@ function submitNewsRequest() {
   const photo = document.getElementById("n-photo-preview").src;
 
   if (!team || !text) return alert("Заполните команду и текст!");
-
   newsRequests.push({ team, text, photo });
   saveRequests();
   alert("Новость отправлена админу!");
@@ -227,14 +222,12 @@ function loginAdmin() {
 
 function showAdminTab(tab) {
   const container = document.getElementById("admin-form-container");
-  
   if (tab === 'teams') {
-    let html = `
+    container.innerHTML = `
       <input type="text" class="search-input" placeholder="Поиск команды..." oninput="searchAdminTeams(this.value)">
       <button class="btn btn-outline" style="margin-bottom:20px;" onclick="addTeamAdminForm()">+ Добавить команду</button>
       <div id="admin-teams-list"></div>
     `;
-    container.innerHTML = html;
     renderAdminTeamsList(APP_DATA.teams);
   } 
   else if (tab === 'requests') {
@@ -329,19 +322,19 @@ function rejectTeamRequest(index) {
   showAdminTab('requests');
 }
 
-// ===== ПРАВИЛЬНЫЕ ФУНКЦИИ (fetch + URLSearchParams) =====
 function approveNews(index) {
   const req = newsRequests[index];
   fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
-  }).then(res => {
+  }).then(function(res) {
+    if (!res.ok) throw new Error('Server error');
     alert('Отправлено в канал!');
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab('requests');
-  }).catch(err => {
+  }).catch(function(err) {
     alert('ОШИБКА СЕТИ!');
   });
 }
@@ -352,15 +345,15 @@ function rejectNews(index) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'reject_news', team: req.team, text: req.text })
-  }).then(res => {
+  }).then(function(res) {
+    if (!res.ok) throw new Error('Server error');
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab('requests');
-  }).catch(err => {
+  }).catch(function(err) {
     alert('ОШИБКА СЕТИ!');
   });
 }
-// =======================================================
 
 function addMatchAdmin() {
   const map = document.getElementById("m-map").value;
@@ -370,13 +363,11 @@ function addMatchAdmin() {
   const s2 = parseInt(document.getElementById("m-s2").value);
 
   if (!t1 || !t2) return alert("Выберите команды");
-  
   APP_DATA.matches.push({
     id: Date.now(), map, 
     team1: { name: t1.name, score: s1, players: t1.players },
     team2: { name: t2.name, score: s2, players: t2.players }
   });
-  
   if (s1 > s2) { t1.wins++; t2.losses++; } else { t2.wins++; t1.losses++; }
   saveData();
   alert("Матч добавлен!");
