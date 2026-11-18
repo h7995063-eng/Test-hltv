@@ -1,4 +1,5 @@
 const API_URL = "https://snowboard-prague-deutsch-field.trycloudflare.com";
+const API_URL = "https://snowboard-prague-deutsch-field.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
