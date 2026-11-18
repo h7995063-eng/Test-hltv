@@ -110,7 +110,7 @@ function showTeamDetail(name) {
 
 function renderRegisterTeamForm() {
   var container = document.getElementById("register-team-content");
-  var ROLES = ["Снайпер", "Капитан", "Штурмовик", "Поддержка", "Люркер"];
+  var ROLES = ["AWP", "IGL", "Riffler", "Entry", "Support", "Lurker"];
   var playersHtml = '';
   for (var i = 1; i <= 5; i++) {
     playersHtml += '<div class="player-row-admin"><div class="num">' + i + '.</div><div style="flex:1; display:flex; gap:10px;">' +
