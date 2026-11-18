@@ -329,7 +329,7 @@ function rejectTeamRequest(index) {
   showAdminTab('requests');
 }
 
-// ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ =====
+// ===== ПРАВИЛЬНЫЕ ФУНКЦИИ (fetch + URLSearchParams) =====
 function approveNews(index) {
   const req = newsRequests[index];
   const formData = new URLSearchParams();
@@ -342,12 +342,14 @@ function approveNews(index) {
     method: 'POST',
     body: formData
   }).then(res => {
-    alert('Отправлено в канал!');
+    if (!res.ok) throw new Error("Server error");
+    alert("Отправлено в канал!");
     newsRequests.splice(index, 1);
     saveRequests();
-    showAdminTab('requests');
+    showAdminTab("requests");
   }).catch(err => {
-    alert('ОШИБКА СЕТИ!');
+    console.error(err);
+    alert("ОШИБКА СЕТИ! Проверь соединение с сервером.");
   });
 }
 
@@ -362,14 +364,16 @@ function rejectNews(index) {
     method: 'POST',
     body: formData
   }).then(res => {
+    if (!res.ok) throw new Error("Server error");
     newsRequests.splice(index, 1);
     saveRequests();
-    showAdminTab('requests');
+    showAdminTab("requests");
   }).catch(err => {
-    alert('ОШИБКА СЕТИ!');
+    console.error(err);
+    alert("ОШИБКА СЕТИ!");
   });
 }
-// =================================
+// =======================================================
 
 function addMatchAdmin() {
   const map = document.getElementById("m-map").value;
