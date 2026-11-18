@@ -6,57 +6,208 @@
 <title>HLTV MiniApp</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root { --bg:#0f1419; --card:#1a2028; --accent:#f5a623; --text:#e7e9ea; --muted:#8b98a5; --win:#00ba7c; --lose:#f4212e; }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); padding:16px; padding-bottom:40px; }
-  h1 { font-size:22px; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
-  h1 svg { width:28px; height:28px; fill:var(--accent); }
-  .tabs { display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
-  .tab { background:var(--card); border:none; color:var(--muted); padding:10px 16px; border-radius:10px; font-size:14px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
-  .tab.active { background:var(--accent); color:#000; font-weight:600; }
-  .tab svg { width:16px; height:16px; fill:currentColor; }
-  .card { background:var(--card); border-radius:14px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
-  .card:active { opacity:0.7; }
-  .rank { font-size:18px; font-weight:700; color:var(--accent); width:32px; }
-  .team-name { font-size:16px; font-weight:600; flex:1; }
-  .points { font-size:14px; color:var(--muted); display:flex; align-items:center; gap:4px; }
-  .points svg { width:14px; height:14px; fill:var(--accent); }
-  .hidden { display:none; }
-  .team-detail { background:var(--card); border-radius:14px; padding:16px; }
-  .team-detail h2 { font-size:20px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-  .team-detail h2 svg { width:22px; height:22px; fill:var(--accent); }
-  .stats { display:flex; gap:12px; margin-bottom:16px; }
-  .stat { flex:1; background:var(--bg); border-radius:10px; padding:10px; text-align:center; }
-  .stat .val { font-size:18px; font-weight:700; }
-  .stat .lbl { font-size:11px; color:var(--muted); margin-top:2px; }
-  .stat.win .val { color:var(--win); }
-  .stat.lose .val { color:var(--lose); }
-  .player { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #2a323c; }
-  .player:last-child { border-bottom:none; }
-  .player .slot { width:24px; height:24px; background:var(--bg); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--muted); }
-  .player .nick { font-size:15px; }
-  .back-btn { background:var(--card); border:none; color:var(--text); padding:10px 16px; border-radius:10px; font-size:14px; margin-bottom:16px; cursor:pointer; display:flex; align-items:center; gap:6px; }
-  .back-btn svg { width:16px; height:16px; fill:currentColor; }
-  .empty { color:var(--muted); text-align:center; padding:30px 0; }
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --accent: #f5a623;
+    --accent-dark: #d68910;
+    --text: #1a2028;
+    --muted: #6b7a8a;
+    --border: #e1e8ed;
+    --win: #00ba7c;
+    --lose: #f4212e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 16px;
+    padding-bottom: 40px;
+  }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h1 svg { width: 28px; height: 28px; fill: var(--accent); }
+
+  /* ===== КНОПКИ РАЗДЕЛОВ — СВЕРХУ СЛЕВА, ВЕРТИКАЛЬНО ===== */
+  .tabs {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .tab:hover { border-color: var(--accent); }
+  .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(245, 166, 35, 0.3);
+  }
+  .tab svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .card:active { opacity: 0.7; }
+  .rank {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    width: 32px;
+  }
+  .team-name { font-size: 16px; font-weight: 600; flex: 1; color: var(--text); }
+  .points {
+    font-size: 14px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .points svg { width: 14px; height: 14px; fill: var(--accent); }
+  .hidden { display: none; }
+
+  .team-detail {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .team-detail h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+  }
+  .team-detail h2 svg { width: 22px; height: 22px; fill: var(--accent); }
+
+  .stats { display: flex; gap: 12px; margin-bottom: 16px; }
+  .stat {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat .val { font-size: 18px; font-weight: 700; color: var(--text); }
+  .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .stat.win .val { color: var(--win); }
+  .stat.lose .val { color: var(--lose); }
+
+  .player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .player:last-child { border-bottom: none; }
+  .player .slot {
+    width: 24px;
+    height: 24px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .player .nick { font-size: 15px; color: var(--text); }
+
+  .back-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .back-btn:hover { border-color: var(--accent); }
+  .back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+  .empty { color: var(--muted); text-align: center; padding: 30px 0; }
 </style>
 </head>
 <body>
+
 <div id="main-screen">
-  <h1><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>HLTV Rating</h1>
+  <h1>
+    <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+    HLTV Rating
+  </h1>
+
+  <!-- КНОПКИ РАЗДЕЛОВ СВЕРХУ СЛЕВА -->
   <div class="tabs">
-    <button class="tab active" data-tab="ranking"><svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg>Рейтинг</button>
-    <button class="tab" data-tab="matches"><svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zm0 2v2h10V4H7zm-4 6v10h18V10H3zm4 3h4v2H7v-2zm6 0h4v2h-4v-2z"/></svg>Матчи</button>
-    <button class="tab" data-tab="tournaments"><svg viewBox="0 0 24 24"><path d="M18 2H6v2H2v4a4 4 0 0 0 4 4h.35A6 6 0 0 0 11 15.9V18H8v2h8v-2h-3v-2.1a6 6 0 0 0 4.65-3.9H18a4 4 0 0 0 4-4V4h-4V2zM6 10a2 2 0 0 1-2-2V6h2v4zm14-2a2 2 0 0 1-2 2V6h2v2z"/></svg>Турниры</button>
+    <button class="tab active" data-tab="ranking">
+      <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg>
+      Рейтинг
+    </button>
+    <button class="tab" data-tab="matches">
+      <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zm0 2v2h10V4H7zm-4 6v10h18V10H3zm4 3h4v2H7v-2zm6 0h4v2h-4v-2z"/></svg>
+      Матчи
+    </button>
+    <button class="tab" data-tab="tournaments">
+      <svg viewBox="0 0 24 24"><path d="M18 2H6v2H2v4a4 4 0 0 0 4 4h.35A6 6 0 0 0 11 15.9V18H8v2h8v-2h-3v-2.1a6 6 0 0 0 4.65-3.9H18a4 4 0 0 0 4-4V4h-4V2zM6 10a2 2 0 0 1-2-2V6h2v4zm14-2a2 2 0 0 1-2 2V6h2v2z"/></svg>
+      Турниры
+    </button>
   </div>
+
   <div id="content"></div>
 </div>
+
 <div id="team-screen" class="hidden">
-  <button class="back-btn" onclick="showMain()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Назад</button>
+  <button class="back-btn" onclick="showMain()">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Назад
+  </button>
   <div id="team-content"></div>
 </div>
+
 <script>
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
+
   const DATA = {
     teams: [
       { name:"FURIA", points:960, wins:12, losses:4, players:["FalleN","yuurih","KSCERATO","molodoy","YEKINDAR"] },
@@ -72,7 +223,9 @@
       { name:"ESL Pro League", prize:"$850,000" },
     ]
   };
+
   let currentTab = "ranking";
+
   function render() {
     const content = document.getElementById("content");
     if (currentTab === "ranking") {
@@ -95,6 +248,7 @@
       content.innerHTML = html || '<div class="empty">Турниров пока нет</div>';
     }
   }
+
   function showTeam(name) {
     const team = DATA.teams.find(t=>t.name===name);
     if (!team) return;
@@ -112,10 +266,12 @@
         ${team.players.map((p,i)=>`<div class="player"><span class="slot">${i+1}</span><span class="nick">${p}</span></div>`).join("")}
       </div>`;
   }
+
   function showMain() {
     document.getElementById("team-screen").classList.add("hidden");
     document.getElementById("main-screen").classList.remove("hidden");
   }
+
   document.querySelectorAll(".tab").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
@@ -124,6 +280,7 @@
       render();
     });
   });
+
   render();
 </script>
 </body>
