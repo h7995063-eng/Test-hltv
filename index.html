@@ -41,7 +41,6 @@
       <button class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
     </div>
     
-    <!-- РЕЙТИНГ -->
     <div id="screen-ranking" class="hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 style="margin-bottom:0;">Рейтинг команд</h1>
@@ -50,36 +49,32 @@
       <div id="ranking-container"></div>
     </div>
 
-    <!-- РЕГИСТРАЦИЯ КОМАНДЫ -->
     <div id="screen-register-team" class="hidden">
       <button class="back-btn" onclick="switchTab('ranking')">← Назад</button>
       <h1>Заявка на регистрацию</h1>
       <div id="register-team-content" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);"></div>
     </div>
 
-    <!-- МАТЧИ -->
     <div id="screen-matches-list" class="hidden">
       <h1>Сыгранные матчи</h1>
       <div id="matches-container"></div>
     </div>
+    
     <div id="screen-match-detail" class="hidden">
       <button class="back-btn" onclick="switchTab('matches')">← Назад</button>
       <div id="match-detail-content"></div>
     </div>
 
-    <!-- ДЕТАЛИ КОМАНДЫ -->
     <div id="screen-team-detail" class="hidden">
       <button class="back-btn" onclick="switchTab('ranking')">← Назад</button>
       <div id="team-detail-content"></div>
     </div>
 
-    <!-- НОВОСТИ (ЗАЯВКИ НА ЗАМЕНУ) -->
     <div id="screen-news" class="hidden">
       <h1>Новости / Замены</h1>
       <div id="news-content" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);"></div>
     </div>
 
-    <!-- АДМИНКА -->
     <div id="screen-admin-login" class="hidden">
       <h1>Вход в админку</h1>
       <div class="form-group">
