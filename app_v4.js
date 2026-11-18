@@ -201,7 +201,7 @@ function showNewsType(type) {
     area.innerHTML = `
       <div style="${formStyle}">
         <h3 style="margin:0 0 5px 0; color:#fff;">Регистрация матча</h3>
-        <p style="color:#ef4444; font-size:12px; margin:0;">* Фото обязательно</p>
+        
         
         <div>
           <label style="${labelStyle}">Скриншот (обязательно)</label>
@@ -345,7 +345,7 @@ function showNewsType(type) {
     area.innerHTML = `
       <div style="${formStyle}">
         <h3 style="margin:0 0 5px 0; color:#fff;">Регистрация матча</h3>
-        <p style="color:#ef4444; font-size:12px; margin:0;">* Фото обязательно</p>
+        
         
         <div>
           <label style="${labelStyle}">Скриншот (обязательно)</label>
