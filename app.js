@@ -1,35 +1,16 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-let userProfile = JSON.parse(localStorage.getItem("hltv_user"));
-
 window.onload = () => {
   setTimeout(() => {
     document.getElementById("splash-screen").style.opacity = "0";
     setTimeout(() => {
       document.getElementById("splash-screen").style.display = "none";
-      
-      if (!userProfile) {
-        document.getElementById("register-screen").style.display = "flex";
-      } else {
-        document.getElementById("register-screen").style.display = "none";
-        document.getElementById("app-container").style.display = "flex";
-        switchTab('ranking');
-      }
+      document.getElementById("app-container").style.display = "flex";
+      switchTab('ranking');
     }, 500);
   }, 1500);
 };
-
-function registerUser() {
-  const nick = document.getElementById("reg-nick").value;
-  const tgId = document.getElementById("reg-id").value || "12345678";
-  if (!nick) return alert("Введите ник!");
-  userProfile = { name: nick, tgId: tgId, role: "Игрок", avatar: "https://ui-avatars.com/api/?name=" + nick + "&background=8b5cf6&color=fff", kd: 1.00, avg: 0.0 };
-  localStorage.setItem("hltv_user", JSON.stringify(userProfile));
-  document.getElementById("register-screen").style.display = "none";
-  document.getElementById("app-container").style.display = "flex";
-  switchTab('ranking');
-}
 
 function toggleMenu() {
   document.getElementById("sidebar").classList.toggle("open");
@@ -39,7 +20,8 @@ function toggleMenu() {
 function switchTab(tab) {
   document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
   document.getElementById(`nav-${tab}`)?.classList.add("active");
-  const screens = ["ranking", "team-detail", "matches-list", "match-detail", "profile", "admin-login", "admin-panel"];
+  
+  const screens = ["ranking", "team-detail", "matches-list", "match-detail", "admin-login", "admin-panel"];
   screens.forEach(s => document.getElementById(`screen-${s}`).classList.add("hidden"));
 
   if (tab === "ranking") {
@@ -48,9 +30,6 @@ function switchTab(tab) {
   } else if (tab === "matches") {
     document.getElementById("screen-matches-list").classList.remove("hidden");
     renderMatchesList();
-  } else if (tab === "profile") {
-    document.getElementById("screen-profile").classList.remove("hidden");
-    renderProfile();
   } else if (tab === "admin") {
     if (sessionStorage.getItem("isAdmin") === "true") {
       document.getElementById("screen-admin-panel").classList.remove("hidden");
@@ -58,6 +37,7 @@ function switchTab(tab) {
       document.getElementById("screen-admin-login").classList.remove("hidden");
     }
   }
+
   if (window.innerWidth <= 768) toggleMenu();
 }
 
@@ -86,7 +66,9 @@ function showTeamDetail(name) {
   if (!team) return;
   document.getElementById("screen-ranking").classList.add("hidden");
   document.getElementById("screen-team-detail").classList.remove("hidden");
+  
   let teamAvatar = team.avatar ? `<img src="${team.avatar}" class="team-big-logo">` : `<div class="team-big-logo">${team.name.charAt(0)}</div>`;
+  
   document.getElementById("team-detail-content").innerHTML = `
     <div class="team-header">
       ${teamAvatar}
@@ -146,7 +128,6 @@ function renderMatchesList() {
   container.innerHTML = html || '<p style="color:var(--muted)">Матчей нет</p>';
 }
 
-// ОБНОВЛЕННАЯ ФУНКЦИЯ ДЕТАЛЕЙ МАТЧА
 function showMatchDetail(id) {
   const m = DATA.matches.find(x => x.id === id);
   if (!m) return;
@@ -203,27 +184,6 @@ function showMatchDetail(id) {
     ${renderTeamTable(m.team1, t1Win)}
     ${renderTeamTable(m.team2, t2Win)}
   `;
-}
-
-function renderProfile() {
-  if (!userProfile) return;
-  document.getElementById("profile-name").innerText = userProfile.name;
-  document.getElementById("profile-role").innerText = userProfile.role;
-  document.getElementById("profile-avatar-img").src = userProfile.avatar;
-  document.getElementById("profile-kd").innerText = userProfile.kd.toFixed(2);
-  document.getElementById("profile-avg").innerText = userProfile.avg.toFixed(1);
-}
-
-function changeMyAvatar(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      userProfile.avatar = e.target.result;
-      localStorage.setItem("hltv_user", JSON.stringify(userProfile));
-      renderProfile();
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
 }
 
 function loginAdmin() {
