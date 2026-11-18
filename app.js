@@ -1,9 +1,9 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-// По умолчанию у пользователя нет аватарки, ставим заглушку
 let myProfile = {
   name: "Player",
+  role: "Игрок",
   avatar: "https://ui-avatars.com/api/?name=P&background=random",
   kd: 1.25,
   avg: 85.4
@@ -90,7 +90,15 @@ function showTeamDetail(name) {
             let pAvatar = p.avatar ? `<img src="${p.avatar}" class="player-avatar">` : `<div class="player-avatar">${p.nick.charAt(0)}</div>`;
             return `
               <tr>
-                <td><div class="player-cell">${pAvatar}<div class="player-nick">${p.nick}</div></div></td>
+                <td>
+                  <div class="player-cell">
+                    ${pAvatar}
+                    <div>
+                      <span class="player-nick">${p.nick}</span>
+                      ${p.role ? `<span class="role-badge">${p.role}</span>` : ''}
+                    </div>
+                  </div>
+                </td>
                 <td>${p.kills}</td><td>${p.deaths}</td><td style="color:var(--accent)">${kd}</td><td>${p.hs}%</td><td>${p.rating.toFixed(2)}</td>
               </tr>
             `;
@@ -111,9 +119,9 @@ function renderMatchesList() {
     html += `
       <div class="card" onclick="showMatchDetail(${m.id})" style="flex-direction:column; align-items:flex-start;">
         <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:10px;">
-          <div style="font-weight:600; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
-          <div style="font-weight:700; font-family:monospace; background:var(--bg); padding:2px 10px; border-radius:6px;">${m.team1.score} : ${m.team2.score}</div>
-          <div style="font-weight:600; color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+          <div style="font-weight:700; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
+          <div style="font-weight:800; font-family:monospace; background:var(--bg); padding:2px 10px; border-radius:6px;">${m.team1.score} : ${m.team2.score}</div>
+          <div style="font-weight:700; color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
         </div>
         <div style="font-size:12px; color:var(--muted); display:flex; gap:10px;">
           <span>${m.tournament}</span> <span style="color:var(--accent)">${m.map}</span>
@@ -136,7 +144,7 @@ function showMatchDetail(id) {
 
   const renderTeamTable = (team, isWinner) => `
     <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:16px; overflow:hidden;">
-      <div style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; display:flex; justify-content:space-between;">
+      <div style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between;">
         <span style="color:${isWinner ? 'var(--win)' : 'var(--text)'}">${team.name}</span>
         <span style="color:var(--muted); font-size:12px;">${isWinner ? 'Победа' : 'Поражение'}</span>
       </div>
@@ -160,11 +168,11 @@ function showMatchDetail(id) {
     <div style="background:linear-gradient(135deg,#1e1b4b,#0f172a); border-radius:16px; padding:20px; margin-bottom:20px; border:1px solid #312e81; text-align:center;">
       <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">${m.tournament} • ${m.map}</div>
       <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
-        <div style="flex:1; font-size:18px; font-weight:700; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
+        <div style="flex:1; font-size:18px; font-weight:800; color:${t1Win ? 'var(--win)' : 'var(--text)'}">${m.team1.name}</div>
         <div style="font-size:32px; font-weight:800; background:rgba(0,0,0,0.4); padding:4px 16px; border-radius:8px;">
           ${m.team1.score} : ${m.team2.score}
         </div>
-        <div style="flex:1; font-size:18px; font-weight:700; color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
+        <div style="flex:1; font-size:18px; font-weight:800; color:${t2Win ? 'var(--win)' : 'var(--text)'}">${m.team2.name}</div>
       </div>
     </div>
     ${renderTeamTable(m.team1, t1Win)}
@@ -175,16 +183,21 @@ function showMatchDetail(id) {
 // --- ПРОФИЛЬ ---
 function renderProfile() {
   document.getElementById("profile-name").innerText = myProfile.name;
+  document.getElementById("profile-role").innerText = myProfile.role;
   document.getElementById("profile-avatar-img").src = myProfile.avatar;
   document.getElementById("profile-kd").innerText = myProfile.kd.toFixed(2);
   document.getElementById("profile-avg").innerText = myProfile.avg.toFixed(1);
 }
 
-function changeMyAvatar() {
-  const url = prompt("Введите ссылку на картинку (аватарку):", myProfile.avatar);
-  if (url) {
-    myProfile.avatar = url;
-    renderProfile();
+// Загрузка аватарки профиля
+function changeMyAvatar(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      myProfile.avatar = e.target.result;
+      renderProfile();
+    };
+    reader.readAsDataURL(input.files[0]);
   }
 }
 
@@ -202,28 +215,54 @@ function loginAdmin() {
 
 function showAdminForm(type) {
   const container = document.getElementById("admin-form-container");
+  
+  // Шаблон для загрузки файла (картинки)
+  const fileUploadHtml = (id, label) => `
+    <div class="form-group">
+      <label>${label}</label>
+      <div class="file-upload-wrapper" onclick="document.getElementById('${id}').click()">
+        <img id="${id}-preview" class="file-upload-preview" src="" style="display:none;">
+        <div class="file-upload-label">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Выбрать из галереи
+        </div>
+        <input type="file" id="${id}" accept="image/*" onchange="previewImage(this, '${id}-preview')">
+      </div>
+    </div>
+  `;
+
   if (type === 'team') {
     container.innerHTML = `
       <h3 style="margin-bottom:16px;">Добавить команду</h3>
-      <div class="form-group"><label>Название</label><input type="text" id="t-name" class="form-control"></div>
+      <div class="form-group"><label>Название</label><input type="text" id="t-name" class="form-control" placeholder="Например: NAVI"></div>
       <div class="form-group"><label>Поинты</label><input type="number" id="t-points" class="form-control" value="0"></div>
-      <div class="form-group"><label>Ссылка на логотип (необязательно)</label><input type="text" id="t-avatar" class="form-control" placeholder="https://..."></div>
-      <button class="btn" onclick="addTeam()">Добавить</button>
+      ${fileUploadHtml('t-avatar-file', 'Логотип команды')}
+      <button class="btn" onclick="addTeam()">Добавить команду</button>
     `;
   } else if (type === 'player') {
     const options = DATA.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
     container.innerHTML = `
       <h3 style="margin-bottom:16px;">Добавить игрока</h3>
       <div class="form-group"><label>Команда</label><select id="p-team" class="form-control">${options}</select></div>
-      <div class="form-group"><label>Ник</label><input type="text" id="p-nick" class="form-control"></div>
-      <div class="form-group"><label>Ссылка на аватарку</label><input type="text" id="p-avatar" class="form-control" placeholder="https://..."></div>
-      <button class="btn" onclick="addPlayer()">Добавить</button>
+      <div class="form-group"><label>Ник</label><input type="text" id="p-nick" class="form-control" placeholder="s1mple"></div>
+      <div class="form-group">
+        <label>Роль</label>
+        <select id="p-role" class="form-control">
+          <option value="Снайпер">Снайпер (AWP)</option>
+          <option value="Капитан">Капитан (IGL)</option>
+          <option value="Штурмовик">Штурмовик (Entry)</option>
+          <option value="Поддержка">Поддержка (Support)</option>
+          <option value="Люркер">Люркер (Lurker)</option>
+        </select>
+      </div>
+      ${fileUploadHtml('p-avatar-file', 'Аватарка игрока')}
+      <button class="btn" onclick="addPlayer()">Добавить игрока</button>
     `;
   } else if (type === 'match') {
     const options = DATA.teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
     container.innerHTML = `
       <h3 style="margin-bottom:16px;">Добавить матч</h3>
-      <div class="form-group"><label>Турнир</label><input type="text" id="m-tour" class="form-control"></div>
+      <div class="form-group"><label>Турнир</label><input type="text" id="m-tour" class="form-control" placeholder="IEM Katowice"></div>
       <div class="form-group"><label>Карта</label><input type="text" id="m-map" class="form-control" value="de_mirage"></div>
       <div style="display:flex; gap:10px;">
         <div class="form-group" style="flex:1;"><label>Команда 1</label><select id="m-t1" class="form-control">${options}</select></div>
@@ -233,15 +272,34 @@ function showAdminForm(type) {
         <div class="form-group" style="flex:1;"><label>Команда 2</label><select id="m-t2" class="form-control">${options}</select></div>
         <div class="form-group" style="width:80px;"><label>Счет</label><input type="number" id="m-s2" class="form-control" value="0"></div>
       </div>
-      <button class="btn" onclick="addMatch()">Добавить</button>
+      <button class="btn" onclick="addMatch()">Добавить матч</button>
     `;
   }
+}
+
+// Вспомогательная функция предпросмотра картинки
+function previewImage(input, previewId) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById(previewId);
+      img.src = e.target.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Получение Base64 из инпута файла
+function getBase64(inputId) {
+  const img = document.getElementById(inputId + '-preview');
+  return img && img.src ? img.src : "";
 }
 
 function addTeam() {
   const name = document.getElementById("t-name").value;
   const points = parseInt(document.getElementById("t-points").value) || 0;
-  const avatar = document.getElementById("t-avatar").value;
+  const avatar = getBase64('t-avatar-file');
   if (!name) return alert("Введите название");
   
   DATA.teams.push({ id: Date.now(), name, points, wins: 0, losses: 0, avatar, players: [] });
@@ -252,12 +310,13 @@ function addTeam() {
 function addPlayer() {
   const teamId = parseInt(document.getElementById("p-team").value);
   const nick = document.getElementById("p-nick").value;
-  const avatar = document.getElementById("p-avatar").value;
+  const role = document.getElementById("p-role").value;
+  const avatar = getBase64('p-avatar-file');
   if (!nick) return alert("Введите ник");
 
   const team = DATA.teams.find(t => t.id === teamId);
   if (team) {
-    team.players.push({ nick, kills: 0, deaths: 0, hs: 0, rating: 1.0, avatar });
+    team.players.push({ nick, role, kills: 0, deaths: 0, hs: 0, rating: 1.0, avatar });
     alert("Игрок добавлен!");
     showAdminForm('player');
   }

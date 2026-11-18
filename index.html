@@ -14,8 +14,7 @@
 <!-- БОКОВАЯ ПАНЕЛЬ -->
 <div class="sidebar" id="sidebar">
   <div class="logo">
-    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-    HLTV MINI
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> HLTV MINI
   </div>
   <div class="nav-item" id="nav-ranking" onclick="switchTab('ranking')">
     <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 4h10v2H7V9zm0 4h10v2H7v-2z"/></svg> Рейтинг
@@ -37,37 +36,37 @@
     <button class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
   </div>
   
-  <!-- ЭКРАН: РЕЙТИНГ -->
   <div id="screen-ranking" class="hidden">
     <h1>Рейтинг команд</h1>
     <div id="ranking-container"></div>
   </div>
 
-  <!-- ЭКРАН: ДЕТАЛИ КОМАНДЫ -->
   <div id="screen-team-detail" class="hidden">
     <button class="back-btn" onclick="switchTab('ranking')">← Назад</button>
     <div id="team-detail-content"></div>
   </div>
 
-  <!-- ЭКРАН: МАТЧИ -->
   <div id="screen-matches-list" class="hidden">
     <h1>Сыгранные матчи</h1>
     <div id="matches-container"></div>
   </div>
   
-  <!-- ЭКРАН: ДЕТАЛИ МАТЧА -->
   <div id="screen-match-detail" class="hidden">
     <button class="back-btn" onclick="switchTab('matches')">← Назад</button>
     <div id="match-detail-content"></div>
   </div>
 
-  <!-- ЭКРАН: ПРОФИЛЬ -->
   <div id="screen-profile" class="hidden">
     <h1>Мой профиль</h1>
     <div class="profile-header">
-      <img id="profile-avatar-img" class="profile-avatar" src="" alt="Avatar" onclick="changeMyAvatar()">
+      <!-- Скрытый инпут для загрузки аватарки профиля -->
+      <input type="file" id="my-avatar-file" accept="image/*" style="display:none;" onchange="changeMyAvatar(this)">
+      
+      <!-- При клике вызываем инпут -->
+      <img id="profile-avatar-img" class="profile-avatar" src="" alt="Avatar" onclick="document.getElementById('my-avatar-file').click()">
+      
       <div class="profile-name" id="profile-name">Player</div>
-      <div class="profile-role">Игрок</div>
+      <div class="profile-role" id="profile-role">Игрок</div>
       
       <div class="profile-stats">
         <div class="p-stat"><div class="val" style="color:var(--win)" id="profile-kd">1.25</div><div class="lbl">К/Д</div></div>
@@ -76,7 +75,6 @@
     </div>
   </div>
 
-  <!-- ЭКРАН: АДМИНКА (ВХОД) -->
   <div id="screen-admin-login" class="hidden">
     <h1>Вход в админку</h1>
     <div class="form-group">
@@ -87,13 +85,12 @@
     <p id="admin-err" style="color:var(--lose); margin-top:10px; font-size:14px;"></p>
   </div>
 
-  <!-- ЭКРАН: АДМИНКА (ПАНЕЛЬ) -->
   <div id="screen-admin-panel" class="hidden">
     <h1>Админ-панель</h1>
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-      <button class="btn btn-outline" onclick="showAdminForm('team')">+ Команда</button>
-      <button class="btn btn-outline" onclick="showAdminForm('player')">+ Игрок</button>
-      <button class="btn btn-outline" onclick="showAdminForm('match')">+ Матч</button>
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <button class="btn btn-outline" style="width:auto; flex:1;" onclick="showAdminForm('team')">+ Команда</button>
+      <button class="btn btn-outline" style="width:auto; flex:1;" onclick="showAdminForm('player')">+ Игрок</button>
+      <button class="btn btn-outline" style="width:auto; flex:1;" onclick="showAdminForm('match')">+ Матч</button>
     </div>
 
     <div id="admin-form-container" style="background:var(--card); padding:20px; border-radius:12px; border:1px solid var(--border);">
