@@ -119,3 +119,56 @@ td:nth-child(n+2) { text-align: center; }
   .player-row-admin { flex-direction: column; }
   .player-row-admin .num { margin-top: 0; text-align: left; }
 }
+
+/* --- ИСПРАВЛЕНИЕ САЙДБАРА (на всю высоту) --- */
+.sidebar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  height: 100vh;
+  width: 220px;
+  background: rgba(17, 20, 28, 0.95);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 10px;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+/* Логотип */
+.sidebar .logo {
+  padding: 0 12px 30px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Кнопки */
+.sidebar .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: all 0.2s;
+}
+
+.sidebar .nav-item.active {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Контент сдвигаем вправо */
+.main {
+  margin-left: 220px !important;
+  padding: 20px !important;
+  min-height: 100vh;
+}
