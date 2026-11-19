@@ -1,4 +1,8 @@
 const API_URL = "https://catalog-ministries-flows-flyer.trycloudflare.com";
+
+// === Supabase (данные от заказчика) ===
+const SUPABASE_URL = "https://vamehxkvplkxbhcoooeq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_BIxdsghEstTjAbmU1nDwhg_Qb5tvXAc";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
