@@ -508,7 +508,11 @@ function showAdminTab(tab) {
     });
     container.innerHTML = html;
   }
-  else if (tab === 'matches') {
+  else if (tab === 'tournaments') {
+      renderAdminTournamentsForm();
+      return;
+    }
+    if (tab === 'matches') {
     var options = APP_DATA.teams.map(function(t){ return '<option value="' + t.name + '">' + t.name + '</option>'; }).join('');
     container.innerHTML = '<h3 style="margin-bottom:16px;">Добавить матч</h3>' +
       '<div class="form-group"><label>Карта</label><input type="text" id="m-map" class="form-control" value="mirage"></div>' +
@@ -1231,4 +1235,36 @@ function renderTournaments() {
 
 function openTournamentDetail(id) {
   alert("Турнир ID: " + id + " (Детали в разработке)");
+}
+
+function renderAdminTournamentsForm() {
+  var container = document.getElementById("admin-form-container");
+  if (!container) return;
+  
+  var html = '<h2>Создать турнир</h2>';
+  html += '<div style="background:#1a1f24; padding:20px; border-radius:12px; border:1px solid #2d3748; margin-bottom:20px;">';
+  html += '  <div style="margin-bottom:15px;"><label style="color:#8b959e; font-size:12px;">Название турнира</label><input type="text" id="tour-name" class="input" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;"></div>';
+  html += '  <div style="margin-bottom:15px;"><label style="color:#8b959e; font-size:12px;">Призовые</label><input type="text" id="tour-prize" class="input" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;" placeholder="$5,000"></div>';
+  html += '  <div style="margin-bottom:15px;"><label style="color:#8b959e; font-size:12px;">Дата</label><input type="text" id="tour-date" class="input" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;" placeholder="25 Ноября"></div>';
+  html += '  <div style="margin-bottom:15px;"><label style="color:#8b959e; font-size:12px;">Ссылка на картинку</label><input type="text" id="tour-image" class="input" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;" placeholder="maps/mirage.jpg"></div>';
+  html += '  <button class="btn btn-green" onclick="saveNewTournament()" style="margin-top:10px;">Создать турнир</button>';
+  html += '</div>';
+  
+  container.innerHTML = html;
+}
+
+function saveNewTournament() {
+  var name = document.getElementById("tour-name").value;
+  var prize = document.getElementById("tour-prize").value;
+  var date = document.getElementById("tour-date").value;
+  var image = document.getElementById("tour-image").value || "maps/mirage.jpg";
+  
+  if (!name || !prize) { alert("Заполните название и призовые!"); return; }
+  
+  var tournaments = JSON.parse(localStorage.getItem("hltv_tournaments")) || [];
+  tournaments.push({ id: Date.now(), name: name, prize: prize, date: date, image: image });
+  localStorage.setItem("hltv_tournaments", JSON.stringify(tournaments));
+  
+  alert("Турнир создан!");
+  renderAdminTournamentsForm();
 }
