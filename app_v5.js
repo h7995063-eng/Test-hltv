@@ -483,6 +483,12 @@ function loginAdmin() {
 
 function showAdminTab(tab) {
   var container = document.getElementById("admin-form-container");
+  
+  if (tab === 'tournaments') {
+    renderAdminTournamentsForm();
+    return;
+  }
+  
   if (tab === 'teams') {
     container.innerHTML = '<input type="text" class="search-input" placeholder="Поиск команды..." oninput="searchAdminTeams(this.value)"><button class="btn btn-outline" style="margin-bottom:20px;" onclick="addTeamAdminForm()">+ Добавить команду</button><div id="admin-teams-list"></div>';
     renderAdminTeamsList(APP_DATA.teams);
