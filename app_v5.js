@@ -1212,11 +1212,15 @@ function renderTournaments() {
   var container = document.getElementById("tournaments-container");
   if (!container) return;
   
-  // Демо-турниры (потом заменим на данные из localStorage/сервера)
   var tournaments = JSON.parse(localStorage.getItem("hltv_tournaments")) || [
     { id: 1, name: "Counter Flame Cup", prize: "$5,000", date: "25 Ноября", image: "maps/mirage.jpg" },
     { id: 2, name: "Major 2026", prize: "$50,000", date: "10 Декабря", image: "maps/inferno.jpg" }
   ];
+  
+  if (tournaments.length === 0) {
+    container.innerHTML = '<h1>Турниры</h1><p style="color:var(--muted); text-align:center; padding:20px;">Пока нет турниров</p>';
+    return;
+  }
   
   var html = '<h1>Турниры</h1>';
   tournaments.forEach(function(t) {
