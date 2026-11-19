@@ -57,6 +57,9 @@ function switchTab(tab) {
     document.getElementById("screen-match-detail").classList.remove("hidden");
   } else if (tab === "team-detail") {
     document.getElementById("screen-team-detail").classList.remove("hidden");
+  } else if (tab === "tournaments") {
+    document.getElementById("screen-tournaments").classList.remove("hidden");
+    renderTournaments();
   } else if (tab === "admin") {
     if (localStorage.getItem("isAdmin") === "true") {
       document.getElementById("screen-admin-panel").classList.remove("hidden");
@@ -1200,4 +1203,32 @@ function rejectRequest(index) {
   localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
   showToast("Заявка отклонена. Уведомление отправлено.");
   renderAdminRequests();
+}
+function renderTournaments() {
+  var container = document.getElementById("tournaments-container");
+  if (!container) return;
+  
+  // Демо-турниры (потом заменим на данные из localStorage/сервера)
+  var tournaments = JSON.parse(localStorage.getItem("hltv_tournaments")) || [
+    { id: 1, name: "Counter Flame Cup", prize: "$5,000", date: "25 Ноября", image: "maps/mirage.jpg" },
+    { id: 2, name: "Major 2026", prize: "$50,000", date: "10 Декабря", image: "maps/inferno.jpg" }
+  ];
+  
+  var html = '<h1>Турниры</h1>';
+  tournaments.forEach(function(t) {
+    html += '<div class="card" style="margin-bottom:15px; padding:15px; display:flex; gap:15px; cursor:pointer;" onclick="openTournamentDetail(' + t.id + ')">';
+    html += '  <div style="width:80px; height:80px; border-radius:8px; background: url(' + t.image + ') center/cover; flex-shrink:0;"></div>';
+    html += '  <div>';
+    html += '    <h3 style="margin:0 0 5px 0; color:#fff;">' + t.name + '</h3>';
+    html += '    <div style="font-size:12px; color:var(--muted);">Призовые: <span style="color:#4ade80; font-weight:bold;">' + t.prize + '</span></div>';
+    html += '    <div style="font-size:12px; color:var(--muted);">Дата: ' + t.date + '</div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+}
+
+function openTournamentDetail(id) {
+  alert("Турнир ID: " + id + " (Детали в разработке)");
 }
