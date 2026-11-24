@@ -29,7 +29,7 @@ async function loadFromAPI() {
     if (Array.isArray(tournaments)) APP_DATA.tournaments = tournaments;
     if (Array.isArray(matches)) APP_DATA.matches = matches.map(function(m, i) {
       return {
-        id: i + 1,
+        id: m.id || (i + 1),
         map: m.map || "de_mirage",
         tournament: m.tournament || "",
         team1: { name: m.team1, score: m.score1, players: (m.stats && m.stats.t1) || [] },
@@ -954,7 +954,12 @@ function showMatchDetail(id) {
   var t1Win = m.team1.score > m.team2.score;
   var t2Win = m.team2.score > m.team1.score;
   
-  var html = '<button class="back-btn" onclick="switchTab(\'matches\')">← Назад</button>';
+  var html = '<div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">';
+  html += '<button class="back-btn" onclick="switchTab(\'matches\')">← Назад</button>';
+  if (localStorage.getItem("isAdmin") === "true") {
+    html += '<button onclick="deleteMatch(' + m.id + ')" style="margin-left:auto; background:#ef4444; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:bold; cursor:pointer;">🗑 Удалить матч</button>';
+  }
+  html += '</div>';
   
   // 1. БАННЕР С КАРТОЙ (ЯРКИЙ)
   html += '<div style="position:relative; width:100%; height:200px; border-radius:12px; overflow:hidden; margin-bottom:20px; background: url(\'' + mapBg + '\') center/cover no-repeat;">';
@@ -1266,3 +1271,20 @@ function toastAuto(msg) {
   }
 }
 // ===== /TOAST SYSTEM =====
+
+
+function deleteMatch(id) {
+  if (!confirm("Удалить этот матч из БД?")) return;
+  fetch(API_BASE + "/api/matches/" + id, { method: "DELETE" })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.ok) {
+        toast("Матч удалён", "success");
+        loadFromAPI();
+        switchTab('matches');
+      } else {
+        toast("Ошибка удаления", "error");
+      }
+    })
+    .catch(function(e){ toast("Ошибка сети: " + e, "error"); });
+}
