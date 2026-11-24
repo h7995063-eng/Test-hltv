@@ -1,5 +1,3 @@
-const API_URL = API_BASE;  // используем тот же рабочий бэк
-
 // === Supabase (данные от заказчика) ===
 const SUPABASE_URL = "https://vamehxkvplkxbhcoooeq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_BIxdsghEstTjAbmU1nDwhg_Qb5tvXAc";
@@ -13,6 +11,7 @@ let APP_DATA = JSON.parse(localStorage.getItem("hltv_data"));
 
 // ===== API LOAD =====
 const API_BASE = "https://four-proposal-kitchen-estates.trycloudflare.com";
+const API_URL = API_BASE;
 async function loadFromAPI() {
   try {
     const [teams, tournaments, matches] = await Promise.all([
