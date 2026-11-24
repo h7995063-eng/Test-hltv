@@ -10,7 +10,7 @@ if (!localStorage.getItem("hltv_data")) {
 let APP_DATA = JSON.parse(localStorage.getItem("hltv_data"));
 
 // ===== API LOAD =====
-const API_BASE = "https://four-proposal-kitchen-estates.trycloudflare.com";
+const API_BASE = "https://ends-monitors-teens-yeah.trycloudflare.com";
 const API_URL = API_BASE;
 async function loadFromAPI() {
   try {
