@@ -271,7 +271,7 @@ function showNewsType(type) {
             <h4 style="margin:0 0 10px 0; color:#fff;">Команда 1</h4>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Название</label>
-              <input type="text" id="m1-name" style="${inputStyle}">
+              <select id="m1-name" style="${inputStyle}"><option value="">— выбери команду —</option>' + (APP_DATA.teams || []).map(function(t){ return "<option value=\"" + t.name + "\">" + t.name + "</option>"; }).join("") + '</select>
             </div>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Ники игроков</label>
@@ -290,7 +290,7 @@ function showNewsType(type) {
             <h4 style="margin:0 0 10px 0; color:#fff;">Команда 2</h4>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Название</label>
-              <input type="text" id="m2-name" style="${inputStyle}">
+              <select id="m2-name" style="${inputStyle}"><option value="">— выбери команду —</option>' + (APP_DATA.teams || []).map(function(t){ return "<option value=\"" + t.name + "\">" + t.name + "</option>"; }).join("") + '</select>
             </div>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Ники игроков</label>
