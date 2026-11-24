@@ -905,19 +905,23 @@ function saveNewMatch() {
     return { nick: p.nick, kills: parseInt(document.getElementById("t2-k-" + i).value) || 0, deaths: parseInt(document.getElementById("t2-d-" + i).value) || 0, hs: parseInt(document.getElementById("t2-hs-" + i).value) || 0 };
   });
   
-  var newMatch = {
-    id: Date.now(),
-    map: map,
-    tournament: "Добавлено вручную",
-    team1: { name: t1.name, score: s1, players: p1 },
-    team2: { name: t2.name, score: s2, players: p2 }
-  };
-  
-  APP_DATA.matches.push(newMatch);
-  saveData();
-  
-  alert("Матч добавлен!");
-  showAdminTab('match'); // Очищаем форму (или возвращаемся)
+    var stats = { t1: p1, t2: p2 };
+  fetch(API_BASE + "/api/matches", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      team1: t1.name, team2: t2.name,
+      score1: s1, score2: s2,
+      tournament: "Добавлено вручную", date: "",
+      map: map, stats: stats
+    })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res.ok) {
+      alert("Матч добавлен в БД!");
+      loadFromAPI();
+      showAdminTab('match');
+    } else { alert("Ошибка: " + (res.error || "unknown")); }
+  }).catch(function(e){ alert("Ошибка сети: " + e); });
 }
 
 function editTeamAdmin(teamName) {
@@ -1010,7 +1014,44 @@ function deleteTeam(teamName) {
   showAdminTab('teams');
 }
 
-function addTeamAdminForm() { alert("Функция добавления в разработке"); }
+function addTeamAdminForm() {
+  var container = document.getElementById("admin-form-container");
+  if (!container) return;
+  var html = '<h2>Добавить команду</h2>';
+  html += '<div style="background:#1a1f24; padding:20px; border-radius:12px; border:1px solid #2d3748; margin-bottom:20px;">';
+  html += '<div style="margin-bottom:15px;"><label style="color:#8b959e; font-size:12px;">Название команды</label><input type="text" id="new-team-name" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;"></div>';
+  html += '<div style="margin-bottom:15px;"><label style="color:#8b959e; font-size:12px;">Очки</label><input type="number" id="new-team-points" value="0" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;"></div>';
+  html += '<h3 style="margin-top:20px;">Игроки (5)</h3>';
+  for (var i = 0; i < 5; i++) {
+    html += '<div style="margin-bottom:10px; display:flex; gap:8px;">';
+    html += '<input type="text" id="np-nick-' + i + '" placeholder="Ник" style="flex:2; padding:8px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;">';
+    html += '<input type="text" id="np-role-' + i + '" placeholder="Роль" style="flex:1; padding:8px; background:#111; border:1px solid #333; color:#fff; border-radius:6px;">';
+    html += '</div>';
+  }
+  html += '<button class="btn btn-green" onclick="saveNewTeam()" style="margin-top:10px;">Создать</button>';
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function saveNewTeam() {
+  var name = (document.getElementById("new-team-name").value || "").trim();
+  var points = parseInt(document.getElementById("new-team-points").value) || 0;
+  if (!name) { alert("Введите название"); return; }
+  var players = [];
+  for (var i = 0; i < 5; i++) {
+    var nick = (document.getElementById("np-nick-" + i).value || "").trim();
+    var role = (document.getElementById("np-role-" + i).value || "").trim();
+    if (nick) players.push({ nick: nick, role: role, kills: 0, deaths: 0, hs: 0, rating: 0 });
+  }
+  fetch(API_BASE + "/api/teams", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name: name, points: points, wins: 0, losses: 0, players: players })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res.ok) { alert("Команда добавлена в БД!"); loadFromAPI(); showAdminTab('teams'); }
+    else { alert("Ошибка: " + (res.error || "unknown")); }
+  }).catch(function(e){ alert("Ошибка сети: " + e); });
+}
 
 function renderMatchesList() {
   var container = document.getElementById("matches-container");
@@ -1324,10 +1365,13 @@ function saveNewTournament() {
   
   if (!name || !prize) { alert("Заполните название и призовые!"); return; }
   
-  var tournaments = JSON.parse(localStorage.getItem("hltv_tournaments")) || [];
-  tournaments.push({ id: Date.now(), name: name, prize: prize, date: date, image: image });
-  localStorage.setItem("hltv_tournaments", JSON.stringify(tournaments));
-  
-  alert("Турнир создан!");
-  renderAdminTournamentsForm();
+  fetch(API_BASE + "/api/tournaments", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name: name, prize: prize })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res.ok) { alert("Турнир создан в БД!"); loadFromAPI(); renderAdminTournamentsForm(); }
+    else { alert("Ошибка: " + (res.error || "unknown")); }
+  }).catch(function(e){ alert("Ошибка сети: " + e); });
+}
 }
