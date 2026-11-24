@@ -10,6 +10,36 @@ if (!localStorage.getItem("hltv_data")) {
   localStorage.setItem("hltv_data", JSON.stringify(DATA));
 }
 let APP_DATA = JSON.parse(localStorage.getItem("hltv_data"));
+
+// ===== API LOAD =====
+const API_BASE = "https://four-proposal-kitchen-estates.trycloudflare.com";
+async function loadFromAPI() {
+  try {
+    const [teams, tournaments, matches] = await Promise.all([
+      fetch(API_BASE + "/api/teams").then(r => r.json()),
+      fetch(API_BASE + "/api/tournaments").then(r => r.json()),
+      fetch(API_BASE + "/api/matches").then(r => r.json())
+    ]);
+    if (Array.isArray(teams) && teams.length) {
+      APP_DATA.teams = teams.map(t => {
+        const old = (APP_DATA.teams || []).find(x => x.name === t.name) || {};
+        return { id: old.id || t.name, name: t.name, points: t.points, wins: t.wins, losses: t.losses,
+                 players: old.players || [] };
+      });
+    }
+    if (Array.isArray(tournaments)) APP_DATA.tournaments = tournaments;
+    if (Array.isArray(matches)) APP_DATA.matches = matches;
+    console.log("[API] loaded:", teams.length, "teams,", tournaments.length, "tournaments,", matches.length, "matches");
+    if (typeof renderRanking === "function") renderRanking();
+    if (typeof renderTournaments === "function") renderTournaments();
+    if (typeof renderMatchesList === "function") renderMatchesList();
+  } catch (e) {
+    console.warn("[API] fallback to local DATA:", e);
+  }
+}
+loadFromAPI();
+// ===== /API LOAD =====
+
 let teamRequests = JSON.parse(localStorage.getItem("hltv_team_requests")) || [];
 let newsRequests = JSON.parse(localStorage.getItem("hltv_news_requests")) || [];
 
@@ -42,7 +72,7 @@ function switchTab(tab) {
   var navEl = document.getElementById("nav-" + tab);
   if (navEl) navEl.classList.add("active");
   
-  var screens = ["ranking", "team-detail", "register-team", "matches-list", "match-detail", "news", "admin-login", "admin-panel"];
+  var screens = ["ranking", "team-detail", "register-team", "matches-list", "match-detail", "news", "admin-login", "admin-panel", "tournaments"];
   screens.forEach(function(s) { document.getElementById("screen-" + s).classList.add("hidden"); });
 
   if (tab === "ranking") {
@@ -1222,10 +1252,21 @@ function renderTournaments() {
   var container = document.getElementById("tournaments-container");
   if (!container) return;
   
-  var tournaments = JSON.parse(localStorage.getItem("hltv_tournaments")) || [
-    { id: 1, name: "Counter Flame Cup", prize: "$5,000", date: "25 Ноября", image: "maps/mirage.jpg" },
-    { id: 2, name: "Major 2026", prize: "$50,000", date: "10 Декабря", image: "maps/inferno.jpg" }
-  ];
+  var tournaments = (APP_DATA.tournaments || []).map(function(t, i) {
+    return {
+      id: t.id || (i + 1),
+      name: t.name || "Турнир",
+      prize: t.prize || "—",
+      date: t.date || "",
+      image: t.image || "maps/mirage.jpg"
+    };
+  });
+  if (tournaments.length === 0) {
+    tournaments = [
+      { id: 1, name: "Counter Flame Cup", prize: "$5,000", date: "25 Ноября", image: "maps/mirage.jpg" },
+      { id: 2, name: "Major 2026", prize: "$50,000", date: "10 Декабря", image: "maps/inferno.jpg" }
+    ];
+  }
   
   if (tournaments.length === 0) {
     container.innerHTML = '<h1>Турниры</h1><p style="color:var(--muted); text-align:center; padding:20px;">Пока нет турниров</p>';
