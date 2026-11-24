@@ -1374,8 +1374,6 @@ function saveNewTournament() {
     else { toastAuto("Ошибка: " + (res.error || "unknown")); }
   }).catch(function(e){ toastAuto("Ошибка сети: " + e); });
 }
-}
-
 
 // ===== TOAST SYSTEM =====
 function toast(msg, type) {
