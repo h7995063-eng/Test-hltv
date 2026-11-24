@@ -1,4 +1,4 @@
-const API_URL = "https://catalog-ministries-flows-flyer.trycloudflare.com";
+const API_URL = API_BASE;  // используем тот же рабочий бэк
 
 // === Supabase (данные от заказчика) ===
 const SUPABASE_URL = "https://vamehxkvplkxbhcoooeq.supabase.co";
@@ -178,16 +178,16 @@ function submitTeamRequest() {
   var logo = document.getElementById("rt-logo-preview").src;
   var contact = document.getElementById("rt-contact").value;
 
-  if (!name || !tag || !contact) return alert("Заполните все поля!");
+  if (!name || !tag || !contact) return toastAuto("Заполните все поля!");
   var players = [];
   for (var i = 1; i <= 5; i++) {
     var nick = document.getElementById("rt-nick-" + i).value;
-    if (!nick) return alert("Введите ник игрока " + i);
+    if (!nick) return toastAuto("Введите ник игрока " + i);
     players.push({ nick: nick, role: document.getElementById("rt-role-" + i).value });
   }
   teamRequests.push({ name: name, tag: tag, logo: logo, contact: contact, players: players });
   saveRequests();
-  alert("Заявка отправлена на модерацию!");
+  toastAuto("Заявка отправлена на модерацию!");
   switchTab('ranking');
 }
 
@@ -504,10 +504,10 @@ function submitNewsRequest() {
   var text = document.getElementById("n-text").value;
   var photo = document.getElementById("n-photo-preview").src;
 
-  if (!team || !text) return alert("Заполните команду и текст!");
+  if (!team || !text) return toastAuto("Заполните команду и текст!");
   newsRequests.push({ team: team, text: text, photo: photo });
   saveRequests();
-  alert("Новость отправлена админу!");
+  toastAuto("Новость отправлена админу!");
   switchTab('ranking');
 }
 
@@ -593,7 +593,7 @@ function approveTeamRequest(index) {
   teamRequests.splice(index, 1);
   saveData(); saveRequests();
   showAdminTab('requests');
-  alert("Команда одобрена!");
+  toastAuto("Команда одобрена!");
 }
 
 function rejectTeamRequest(index) {
@@ -610,12 +610,12 @@ function approveNews(index) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
   }).then(function() {
-    alert('Отправлено в чат админов!');
+    toastAuto('Отправлено в чат админов!');
     newsRequests.splice(index, 1);
     saveRequests();
     showAdminTab('requests');
   }).catch(function(err) {
-    alert('ОШИБКА СЕТИ!');
+    toastAuto('ОШИБКА СЕТИ!');
   });
 }
 
@@ -728,8 +728,8 @@ function saveNewMatch() {
   var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
   var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
   
-  if (!t1 || !t2) { alert("Ошибка: команды не найдены"); return; }
-  if (t1Name === t2Name) { alert("Нельзя выбрать одинаковые команды!"); return; }
+  if (!t1 || !t2) { toastAuto("Ошибка: команды не найдены"); return; }
+  if (t1Name === t2Name) { toastAuto("Нельзя выбрать одинаковые команды!"); return; }
   
   var map = document.getElementById("add-m-map").value || "de_mirage";
   var s1 = parseInt(document.getElementById("add-m-s1").value) || 0;
@@ -808,8 +808,8 @@ function saveNewMatch() {
   var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
   var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
   
-  if (!t1 || !t2) { alert("Ошибка: команды не найдены"); return; }
-  if (t1Name === t2Name) { alert("Нельзя выбрать одинаковые команды!"); return; }
+  if (!t1 || !t2) { toastAuto("Ошибка: команды не найдены"); return; }
+  if (t1Name === t2Name) { toastAuto("Нельзя выбрать одинаковые команды!"); return; }
   
   var map = document.getElementById("add-m-map").value || "de_mirage";
   var s1 = parseInt(document.getElementById("add-m-s1").value) || 0;
@@ -891,7 +891,7 @@ function saveNewMatch() {
   var t1 = APP_DATA.teams.find(function(t) { return t.name === t1Name; });
   var t2 = APP_DATA.teams.find(function(t) { return t.name === t2Name; });
   
-  if (!t1 || !t2) { alert("Ошибка: команды не найдены"); return; }
+  if (!t1 || !t2) { toastAuto("Ошибка: команды не найдены"); return; }
   
   var map = document.getElementById("add-m-map").value || "de_mirage";
   var s1 = parseInt(document.getElementById("add-m-s1").value) || 0;
@@ -917,11 +917,11 @@ function saveNewMatch() {
     })
   }).then(function(r){ return r.json(); }).then(function(res){
     if (res.ok) {
-      alert("Матч добавлен в БД!");
+      toastAuto("Матч добавлен в БД!");
       loadFromAPI();
       showAdminTab('match');
-    } else { alert("Ошибка: " + (res.error || "unknown")); }
-  }).catch(function(e){ alert("Ошибка сети: " + e); });
+    } else { toastAuto("Ошибка: " + (res.error || "unknown")); }
+  }).catch(function(e){ toastAuto("Ошибка сети: " + e); });
 }
 
 function editTeamAdmin(teamName) {
@@ -967,7 +967,7 @@ function saveTeamPoints(teamName) {
   var newPoints = parseInt(document.getElementById("edit-points").value) || 0;
   team.points = newPoints;
   saveData();
-  alert("Очки обновлены!");
+  toastAuto("Очки обновлены!");
   showAdminTab('teams');
 }
 
@@ -976,11 +976,11 @@ function savePlayer(teamName, index) {
   if (!team || !team.players[index]) return;
   var newNick = document.getElementById("nick-" + index).value.trim();
   var newRole = document.getElementById("role-" + index).value.trim();
-  if (!newNick) { alert("Ник не может быть пустым!"); return; }
+  if (!newNick) { toastAuto("Ник не может быть пустым!"); return; }
   team.players[index].nick = newNick;
   team.players[index].role = newRole;
   saveData();
-  alert("Игрок обновлен!");
+  toastAuto("Игрок обновлен!");
   showAdminTab('teams');
 }
 
@@ -990,7 +990,7 @@ function removePlayer(teamName, index) {
   if (!team) return;
   team.players.splice(index, 1);
   saveData();
-  alert("Игрок удален!");
+  toastAuto("Игрок удален!");
   showAdminTab('teams');
 }
 
@@ -1002,7 +1002,7 @@ function addPlayer(teamName) {
   var role = prompt("Введите роль (Снайпер, Штурмовик и т.д.):") || "Игрок";
   team.players.push({ nick: nick.trim(), role: role.trim(), kills: 0, deaths: 0, hs: 0, rating: 0 });
   saveData();
-  alert("Игрок добавлен!");
+  toastAuto("Игрок добавлен!");
   showAdminTab('teams');
 }
 
@@ -1010,7 +1010,7 @@ function deleteTeam(teamName) {
   if (!confirm("Вы уверены, что хотите УДАЛИТЬ команду " + teamName + "?")) return;
   APP_DATA.teams = APP_DATA.teams.filter(function(t) { return t.name !== teamName; });
   saveData();
-  alert("Команда удалена!");
+  toastAuto("Команда удалена!");
   showAdminTab('teams');
 }
 
@@ -1036,7 +1036,7 @@ function addTeamAdminForm() {
 function saveNewTeam() {
   var name = (document.getElementById("new-team-name").value || "").trim();
   var points = parseInt(document.getElementById("new-team-points").value) || 0;
-  if (!name) { alert("Введите название"); return; }
+  if (!name) { toastAuto("Введите название"); return; }
   var players = [];
   for (var i = 0; i < 5; i++) {
     var nick = (document.getElementById("np-nick-" + i).value || "").trim();
@@ -1048,9 +1048,9 @@ function saveNewTeam() {
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ name: name, points: points, wins: 0, losses: 0, players: players })
   }).then(function(r){ return r.json(); }).then(function(res){
-    if (res.ok) { alert("Команда добавлена в БД!"); loadFromAPI(); showAdminTab('teams'); }
-    else { alert("Ошибка: " + (res.error || "unknown")); }
-  }).catch(function(e){ alert("Ошибка сети: " + e); });
+    if (res.ok) { toastAuto("Команда добавлена в БД!"); loadFromAPI(); showAdminTab('teams'); }
+    else { toastAuto("Ошибка: " + (res.error || "unknown")); }
+  }).catch(function(e){ toastAuto("Ошибка сети: " + e); });
 }
 
 function renderMatchesList() {
@@ -1175,7 +1175,7 @@ function addNewTeam() {
     players: []
   });
   saveData();
-  alert("Команда создана!");
+  toastAuto("Команда создана!");
   showAdminTab('teams');
 }
 
@@ -1338,7 +1338,7 @@ function renderTournaments() {
 }
 
 function openTournamentDetail(id) {
-  alert("Турнир ID: " + id + " (Детали в разработке)");
+  toastAuto("Турнир ID: " + id + " (Детали в разработке)");
 }
 
 function renderAdminTournamentsForm() {
@@ -1363,15 +1363,57 @@ function saveNewTournament() {
   var date = document.getElementById("tour-date").value;
   var image = document.getElementById("tour-image").value || "maps/mirage.jpg";
   
-  if (!name || !prize) { alert("Заполните название и призовые!"); return; }
+  if (!name || !prize) { toastAuto("Заполните название и призовые!"); return; }
   
   fetch(API_BASE + "/api/tournaments", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ name: name, prize: prize })
   }).then(function(r){ return r.json(); }).then(function(res){
-    if (res.ok) { alert("Турнир создан в БД!"); loadFromAPI(); renderAdminTournamentsForm(); }
-    else { alert("Ошибка: " + (res.error || "unknown")); }
-  }).catch(function(e){ alert("Ошибка сети: " + e); });
+    if (res.ok) { toastAuto("Турнир создан в БД!"); loadFromAPI(); renderAdminTournamentsForm(); }
+    else { toastAuto("Ошибка: " + (res.error || "unknown")); }
+  }).catch(function(e){ toastAuto("Ошибка сети: " + e); });
 }
 }
+
+
+// ===== TOAST SYSTEM =====
+function toast(msg, type) {
+  type = type || "info";
+  var colors = { success: "#10b981", error: "#ef4444", info: "#3b82f6" };
+  var icons = {
+    success: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    error:   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    info:    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  var container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.style.cssText = "position:fixed; top:80px; right:16px; z-index:99999; display:flex; flex-direction:column; gap:10px;";
+    document.body.appendChild(container);
+  }
+  var el = document.createElement("div");
+  el.style.cssText = "display:flex; align-items:center; gap:10px; background:" + colors[type] + "; color:#fff; padding:14px 18px; border-radius:10px; font-size:14px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.4); min-width:200px; max-width:320px; transform:translateX(120%); transition:transform 0.3s ease;";
+  el.innerHTML = icons[type] + '<span style="flex:1;">' + msg + '</span>';
+  container.appendChild(el);
+  setTimeout(function(){ el.style.transform = "translateX(0)"; }, 10);
+  setTimeout(function(){
+    el.style.transform = "translateX(120%)";
+    setTimeout(function(){ el.remove(); }, 350);
+  }, 3000);
+}
+
+function toastAuto(msg) {
+  var low = (msg || "").toLowerCase();
+  if (low.indexOf("ошибк") >= 0 || low.indexOf("заполнит") >= 0 || low.indexOf("не найден") >= 0 ||
+      low.indexOf("неверн") >= 0 || low.indexOf("введите") >= 0 || low.indexOf("нет ") >= 0) {
+    toast(msg, "error");
+  } else if (low.indexOf("добавл") >= 0 || low.indexOf("создан") >= 0 || low.indexOf("отправл") >= 0 ||
+             low.indexOf("сохран") >= 0 || low.indexOf("успешн") >= 0 || low.indexOf("готово") >= 0) {
+    toast(msg, "success");
+  } else {
+    toast(msg, "info");
+  }
+}
+// ===== /TOAST SYSTEM =====
