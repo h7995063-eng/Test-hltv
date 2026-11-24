@@ -32,8 +32,8 @@ async function loadFromAPI() {
         id: i + 1,
         map: m.map || "de_mirage",
         tournament: m.tournament || "",
-        team1: { name: m.team1, score: m.score1, players: [] },
-        team2: { name: m.team2, score: m.score2, players: [] }
+        team1: { name: m.team1, score: m.score1, players: (m.stats && m.stats.t1) || [] },
+        team2: { name: m.team2, score: m.score2, players: (m.stats && m.stats.t2) || [] }
       };
     });
     console.log("[API] loaded:", teams.length, "teams,", tournaments.length, "tournaments,", matches.length, "matches");
