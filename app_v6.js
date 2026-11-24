@@ -517,6 +517,12 @@ function addMatchAdmin() {
   var options = teams.map(function(t) { return '<option value="' + t.name + '">' + t.name + '</option>'; }).join('');
   
   var html = '<div style="background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748; margin-bottom:20px;">';
+  var pending = window._pendingRequest;
+  var shotHtml = '';
+  if (pending && pending.photo) {
+    shotHtml = '<div style="background:#1a1f24; padding:12px; border-radius:12px; margin-bottom:16px;"><div style="color:#8b959e; font-size:12px; margin-bottom:8px;">Скриншот из заявки:</div><img src="' + pending.photo + '" style="max-width:100%; max-height:300px; border-radius:8px; cursor:pointer;" onclick="window.open(this.src)"></div>';
+  }
+  html += shotHtml;
   html += '<h2 style="margin:0 0 20px 0; color:#fff;">Создание матча</h2>';
   
   html += '<div style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">';
@@ -543,6 +549,21 @@ function addMatchAdmin() {
   
   html += '<button class="btn btn-green" style="margin-top:20px; padding:15px; font-size:16px; font-weight:bold; border-radius:8px;" onclick="saveNewMatch()">Добавить матч</button>';
   
+
+  if (pending) {
+    setTimeout(function() {
+      var s1 = document.getElementById("add-m-t1");
+      var s2 = document.getElementById("add-m-t2");
+      if (s1 && pending.data.m1 && pending.data.m1.name) s1.value = pending.data.m1.name;
+      if (s2 && pending.data.m2 && pending.data.m2.name) s2.value = pending.data.m2.name;
+      var parts = (pending.data.score || "0:0").split(":");
+      var sc1 = document.getElementById("add-m-s1");
+      var sc2 = document.getElementById("add-m-s2");
+      if (sc1) sc1.value = parseInt(parts[0]) || 0;
+      if (sc2) sc2.value = parseInt(parts[1]) || 0;
+      loadMatchStatsForm();
+    }, 50);
+  }
   container.innerHTML = html;
   loadMatchStatsForm();
 }
@@ -639,9 +660,16 @@ function saveNewMatch() {
     })
   }).then(function(r){ return r.json(); }).then(function(res){
     if (res.ok) {
-      toastAuto("Матч добавлен в БД!");
+      if (window._pendingRequest) {
+        var rid = window._pendingRequest.id;
+        window._pendingRequest = null;
+        fetch(API_BASE + "/api/requests/" + rid, { method: "DELETE" });
+        toast("Матч создан, заявка закрыта", "success");
+      } else {
+        toast("Матч добавлен в БД!", "success");
+      }
       loadFromAPI();
-      showAdminTab('match');
+      showAdminTab('matches');
     } else { toastAuto("Ошибка: " + (res.error || "unknown")); }
   }).catch(function(e){ toastAuto("Ошибка сети: " + e); });
 }
@@ -1002,27 +1030,8 @@ function approveMatchRequest(id) {
   fetch(API_BASE + "/api/requests").then(function(r){ return r.json(); }).then(function(reqs){
     var req = reqs.find(function(x){ return x.id === id; });
     if (!req || req.type !== 'match') return;
-    var scoreParts = (req.data.score || "0:0").split(":");
-    var s1 = parseInt(scoreParts[0]) || 0;
-    var s2 = parseInt(scoreParts[1]) || 0;
-    fetch(API_BASE + "/api/matches", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        team1: req.data.m1.name, team2: req.data.m2.name,
-        score1: s1, score2: s2,
-        tournament: "Заявка", date: "",
-        map: "de_mirage", stats: {}
-      })
-    }).then(function(r){ return r.json(); }).then(function(res){
-      if (res.ok) {
-        fetch(API_BASE + "/api/requests/" + id, { method: "DELETE" }).then(function(){
-          toast("Матч создан из заявки!", "success");
-          loadFromAPI();
-          renderAdminRequests();
-        });
-      } else toast("Ошибка создания матча", "error");
-    }).catch(function(e){ toast("Ошибка: " + e, "error"); });
+    window._pendingRequest = req;
+    addMatchAdmin();
   });
 }
 function approveRequest(index) {
