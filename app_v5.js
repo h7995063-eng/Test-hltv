@@ -28,7 +28,15 @@ async function loadFromAPI() {
       });
     }
     if (Array.isArray(tournaments)) APP_DATA.tournaments = tournaments;
-    if (Array.isArray(matches)) APP_DATA.matches = matches;
+    if (Array.isArray(matches)) APP_DATA.matches = matches.map(function(m, i) {
+      return {
+        id: i + 1,
+        map: m.map || "de_mirage",
+        tournament: m.tournament || "",
+        team1: { name: m.team1, score: m.score1, players: [] },
+        team2: { name: m.team2, score: m.score2, players: [] }
+      };
+    });
     console.log("[API] loaded:", teams.length, "teams,", tournaments.length, "tournaments,", matches.length, "matches");
     if (typeof renderRanking === "function") renderRanking();
     if (typeof renderTournaments === "function") renderTournaments();
