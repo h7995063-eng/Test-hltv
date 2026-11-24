@@ -1001,7 +1001,10 @@ async function renderAdminRequests() {
         html += '<h3 style="margin:0 0 10px 0; font-size:18px;">Смена состава: <span style="color:#3b82f6;">' + r.data.team + '</span></h3>';
         html += '<p style="margin:0 0 15px 0; color:#e1e1e1; font-size:14px; line-height:1.5; white-space:pre-wrap;">' + r.data.changes + '</p>';
         if (r.photo) html += '<img src="' + r.photo + '" style="max-height:200px; border-radius:8px; margin-bottom:15px; display:block;">';
-        html += '<button class="btn" style="background:#ef4444; margin:0;" onclick="deleteRequest(' + r.id + ')">Закрыть</button>';
+        html += '<div style="display:flex; gap:10px;">';
+        html += '<button class="btn" style="background:#10b981; flex:1; margin:0;" onclick="approveRosterRequest(' + r.id + ')">Принять</button>';
+        html += '<button class="btn" style="background:#ef4444; flex:1; margin:0;" onclick="deleteRequest(' + r.id + ')">Отклонить</button>';
+        html += '</div>';
       } else if (r.type === 'match') {
         html += '<h3 style="margin:0 0 10px 0; font-size:18px;">Регистрация матча</h3>';
         if (r.photo) html += '<img src="' + r.photo + '" style="max-width:100%; max-height:300px; border-radius:8px; margin-bottom:15px; display:block; border:1px solid #444; cursor:pointer;" onclick="window.open(this.src)">';
@@ -1262,4 +1265,31 @@ if (!document.getElementById("modal-css")) {
   style.id = "modal-css";
   style.textContent = "@keyframes fadeIn{from{opacity:0}to{opacity:1}}";
   document.head.appendChild(style);
+}
+
+
+function approveRosterRequest(id) {
+  fetch(API_BASE + "/api/requests").then(function(r){ return r.json(); }).then(function(reqs){
+    var req = reqs.find(function(x){ return x.id === id; });
+    if (!req || req.type !== 'roster') return;
+
+    var text = "🔄 <b>Смена состава</b>\n\n" +
+               "<b>Команда:</b> " + req.data.team + "\n\n" +
+               "<b>Изменения:</b>\n" + req.data.changes;
+
+    fetch(API_BASE + "/api/send_to_channel", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ text: text, photo: req.photo || "" })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if (res.ok) {
+        fetch(API_BASE + "/api/requests/" + id, { method: "DELETE" }).then(function(){
+          toast("Отправлено в канал", "success");
+          renderAdminRequests();
+        });
+      } else {
+        toast("Ошибка отправки: " + (res.description || "unknown"), "error");
+      }
+    }).catch(function(e){ toast("Ошибка сети: " + e, "error"); });
+  });
 }
