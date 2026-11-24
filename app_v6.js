@@ -210,6 +210,20 @@ function renderNewsForm() {
   container.innerHTML = html;
 }
 
+
+
+function toast(msg) {
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.5);';
+  toast.innerText = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+}
+
+
+
+
+
 function showNewsType(type) {
   var area = document.getElementById("news-form-area");
   if (!area) return;
@@ -303,7 +317,7 @@ function showNewsType(type) {
   }
 }
 
-function showToast(msg) {
+function toast(msg) {
   var toast = document.createElement('div');
   toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.5);';
   toast.innerText = msg;
@@ -315,22 +329,17 @@ function submitRosterChange() {
   var team = document.getElementById("roster-team").value;
   var changes = document.getElementById("roster-changes").value;
   var fileInput = document.getElementById("roster-photo");
-
   if (!team || !changes) { toast("Заполните все поля!", "error"); return; }
-
   var save = function(photoData) {
     fetch(API_BASE + "/api/requests", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ type: "roster", data: { team: team, changes: changes }, photo: photoData })
     }).then(function(r){ return r.json(); }).then(function(res){
-      if (res.ok) {
-        toast("Заявка отправлена", "success");
-        showNewsType('roster');
-      } else toast("Ошибка отправки", "error");
+      if (res.ok) { toast("Заявка отправлена", "success"); showNewsType('roster'); }
+      else toast("Ошибка", "error");
     }).catch(function(e){ toast("Ошибка сети: " + e, "error"); });
   };
-
   if (fileInput.files.length > 0) {
     var reader = new FileReader();
     reader.onload = function(e) { save(e.target.result); };
@@ -340,12 +349,10 @@ function submitRosterChange() {
 
 function submitMatchRegistration() {
   var fileInput = document.getElementById("match-photo");
-  if (fileInput.files.length === 0) { toast("Прикрепите скриншот!", "error"); return; }
-
+  if (!fileInput || fileInput.files.length === 0) { toast("Прикрепите скриншот!", "error"); return; }
   var m1 = { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value };
   var m2 = { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value };
   var score = document.getElementById("match-score").value;
-
   var reader = new FileReader();
   reader.onload = function(e) {
     fetch(API_BASE + "/api/requests", {
@@ -354,154 +361,10 @@ function submitMatchRegistration() {
       body: JSON.stringify({ type: "match", data: { m1: m1, m2: m2, score: score }, photo: e.target.result })
     }).then(function(r){ return r.json(); }).then(function(res){
       if (res.ok) {
-        toast("Заявка на матч отправлена", "success");
+        toast("Заявка отправлена", "success");
         showNewsType('match');
-      } else toast("Ошибка отправки", "error");
+      } else toast("Ошибка: " + (res.error || "unknown"), "error");
     }).catch(function(e){ toast("Ошибка сети: " + e, "error"); });
-  };
-  reader.readAsDataURL(fileInput.files[0]);
-}
-
-function showNewsType(type) {
-  var area = document.getElementById("news-form-area");
-  if (!area) return;
-  
-  var formStyle = "background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748; display:flex; flex-direction:column; gap:15px;";
-  var inputStyle = "width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; box-sizing:border-box; font-family:inherit; font-size:14px;";
-  var labelStyle = "color:#8b959e; font-size:12px; margin-bottom:5px; display:block;";
-  
-  if (type === 'roster') {
-    area.innerHTML = `
-      <div style="${formStyle}">
-        <h3 style="margin:0 0 10px 0; color:#fff;">Смена состава</h3>
-        
-        <div>
-          <label style="${labelStyle}">Название команды</label>
-          <input type="text" id="roster-team" style="${inputStyle}">
-        </div>
-        
-        <div>
-          <label style="${labelStyle}">Какие изменения? (кто ушел, кто пришел)</label>
-          <textarea id="roster-changes" style="${inputStyle} height:100px; resize:vertical;"></textarea>
-        </div>
-        
-        <div>
-          <label style="${labelStyle}">Фото (необязательно)</label>
-          <input type="file" id="roster-photo" accept="image/*" style="${inputStyle} padding:8px;">
-        </div>
-        
-        <button class="btn" style="background:#10b981; margin-top:10px;" onclick="submitRosterChange()">Отправить</button>
-      </div>
-    `;
-  } else if (type === 'match') {
-    area.innerHTML = `
-      <div style="${formStyle}">
-        <h3 style="margin:0 0 5px 0; color:#fff;">Регистрация матча</h3>
-        
-        
-        <div>
-          <label style="${labelStyle}">Скриншот (обязательно)</label>
-          <input type="file" id="match-photo" accept="image/*" style="${inputStyle} padding:8px;">
-        </div>
-        
-        <div style="display:flex; gap:15px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:200px; background:#171a1f; padding:15px; border-radius:8px;">
-            <h4 style="margin:0 0 10px 0; color:#fff;">Команда 1</h4>
-            <div style="margin-bottom:10px;">
-              <label style="${labelStyle}">Название</label>
-              <input type="text" id="m1-name" style="${inputStyle}">
-            </div>
-            <div style="margin-bottom:10px;">
-              <label style="${labelStyle}">Ники игроков</label>
-              <input type="text" id="m1-players" placeholder="через запятую" style="${inputStyle}">
-            </div>
-            <div>
-              <label style="${labelStyle}">Результат</label>
-              <select id="m1-result" style="${inputStyle}">
-                <option value="win">Победа</option>
-                <option value="lose">Поражение</option>
-              </select>
-            </div>
-          </div>
-          
-          <div style="flex:1; min-width:200px; background:#171a1f; padding:15px; border-radius:8px;">
-            <h4 style="margin:0 0 10px 0; color:#fff;">Команда 2</h4>
-            <div style="margin-bottom:10px;">
-              <label style="${labelStyle}">Название</label>
-              <input type="text" id="m2-name" style="${inputStyle}">
-            </div>
-            <div style="margin-bottom:10px;">
-              <label style="${labelStyle}">Ники игроков</label>
-              <input type="text" id="m2-players" placeholder="через запятую" style="${inputStyle}">
-            </div>
-            <div>
-              <label style="${labelStyle}">Результат</label>
-              <select id="m2-result" style="${inputStyle}">
-                <option value="lose">Поражение</option>
-                <option value="win">Победа</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <label style="${labelStyle}">Счет (например, 13:9)</label>
-          <input type="text" id="match-score" style="${inputStyle}">
-        </div>
-        
-        <button class="btn" style="background:#10b981; margin-top:10px;" onclick="submitMatchRegistration()">Отправить</button>
-      </div>
-    `;
-  }
-}
-
-function showToast(msg) {
-  var toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.5);';
-  toast.innerText = msg;
-  document.body.appendChild(toast);
-  setTimeout(function() { toast.remove(); }, 3000);
-}
-
-function submitRosterChange() {
-  var team = document.getElementById("roster-team").value;
-  var changes = document.getElementById("roster-changes").value;
-  var fileInput = document.getElementById("roster-photo");
-  
-  if (!team || !changes) { showToast("Заполните все поля!"); return; }
-  
-  var saveRequest = function(photoData) {
-    var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
-    reqs.push({ type: 'roster', team: team, changes: changes, photo: photoData, id: Date.now() });
-    localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
-    showToast("Отправлено!");
-    showNewsType('roster');
-  };
-
-  if (fileInput.files.length > 0) {
-    var reader = new FileReader();
-    reader.onload = function(e) { saveRequest(e.target.result); };
-    reader.readAsDataURL(fileInput.files[0]);
-  } else {
-    saveRequest("");
-  }
-}
-
-function submitMatchRegistration() {
-  var fileInput = document.getElementById("match-photo");
-  if (fileInput.files.length === 0) { showToast("Прикрепите скриншот!"); return; }
-  
-  var m1 = { name: document.getElementById("m1-name").value, players: document.getElementById("m1-players").value, result: document.getElementById("m1-result").value };
-  var m2 = { name: document.getElementById("m2-name").value, players: document.getElementById("m2-players").value, result: document.getElementById("m2-result").value };
-  var score = document.getElementById("match-score").value;
-  
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
-    reqs.push({ type: 'match', photo: e.target.result, m1: m1, m2: m2, score: score, id: Date.now() });
-    localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
-    showToast("Отправлено!");
-    showNewsType('match');
   };
   reader.readAsDataURL(fileInput.files[0]);
 }
@@ -1170,9 +1033,9 @@ function approveRequest(index) {
   if (r.type === 'match') {
     // Обновляем статистику команд (добавляем победы/поражения)
     // В демо-режиме просто уведомляем
-    showToast("Матч засчитан! Уведомление отправлено игроку.");
+    toast("Матч засчитан! Уведомление отправлено игроку.");
   } else {
-    showToast("Состав изменён! Уведомление отправлено игроку.");
+    toast("Состав изменён! Уведомление отправлено игроку.");
   }
   
   reqs.splice(index, 1);
@@ -1184,7 +1047,7 @@ function rejectRequest(index) {
   var reqs = JSON.parse(localStorage.getItem("hltv_admin_requests")) || [];
   reqs.splice(index, 1);
   localStorage.setItem("hltv_admin_requests", JSON.stringify(reqs));
-  showToast("Заявка отклонена. Уведомление отправлено.");
+  toast("Заявка отклонена. Уведомление отправлено.");
   renderAdminRequests();
 }
 function renderTournaments() {
