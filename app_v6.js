@@ -23,7 +23,7 @@ async function loadFromAPI() {
       APP_DATA.teams = teams.map(t => {
         const old = (APP_DATA.teams || []).find(x => x.name === t.name) || {};
         return { id: old.id || t.name, name: t.name, points: t.points, wins: t.wins, losses: t.losses,
-                 players: old.players || [] };
+                 players: (t.players && t.players.length) ? t.players : (old.players || []) };
       });
     }
     if (Array.isArray(tournaments)) APP_DATA.tournaments = tournaments;
