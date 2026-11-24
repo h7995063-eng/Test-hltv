@@ -393,14 +393,30 @@ function submitNewsRequest() {
 
 function loginAdmin() {
   var pass = document.getElementById("admin-pass").value;
-  if (pass === "hltv26") {
-    localStorage.setItem("isAdmin", "true");
-    document.getElementById("screen-admin-login").classList.add("hidden");
-    document.getElementById("screen-admin-panel").classList.remove("hidden");
-    showAdminTab('teams');
-  } else {
-    document.getElementById("admin-err").innerText = "Неверный пароль";
-  }
+  fetch(API_URL + "/api/admin/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({password: pass})
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok && d.token) {
+        localStorage.setItem("adminToken", d.token);
+        localStorage.setItem("isAdmin", "true");
+        document.getElementById("screen-admin-login").classList.add("hidden");
+        document.getElementById("screen-admin-panel").classList.remove("hidden");
+        showAdminTab('teams');
+      } else {
+        document.getElementById("admin-err").innerText = "Неверный пароль";
+      }
+    })
+    .catch(function(e){ document.getElementById("admin-err").innerText = "Ошибка: " + e; });
+}
+
+function adminHeaders() {
+  var h = {"Content-Type": "application/json"};
+  var t = localStorage.getItem("adminToken");
+  if (t) h["X-Admin-Token"] = t;
+  return h;
 }
 
 function showAdminTab(tab) {
@@ -487,7 +503,7 @@ function approveNews(index) {
   fetch(API_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': localStorage.getItem('adminToken') || '' },
     body: JSON.stringify({ action: 'approve_news', team: req.team, text: req.text, photo: req.photo || '' })
   }).then(function() {
     toastAuto('Отправлено в чат админов!');
@@ -505,7 +521,7 @@ function rejectNews(index) {
   const data = { action: 'reject_news', team: req.team, text: req.text };
   fetch(API_URL + "/api/news", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || "" },
     body: JSON.stringify(data)
   }).catch(e => console.warn(e));
   newsRequests.splice(index, 1);
@@ -661,7 +677,7 @@ function saveNewMatch() {
     var stats = { t1: p1, t2: p2 };
   fetch(API_BASE + "/api/matches", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || ""},
     body: JSON.stringify({
       team1: t1.name, team2: t2.name,
       score1: s1, score2: s2,
@@ -673,7 +689,7 @@ function saveNewMatch() {
       if (window._pendingRequest) {
         var rid = window._pendingRequest.id;
         window._pendingRequest = null;
-        fetch(API_BASE + "/api/requests/" + rid, { method: "DELETE" });
+        fetch(API_BASE + "/api/requests/" + rid, { method: "DELETE", headers: adminHeaders() });
         toast("Матч создан, заявка закрыта", "success");
       } else {
         toast("Матч добавлен в БД!", "success");
@@ -768,7 +784,7 @@ function addPlayer(teamName) {
 
 function deleteTeam(teamName) {
   if (!confirmDialog("Вы уверены, что хотите УДАЛИТЬ команду " + teamName + "?")) return;
-  fetch(API_URL + "/api/teams/" + encodeURIComponent(teamName), { method: "DELETE" })
+  fetch(API_URL + "/api/teams/" + encodeURIComponent(teamName), { method: "DELETE", headers: adminHeaders() })
     .then(function(r){ return r.json(); })
     .then(function(){
       APP_DATA.teams = APP_DATA.teams.filter(function(t) { return t.name !== teamName; });
@@ -810,7 +826,7 @@ function saveNewTeam() {
   }
   fetch(API_BASE + "/api/teams", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || ""},
     body: JSON.stringify({ name: name, points: points, wins: 0, losses: 0, players: players })
   }).then(function(r){ return r.json(); }).then(function(res){
     if (res.ok) { toastAuto("Команда добавлена в БД!"); loadFromAPI(); showAdminTab('teams'); }
@@ -961,7 +977,7 @@ function toggleVerify(teamName) {
   
   fetch(API_URL + "/api/verify-team", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || "" },
     body: JSON.stringify({ team: teamName, verified: team.verified })
   }).catch(function(err) {
     console.warn("Демо-режим: сервер не отвечает", err);
@@ -980,7 +996,7 @@ function togglePlayerVerify(teamName, playerIndex) {
   
   fetch(API_URL + "/api/verify-player", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || "" },
     body: JSON.stringify({ team: teamName, playerNick: player.nick, verified: player.verified })
   }).catch(function(err) {
     console.warn("Демо-режим: сервер не отвечает", err);
@@ -1037,7 +1053,7 @@ async function renderAdminRequests() {
 function deleteRequest(id) {
   confirmDialog("Удалить заявку?", "Удаление", "danger").then(function(ok){
     if (!ok) return;
-    fetch(API_BASE + "/api/requests/" + id, { method: "DELETE" })
+    fetch(API_BASE + "/api/requests/" + id, { method: "DELETE", headers: adminHeaders() })
       .then(function(r){ return r.json(); })
       .then(function(){ toast("Заявка удалена", "success"); renderAdminRequests(); })
       .catch(function(e){ toast("Ошибка: " + e, "error"); });
@@ -1147,7 +1163,7 @@ function saveNewTournament() {
   
   fetch(API_BASE + "/api/tournaments", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || ""},
     body: JSON.stringify({ name: name, prize: prize })
   }).then(function(r){ return r.json(); }).then(function(res){
     if (res.ok) { toastAuto("Турнир создан в БД!"); loadFromAPI(); renderAdminTournamentsForm(); }
@@ -1199,7 +1215,7 @@ function toastAuto(msg) {
 
 function deleteMatch(id) {
   if (!confirmDialog("Удалить этот матч из БД?")) return;
-  fetch(API_BASE + "/api/matches/" + id, { method: "DELETE" })
+  fetch(API_BASE + "/api/matches/" + id, { method: "DELETE", headers: adminHeaders() })
     .then(function(r){ return r.json(); })
     .then(function(res){
       if (res.ok) {
@@ -1289,11 +1305,11 @@ function approveRosterRequest(id) {
 
     fetch(API_BASE + "/api/send_to_channel", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type": "application/json", "X-Admin-Token": localStorage.getItem("adminToken") || ""},
       body: JSON.stringify({ text: text, photo: req.photo || "" })
     }).then(function(r){ return r.json(); }).then(function(res){
       if (res.ok) {
-        fetch(API_BASE + "/api/requests/" + id, { method: "DELETE" }).then(function(){
+        fetch(API_BASE + "/api/requests/" + id, { method: "DELETE", headers: adminHeaders() }).then(function(){
           toast("Отправлено в канал", "success");
           renderAdminRequests();
         });
