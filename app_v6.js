@@ -70,7 +70,12 @@ window.onload = function() {
 function toggleMenu() {
   var sidebar = document.getElementById("sidebar");
   var overlay = document.getElementById("overlay");
-  if (sidebar) sidebar.classList.toggle("open");
+  if (sidebar) {
+    sidebar.classList.toggle("open");
+    console.log("[menu] sidebar classes:", sidebar.className, "id:", sidebar.id, "tag:", sidebar.tagName);
+  } else {
+    console.warn("[menu] #sidebar not found");
+  }
   if (overlay) overlay.classList.toggle("open");
 }
 
