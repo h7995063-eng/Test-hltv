@@ -576,7 +576,7 @@ function renderAdminTeamsList(teams) {
   teams.forEach(function(t) {
     html += '<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">' +
       '<div><b>' + t.name + '</b> (' + t.points + ' pts)</div>' +
-      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn" style="margin:0; padding:6px 10px; font-size:12px; background: #3b82f6;" onclick="toggleVerify(\'' + t.name + '\')">' + (t.verified ? 'Снять ✔' : '✔') + '</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeam(\'' + t.name + '\')">Удал.</button></div></div>';
+      '<div style="display:flex; gap:5px;"><button class="btn" style="margin:0; padding:6px 10px; font-size:12px;" onclick="editTeamAdmin(\'' + t.name + '\')">Ред.</button><button class="btn" style="margin:0; padding:6px 10px; font-size:12px; background: #3b82f6;" onclick="toggleVerify(\'' + t.name + '\')">' + (t.verified ? 'Снять <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>') + '</button><button class="btn btn-red" style="margin:0; padding:6px 10px; font-size:12px;" onclick="deleteTeam(\'' + t.name + '\')">Удал.</button></div></div>';
   });
   list.innerHTML = html;
 }
@@ -798,7 +798,7 @@ function editTeamAdmin(teamName) {
   team.players.forEach(function(p, i) {
     html += '<div style="background:#232b33; padding:15px; border-radius:8px; margin-bottom:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">';
     html += '  <input type="text" value="' + p.nick + '" id="nick-' + i + '" placeholder="Ник" style="flex:1; padding:8px; background:#111; border:1px solid #333; color:#fff; border-radius:5px;">';
-    html += '  <button class="btn" style="margin:0; padding:8px 12px; background:#3b82f6; font-size:14px;" onclick="togglePlayerVerify(\'' + team.name + '\', ' + i + ')" title="Верификация">' + (p.verified ? 'Снять ✔' : '✔') + '</button>';
+    html += '  <button class="btn" style="margin:0; padding:8px 12px; background:#3b82f6; font-size:14px;" onclick="togglePlayerVerify(\'' + team.name + '\', ' + i + ')" title="Верификация">' + (p.verified ? 'Снять <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>') + '</button>';
     html += '  <input type="text" value="' + (p.role || '') + '" id="role-' + i + '" placeholder="Роль" style="flex:1; padding:8px; background:#111; border:1px solid #333; color:#fff; border-radius:5px;">';
     html += '  <button onclick="savePlayer(\'' + team.name + '\', ' + i + ')" style="background:#2b6cb0; border:none; padding:8px 15px; border-radius:5px; color:#fff; cursor:pointer;">Сохранить</button>';
     html += '  <button onclick="removePlayer(\'' + team.name + '\', ' + i + ')" style="background:#ef4444; border:none; padding:8px 15px; border-radius:5px; color:#fff; cursor:pointer;">Удалить</button>';
@@ -836,7 +836,7 @@ function savePlayer(teamName, index) {
 }
 
 function removePlayer(teamName, index) {
-  if (!confirm("Удалить этого игрока?")) return;
+  if (!confirmDialog("Удалить этого игрока?")) return;
   var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
   if (!team) return;
   team.players.splice(index, 1);
@@ -848,9 +848,9 @@ function removePlayer(teamName, index) {
 function addPlayer(teamName) {
   var team = APP_DATA.teams.find(function(t) { return t.name === teamName; });
   if (!team) return;
-  var nick = prompt("Введите ник нового игрока:");
+  var nick = promptDialog("Введите ник нового игрока:");
   if (!nick || !nick.trim()) return;
-  var role = prompt("Введите роль (Снайпер, Штурмовик и т.д.):") || "Игрок";
+  var role = promptDialog("Введите роль (Снайпер, Штурмовик и т.д.):") || "Игрок";
   team.players.push({ nick: nick.trim(), role: role.trim(), kills: 0, deaths: 0, hs: 0, rating: 0 });
   saveData();
   toastAuto("Игрок добавлен!");
@@ -858,7 +858,7 @@ function addPlayer(teamName) {
 }
 
 function deleteTeam(teamName) {
-  if (!confirm("Вы уверены, что хотите УДАЛИТЬ команду " + teamName + "?")) return;
+  if (!confirmDialog("Вы уверены, что хотите УДАЛИТЬ команду " + teamName + "?")) return;
   APP_DATA.teams = APP_DATA.teams.filter(function(t) { return t.name !== teamName; });
   saveData();
   toastAuto("Команда удалена!");
@@ -957,7 +957,7 @@ function showMatchDetail(id) {
   var html = '<div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">';
   html += '<button class="back-btn" onclick="switchTab(\'matches\')">← Назад</button>';
   if (localStorage.getItem("isAdmin") === "true") {
-    html += '<button onclick="deleteMatch(' + m.id + ')" style="margin-left:auto; background:#ef4444; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:bold; cursor:pointer;">🗑 Удалить матч</button>';
+    html += '<button onclick="deleteMatch(' + m.id + ')" style="margin-left:auto; background:#ef4444; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:bold; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Удалить матч</button>';
   }
   html += '</div>';
   
@@ -1017,9 +1017,9 @@ function previewImage(input, previewId) {
 
 
 function addNewTeam() {
-  var name = prompt("Введите название команды:");
+  var name = promptDialog("Введите название команды:");
   if (!name || !name.trim()) return;
-  var tag = prompt("Введите тег команды (например, NAVI):") || "TAG";
+  var tag = promptDialog("Введите тег команды (например, NAVI):") || "TAG";
   
   APP_DATA.teams.push({
     id: Date.now(),
@@ -1274,7 +1274,7 @@ function toastAuto(msg) {
 
 
 function deleteMatch(id) {
-  if (!confirm("Удалить этот матч из БД?")) return;
+  if (!confirmDialog("Удалить этот матч из БД?")) return;
   fetch(API_BASE + "/api/matches/" + id, { method: "DELETE" })
     .then(function(r){ return r.json(); })
     .then(function(res){
@@ -1287,4 +1287,68 @@ function deleteMatch(id) {
       }
     })
     .catch(function(e){ toast("Ошибка сети: " + e, "error"); });
+}
+
+
+// ===== КРАСИВЫЕ МОДАЛКИ =====
+function showModal(opts) {
+  return new Promise(function(resolve) {
+    var overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.2s ease;";
+    var iconMap = {
+      danger: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      question: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      success: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+    };
+    var modal = document.createElement("div");
+    modal.style.cssText = "background:#1a1f24; border:1px solid #2d3748; border-radius:16px; padding:24px; max-width:380px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); transform:scale(0.9); transition:transform 0.2s ease;";
+    var icon = iconMap[opts.type || "question"] || "";
+    var inputHtml = "";
+    if (opts.input) {
+      inputHtml = '<input id="modal-input" type="text" value="' + (opts.inputValue || "") + '" placeholder="' + (opts.inputPlaceholder || "") + '" style="width:100%; padding:12px; background:#111; border:1px solid #333; color:#fff; border-radius:8px; margin-bottom:16px; font-size:14px; box-sizing:border-box; font-family:inherit;">';
+    }
+    modal.innerHTML = 
+      '<div style="display:flex; align-items:center; justify-content:center; margin-bottom:16px;">' + icon + '</div>' +
+      '<h3 style="color:#fff; margin:0 0 8px 0; font-size:18px; text-align:center;">' + (opts.title || "Подтверждение") + '</h3>' +
+      '<p style="color:#8b959e; margin:0 0 20px 0; font-size:14px; text-align:center; line-height:1.5;">' + (opts.text || "") + '</p>' +
+      inputHtml +
+      '<div style="display:flex; gap:10px;">' +
+        '<button id="modal-cancel" style="flex:1; padding:12px; background:#232b33; color:#fff; border:none; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;">' + (opts.cancelText || "Отмена") + '</button>' +
+        '<button id="modal-ok" style="flex:1; padding:12px; background:' + (opts.type === "danger" ? "#ef4444" : "#3b82f6") + '; color:#fff; border:none; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;">' + (opts.okText || "ОК") + '</button>' +
+      '</div>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function(){ modal.style.transform = "scale(1)"; }, 10);
+
+    function close(result) {
+      modal.style.transform = "scale(0.9)";
+      overlay.style.opacity = "0";
+      setTimeout(function(){ overlay.remove(); resolve(result); }, 150);
+    }
+    document.getElementById("modal-ok").onclick = function() {
+      if (opts.input) {
+        var v = document.getElementById("modal-input").value.trim();
+        close(v || null);
+      } else close(true);
+    };
+    document.getElementById("modal-cancel").onclick = function() { close(false); };
+    overlay.onclick = function(e) { if (e.target === overlay) close(false); };
+    if (opts.input) setTimeout(function(){ document.getElementById("modal-input").focus(); }, 200);
+  });
+}
+
+// Хелперы для замены confirm/prompt
+function confirmDialog(text, title, type) {
+  return showModal({ type: type || "question", title: title || "Подтверждение", text: text, okText: "Да", cancelText: "Отмена" });
+}
+function promptDialog(text, defaultValue, placeholder) {
+  return showModal({ type: "question", title: "Ввод", text: text, input: true, inputValue: defaultValue || "", inputPlaceholder: placeholder || "" });
+}
+
+// CSS для анимации
+if (!document.getElementById("modal-css")) {
+  var style = document.createElement("style");
+  style.id = "modal-css";
+  style.textContent = "@keyframes fadeIn{from{opacity:0}to{opacity:1}}";
+  document.head.appendChild(style);
 }
