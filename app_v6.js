@@ -768,10 +768,15 @@ function addPlayer(teamName) {
 
 function deleteTeam(teamName) {
   if (!confirmDialog("Вы уверены, что хотите УДАЛИТЬ команду " + teamName + "?")) return;
-  APP_DATA.teams = APP_DATA.teams.filter(function(t) { return t.name !== teamName; });
-  saveData();
-  toastAuto("Команда удалена!");
-  showAdminTab('teams');
+  fetch(API_URL + "/api/teams/" + encodeURIComponent(teamName), { method: "DELETE" })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      APP_DATA.teams = APP_DATA.teams.filter(function(t) { return t.name !== teamName; });
+      saveData();
+      toastAuto("Команда удалена!");
+      loadFromAPI().then(function(){ showAdminTab('teams'); });
+    })
+    .catch(function(e){ toastAuto("Ошибка удаления: " + e); });
 }
 
 function addTeamAdminForm() {
