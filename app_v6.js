@@ -227,6 +227,11 @@ function toast(msg) {
 function showNewsType(type) {
   var area = document.getElementById("news-form-area");
   if (!area) return;
+
+  var options = (APP_DATA.teams || []).map(function(t) {
+    return '<option value="' + t.name + '">' + t.name + '</option>';
+  }).join("");
+
   
   var formStyle = "background:#232b33; padding:20px; border-radius:12px; border:1px solid #2d3748; display:flex; flex-direction:column; gap:15px;";
   var inputStyle = "width:100%; padding:12px; background:#171a1f; border:1px solid #2d3748; color:#fff; border-radius:6px; box-sizing:border-box; font-family:inherit; font-size:14px;";
@@ -271,7 +276,7 @@ function showNewsType(type) {
             <h4 style="margin:0 0 10px 0; color:#fff;">Команда 1</h4>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Название</label>
-              <select id="m1-name" style="${inputStyle}"><option value="">— выбери команду —</option>' + (APP_DATA.teams || []).map(function(t){ return "<option value=\"" + t.name + "\">" + t.name + "</option>"; }).join("") + '</select>
+              <select id="m1-name" style="${inputStyle}"><option value="">— выбери команду —</option>${options}</select>
             </div>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Ники игроков</label>
@@ -290,7 +295,7 @@ function showNewsType(type) {
             <h4 style="margin:0 0 10px 0; color:#fff;">Команда 2</h4>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Название</label>
-              <select id="m2-name" style="${inputStyle}"><option value="">— выбери команду —</option>' + (APP_DATA.teams || []).map(function(t){ return "<option value=\"" + t.name + "\">" + t.name + "</option>"; }).join("") + '</select>
+              <select id="m2-name" style="${inputStyle}"><option value="">— выбери команду —</option>${options}</select>
             </div>
             <div style="margin-bottom:10px;">
               <label style="${labelStyle}">Ники игроков</label>
