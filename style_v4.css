@@ -257,3 +257,8 @@ td:nth-child(n+2) { text-align: center; }
 /* --- базовые размеры иконок (всегда) --- */
 .sidebar .logo img { width: 32px !important; height: 32px !important; object-fit: contain; flex-shrink: 0; }
 .sidebar .nav-item svg { width: 20px !important; height: 20px !important; flex-shrink: 0; }
+
+/* --- фикс скролла контента --- */
+html, body { height: 100%; overflow: hidden; }
+#app-container { height: 100vh; height: 100dvh; min-height: 0; }
+.main { overflow-y: auto !important; -webkit-overflow-scrolling: touch; min-height: 0; flex: 1 1 auto; padding-bottom: 100px !important; }
