@@ -172,3 +172,86 @@ td:nth-child(n+2) { text-align: center; }
   padding: 20px !important;
   min-height: 100vh;
 }
+
+/* ===== АДАПТИВ ===== */
+.menu-btn {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  background: rgba(17, 20, 28, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+.menu-close {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 110;
+}
+.toggleMenu-checkbox { display: none; }
+
+@media (max-width: 768px) {
+  .menu-btn { display: flex; }
+  .menu-close { display: flex; }
+  .main { padding: 16px 12px 80px 12px; margin-left: 0 !important; width: 100% !important; }
+  .sidebar { width: 260px; padding-top: 60px; }
+  .sidebar .logo { font-size: 16px; }
+  .sidebar .nav-item { padding: 12px 14px; font-size: 14px; }
+  h1 { font-size: 20px !important; margin-bottom: 14px; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 15px !important; }
+  .card { padding: 12px !important; gap: 10px; }
+  .card .card-num { font-size: 14px; min-width: 20px; }
+  .card .name { font-size: 15px; }
+  .card .sub { font-size: 12px; }
+  .card .points { font-size: 12px; padding: 5px 10px; }
+  .avatar { width: 38px !important; height: 38px !important; font-size: 16px !important; }
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-wrapper table { min-width: 600px; }
+  table { font-size: 12px; }
+  table th, table td { padding: 8px 6px !important; }
+  .btn { padding: 12px !important; font-size: 14px !important; }
+  .form-control { font-size: 14px; padding: 10px; }
+  .team-stats-row { gap: 8px; }
+  .team-stat-box { padding: 12px; }
+  .team-stat-box .val { font-size: 20px; }
+  .team-stat-box .lbl { font-size: 11px; }
+  .team-big-logo { width: 80px !important; height: 80px !important; font-size: 32px !important; }
+  .match-card { padding: 14px !important; flex-wrap: wrap; }
+  .match-team { font-size: 14px !important; }
+  .match-score { font-size: 16px !important; padding: 4px 12px !important; }
+  #toast-container { top: 70px !important; right: 8px !important; left: 8px !important; }
+  #toast-container > div { max-width: none !important; }
+}
+
+@media (max-width: 480px) {
+  .main { padding: 12px 8px 80px 8px; }
+  h1 { font-size: 18px !important; }
+  .card { padding: 10px !important; }
+  .sidebar { width: 240px; }
+}
+
+/* Скрываем бургер на десктопе при открытом меню на мобилке */
+@media (min-width: 769px) {
+  .sidebar { transform: none !important; position: fixed !important; }
+  .overlay { display: none !important; }
+}
